@@ -27,7 +27,7 @@ func testEncode(t *testing.T, node Node, expected string) {
 	}
 }
 
-func TestConfig_YamlNode(t *testing.T) {
+func TestConfig_String(t *testing.T) {
 	var nodeTestJob = Job{
 		Name:        "node-test-job",
 		DockerImage: "cimg/base",
@@ -123,7 +123,10 @@ func TestConfig_YamlNode(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			testEncode(t, tt.config, tt.expected)
+			got := tt.config.String()
+			if got != tt.expected {
+				t.Errorf("\ngot:     %q\nexpected:%q", got, tt.expected)
+			}
 		})
 	}
 }

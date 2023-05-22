@@ -38,6 +38,8 @@ See [the TestConfig_YamlNode test](config/config_test.go) for an example.
 
 ```go
 yamlNode := config.YamlNode() // yamlNode: a gopkg.in/yaml.v3 yaml.Node
+// or
+yamlText := config.String()
 ```
 
 Not all possible configs can be represented, only the ones needed for inference.
@@ -57,3 +59,12 @@ Adding support for a new stack consists of three parts:
    Add that function to the list of calls in [`GenerateConfig`](generation/generation.go).
 
 Of course, also add tests for the new rules and config generation code.
+
+## CLI
+
+A simple CLI for experimenting with inference is included.
+Build it with
+```sh
+go build ./cmd/inferconfig.go
+```
+Then invoke it with a path to print config for the codebase in that path to stdout.

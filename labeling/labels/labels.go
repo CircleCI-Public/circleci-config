@@ -1,7 +1,10 @@
 package labels
 
 import (
+	"fmt"
 	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
+	"sort"
+	"strings"
 )
 
 const (
@@ -23,6 +26,25 @@ type Match struct {
 	MatchData        // MatchData rule-specific data for each match
 }
 
+func (m Match) String() string {
+	if m.Valid {
+		return fmt.Sprintf("%s:%s", m.Label, m.BasePath)
+	} else {
+		return fmt.Sprintf("!%s", m.Label)
+	}
+}
+
 type MatchSet map[string]Match
+
+func (m MatchSet) String() string {
+	matchStrings := make([]string, len(m))
+	i := 0
+	for _, v := range m {
+		matchStrings[i] = v.String()
+		i++
+	}
+	sort.Strings(matchStrings)
+	return strings.Join(matchStrings, ",")
+}
 
 type Rule func(codebase.Codebase, *MatchSet) (Match, error)

@@ -36,7 +36,8 @@ func BuildConfig(matches labels.MatchSet, jobs []*Job) config.Config {
 	workflows := buildWorkflows(jobs)
 
 	return config.Config{
-		Comment:   fmt.Sprintf("This config was automatically generated from your source code"),
+		Comment: fmt.Sprintf("This config was automatically generated from your source code\n"+
+			"Stacks detected: %s", matches.String()),
 		Workflows: workflows,
 		Jobs:      configJobs,
 		Orbs:      buildOrbs(jobs),

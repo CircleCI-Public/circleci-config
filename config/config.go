@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"sort"
 )
@@ -14,6 +16,17 @@ type Config struct {
 	Workflows []*Workflow
 	Jobs      []*Job
 	Orbs      []Orb
+}
+
+func (c Config) String() string {
+	buf := new(bytes.Buffer)
+	encoder := yaml.NewEncoder(buf)
+	encoder.SetIndent(2)
+	err := encoder.Encode(c.YamlNode())
+	if err != nil {
+		return fmt.Sprintf("[Could not encode config: %v])", err)
+	}
+	return buf.String()
 }
 
 func (c Config) YamlNode() *yaml.Node {

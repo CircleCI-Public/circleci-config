@@ -10,10 +10,10 @@ import (
 var checkoutStep = config.Step{Type: config.Checkout}
 
 // initialSteps returns a checkout step and, if necessary cd step
-func initialSteps(depsMatch labels.Match) []config.Step {
+func initialSteps(depsLabel labels.Label) []config.Step {
 	steps := []config.Step{checkoutStep}
 
-	basePath := depsMatch.BasePath
+	basePath := depsLabel.BasePath
 	if basePath != "." {
 		steps = append(steps, config.Step{
 			Type:    config.Run,

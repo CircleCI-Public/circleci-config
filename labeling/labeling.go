@@ -6,27 +6,27 @@ import (
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
-// ApplyRules applies the rules to a codebase.Codebase and returns a map of rule label to
-// valid codebase.Match
+// ApplyRules applies the rules to a codebase.Codebase and returns a map of label key to
+// valid codebase.Label
 // Order of rules is relevant, higher "salience" rules should come first, i.e. later rules can
-// depend on the MatchData of previous rules.
-func ApplyRules(c codebase.Codebase, rules []labels.Rule) labels.MatchSet {
-	matches := make(labels.MatchSet)
+// depend on the LabelData of previous rules.
+func ApplyRules(c codebase.Codebase, rules []labels.Rule) labels.LabelSet {
+	ls := make(labels.LabelSet)
 	for _, r := range rules {
-		match, err := r(c, &matches)
+		label, err := r(c, &ls)
 		if err != nil {
 			continue
 		}
 
-		if match.Valid {
-			matches[match.Label] = match
+		if label.Valid {
+			ls[label.Key] = label
 		}
 	}
 
-	return matches
+	return ls
 }
 
-func ApplyAllRules(c codebase.Codebase) labels.MatchSet {
+func ApplyAllRules(c codebase.Codebase) labels.LabelSet {
 	allStacks := [][]labels.Rule{
 		internal.NodeRules,
 		internal.GoRules,

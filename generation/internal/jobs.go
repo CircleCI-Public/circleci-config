@@ -22,7 +22,7 @@ type Job struct {
 	Orbs map[string]string
 }
 
-func BuildConfig(matches labels.MatchSet, jobs []*Job) config.Config {
+func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 	if len(jobs) == 0 {
 		return fallbackConfig
 	}
@@ -37,7 +37,7 @@ func BuildConfig(matches labels.MatchSet, jobs []*Job) config.Config {
 
 	return config.Config{
 		Comment: fmt.Sprintf("This config was automatically generated from your source code\n"+
-			"Stacks detected: %s", matches.String()),
+			"Stacks detected: %s", ls.String()),
 		Workflows: workflows,
 		Jobs:      configJobs,
 		Orbs:      buildOrbs(jobs),

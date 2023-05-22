@@ -7,18 +7,18 @@ import (
 
 const nodeOrb = "circleci/node@5"
 
-func npmTaskDefined(matches labels.MatchSet, task string) bool {
-	return matches[labels.DepsNode].Tasks[task] != ""
+func npmTaskDefined(ls labels.LabelSet, task string) bool {
+	return ls[labels.DepsNode].Tasks[task] != ""
 }
 
-func nodeTestSteps(matches labels.MatchSet) []config.Step {
-	if matches[labels.TestJest].Valid {
+func nodeTestSteps(ls labels.LabelSet) []config.Step {
+	if ls[labels.TestJest].Valid {
 		return []config.Step{{
 			Type:    config.Run,
 			Command: "jest",
 		}}
 	}
-	if npmTaskDefined(matches, "test:ci") {
+	if npmTaskDefined(ls, "test:ci") {
 		return []config.Step{{
 			Type:    config.Run,
 			Command: "npm run test:ci",
@@ -31,14 +31,14 @@ func nodeTestSteps(matches labels.MatchSet) []config.Step {
 	}}
 }
 
-func nodeTestJob(matches labels.MatchSet) *Job {
-	steps := initialSteps(matches[labels.DepsNode])
+func nodeTestJob(ls labels.LabelSet) *Job {
+	steps := initialSteps(ls[labels.DepsNode])
 
 	steps = append(steps, config.Step{
 		Type:    config.OrbCommand,
 		Command: "node/install-packages",
 	})
-	steps = append(steps, nodeTestSteps(matches)...)
+	steps = append(steps, nodeTestSteps(ls)...)
 
 	return &Job{
 		Job: config.Job{Name: "test-node",
@@ -50,9 +50,9 @@ func nodeTestJob(matches labels.MatchSet) *Job {
 	}
 }
 
-func GenerateNodeJobs(matches labels.MatchSet) []*Job {
-	if !matches[labels.DepsNode].Valid {
+func GenerateNodeJobs(ls labels.LabelSet) []*Job {
+	if !ls[labels.DepsNode].Valid {
 		return nil
 	}
-	return []*Job{nodeTestJob(matches)}
+	return []*Job{nodeTestJob(ls)}
 }

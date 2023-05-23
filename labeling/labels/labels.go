@@ -13,38 +13,38 @@ const (
 	DepsGo   = "deps:go"
 )
 
-type MatchData struct {
+type LabelData struct {
 	BasePath     string
 	Dependencies map[string]string
 	Tasks        map[string]string
 }
 
-// Match is the result of applying a Rule
-type Match struct {
-	Label     string // Label of the matching rule
-	Valid     bool   // If the rule matched, Valid = true
-	MatchData        // MatchData rule-specific data for each match
+// Label is the result of applying a Rule
+type Label struct {
+	Key       string // string identifying the label, like "deps:go"
+	Valid     bool   // If the rule applies, Valid = true
+	LabelData        // LabelData rule-specific data for each label
 }
 
-func (m Match) String() string {
-	if m.Valid {
-		return fmt.Sprintf("%s:%s", m.Label, m.BasePath)
+func (label Label) String() string {
+	if label.Valid {
+		return fmt.Sprintf("%s:%s", label.Key, label.BasePath)
 	} else {
-		return fmt.Sprintf("!%s", m.Label)
+		return fmt.Sprintf("!%s", label.Key)
 	}
 }
 
-type MatchSet map[string]Match
+type LabelSet map[string]Label
 
-func (m MatchSet) String() string {
-	matchStrings := make([]string, len(m))
+func (ls LabelSet) String() string {
+	labelsAsStrings := make([]string, len(ls))
 	i := 0
-	for _, v := range m {
-		matchStrings[i] = v.String()
+	for _, v := range ls {
+		labelsAsStrings[i] = v.String()
 		i++
 	}
-	sort.Strings(matchStrings)
-	return strings.Join(matchStrings, ",")
+	sort.Strings(labelsAsStrings)
+	return strings.Join(labelsAsStrings, ",")
 }
 
-type Rule func(codebase.Codebase, *MatchSet) (Match, error)
+type Rule func(codebase.Codebase, *LabelSet) (Label, error)

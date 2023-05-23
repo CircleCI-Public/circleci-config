@@ -8,20 +8,20 @@ import (
 )
 
 var NodeRules = []labels.Rule{
-	func(c codebase.Codebase, ms *labels.MatchSet) (m labels.Match, err error) {
-		m.Label = labels.DepsNode
+	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+		label.Key = labels.DepsNode
 		packagePath := findPackageJSON(c)
-		m.Valid = packagePath != ""
-		if !m.Valid {
-			return m, err
+		label.Valid = packagePath != ""
+		if !label.Valid {
+			return label, err
 		}
-		err = readPackageJSON(c, packagePath, &m)
-		return m, err
+		err = readPackageJSON(c, packagePath, &label)
+		return label, err
 	},
-	func(c codebase.Codebase, ms *labels.MatchSet) (m labels.Match, err error) {
-		m.Label = labels.TestJest
-		m.Valid = hasDependency(ms, "jest")
-		return m, err
+	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+		label.Key = labels.TestJest
+		label.Valid = hasDependency(ls, "jest")
+		return label, err
 	},
 }
 
@@ -42,7 +42,7 @@ func findPackageJSON(c codebase.Codebase) string {
 	return file
 }
 
-func readPackageJSON(c codebase.Codebase, filePath string, match *labels.Match) error {
+func readPackageJSON(c codebase.Codebase, filePath string, label *labels.Label) error {
 	var packageJSON npmPackageJSON
 
 	fileContents, err := c.ReadFile(filePath)
@@ -55,20 +55,20 @@ func readPackageJSON(c codebase.Codebase, filePath string, match *labels.Match) 
 		return err
 	}
 
-	match.MatchData.BasePath = path.Dir(filePath)
-	match.Tasks = packageJSON.Scripts
-	match.Dependencies = make(map[string]string)
+	label.LabelData.BasePath = path.Dir(filePath)
+	label.Tasks = packageJSON.Scripts
+	label.Dependencies = make(map[string]string)
 
 	for k, v := range packageJSON.Dependencies {
-		match.Dependencies[k] = v
+		label.Dependencies[k] = v
 	}
 	for k, v := range packageJSON.DevDependencies {
-		match.Dependencies[k] = v
+		label.Dependencies[k] = v
 	}
 
 	return err
 }
 
-func hasDependency(ms *labels.MatchSet, dep string) bool {
-	return (*ms)[labels.DepsNode].Dependencies[dep] != ""
+func hasDependency(ls *labels.LabelSet, dep string) bool {
+	return (*ls)[labels.DepsNode].Dependencies[dep] != ""
 }

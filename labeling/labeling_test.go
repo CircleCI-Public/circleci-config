@@ -35,26 +35,26 @@ func (r fakeCodebase) ReadFile(path string) (contents []byte, err error) {
 
 func TestCodebase_ApplyAllRules(t *testing.T) {
 	tests := []struct {
-		name            string
-		files           map[string]string
-		expectedMatches []labels.Match
+		name           string
+		files          map[string]string
+		expectedLabels []labels.Label
 	}{
 		{
-			name: "go & node rules match",
+			name: "go & node rules apply",
 			files: map[string]string{
 				"go.mod":       "",
 				"package.json": "{}",
 			},
-			expectedMatches: []labels.Match{
+			expectedLabels: []labels.Label{
 				{
-					Label: labels.DepsNode,
-					MatchData: labels.MatchData{
+					Key: labels.DepsNode,
+					LabelData: labels.LabelData{
 						BasePath:     ".",
 						Dependencies: map[string]string{},
 					},
 				}, {
-					Label: labels.DepsGo,
-					MatchData: labels.MatchData{
+					Key: labels.DepsGo,
+					LabelData: labels.LabelData{
 						BasePath: ".",
 					},
 				},
@@ -64,11 +64,11 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := fakeCodebase{tt.files}
-			expected := make(labels.MatchSet)
-			for _, m := range tt.expectedMatches {
+			expected := make(labels.LabelSet)
+			for _, label := range tt.expectedLabels {
 				// all should be Valid
-				m.Valid = true
-				expected[m.Label] = m
+				label.Valid = true
+				expected[label.Key] = label
 			}
 			got := ApplyAllRules(c)
 
@@ -86,20 +86,20 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 func TestCodebase_ApplyRules_Node(t *testing.T) {
 	rules := internal.NodeRules
 	tests := []struct {
-		name            string
-		files           map[string]string
-		rules           []labels.Rule
-		expectedMatches []labels.Match
+		name           string
+		files          map[string]string
+		rules          []labels.Rule
+		expectedLabels []labels.Label
 	}{
 		{
 			name: "deps:node with package.json in subdir",
 			files: map[string]string{
 				"project/package.json": `{}`,
 			},
-			expectedMatches: []labels.Match{
+			expectedLabels: []labels.Label{
 				{
-					Label: labels.DepsNode,
-					MatchData: labels.MatchData{
+					Key: labels.DepsNode,
+					LabelData: labels.LabelData{
 						BasePath:     "project",
 						Dependencies: map[string]string{},
 					},
@@ -110,10 +110,10 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 			files: map[string]string{
 				"package.json": `{"dependencies": {"mylib": ">3.0"}}`,
 			},
-			expectedMatches: []labels.Match{
+			expectedLabels: []labels.Label{
 				{
-					Label: labels.DepsNode,
-					MatchData: labels.MatchData{
+					Key: labels.DepsNode,
+					LabelData: labels.LabelData{
 						BasePath:     ".",
 						Dependencies: map[string]string{"mylib": ">3.0"},
 					},
@@ -124,10 +124,10 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 			files: map[string]string{
 				"package.json": `{"dependencies": {"mylib": ">3.0"}, "scripts": {"test": "echo ok"}}`,
 			},
-			expectedMatches: []labels.Match{
+			expectedLabels: []labels.Label{
 				{
-					Label: labels.DepsNode,
-					MatchData: labels.MatchData{
+					Key: labels.DepsNode,
+					LabelData: labels.LabelData{
 						BasePath:     ".",
 						Dependencies: map[string]string{"mylib": ">3.0"},
 						Tasks:        map[string]string{"test": "echo ok"},
@@ -139,10 +139,10 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 			files: map[string]string{
 				"package.json": `{"dependencies": {"mylib": ">3.0"}, "devDependencies": {"jest": "1.0"}}`,
 			},
-			expectedMatches: []labels.Match{
+			expectedLabels: []labels.Label{
 				{
-					Label: labels.DepsNode,
-					MatchData: labels.MatchData{
+					Key: labels.DepsNode,
+					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
 							"mylib": ">3.0",
@@ -150,7 +150,7 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 						},
 					},
 				}, {
-					Label: labels.TestJest,
+					Key: labels.TestJest,
 				},
 			},
 		},
@@ -158,11 +158,11 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := fakeCodebase{tt.files}
-			expected := make(labels.MatchSet)
-			for _, m := range tt.expectedMatches {
+			expected := make(labels.LabelSet)
+			for _, label := range tt.expectedLabels {
 				// all should be Valid
-				m.Valid = true
-				expected[m.Label] = m
+				label.Valid = true
+				expected[label.Key] = label
 			}
 			got := ApplyRules(c, rules)
 
@@ -180,20 +180,20 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 func TestCodebase_ApplyRules_Go(t *testing.T) {
 	rules := internal.GoRules
 	tests := []struct {
-		name            string
-		files           map[string]string
-		rules           []labels.Rule
-		expectedMatches []labels.Match
+		name           string
+		files          map[string]string
+		rules          []labels.Rule
+		expectedLabels []labels.Label
 	}{
 		{
 			name: "deps:go",
 			files: map[string]string{
 				"go.mod": "module mymod\n\ngo 1.18\n",
 			},
-			expectedMatches: []labels.Match{
+			expectedLabels: []labels.Label{
 				{
-					Label: labels.DepsGo,
-					MatchData: labels.MatchData{
+					Key: labels.DepsGo,
+					LabelData: labels.LabelData{
 						BasePath: ".",
 					},
 				},
@@ -203,11 +203,11 @@ func TestCodebase_ApplyRules_Go(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := fakeCodebase{tt.files}
-			expected := make(labels.MatchSet)
-			for _, m := range tt.expectedMatches {
+			expected := make(labels.LabelSet)
+			for _, label := range tt.expectedLabels {
 				// all should be Valid
-				m.Valid = true
-				expected[m.Label] = m
+				label.Valid = true
+				expected[label.Key] = label
 			}
 			got := ApplyRules(c, rules)
 

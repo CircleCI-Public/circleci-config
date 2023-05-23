@@ -6,9 +6,9 @@ import (
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
-func GenerateConfig(matches labels.MatchSet) config.Config {
+func GenerateConfig(labels labels.LabelSet) config.Config {
 	var generatedJobs []*internal.Job
-	generatedJobs = append(generatedJobs, internal.GenerateNodeJobs(matches)...)
-	generatedJobs = append(generatedJobs, internal.GenerateGoJobs(matches)...)
-	return internal.BuildConfig(matches, generatedJobs)
+	generatedJobs = append(generatedJobs, internal.GenerateNodeJobs(labels)...)
+	generatedJobs = append(generatedJobs, internal.GenerateGoJobs(labels)...)
+	return internal.BuildConfig(labels, generatedJobs)
 }

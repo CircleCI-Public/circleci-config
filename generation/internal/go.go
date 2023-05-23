@@ -7,8 +7,8 @@ import (
 
 const goCacheKey = `go-mod-{{ checksum "go.sum" }}`
 
-func goTestJob(matches labels.MatchSet) *Job {
-	steps := initialSteps(matches[labels.DepsGo])
+func goTestJob(ls labels.LabelSet) *Job {
+	steps := initialSteps(ls[labels.DepsGo])
 
 	steps = append(steps, []config.Step{
 		{
@@ -46,9 +46,9 @@ func goTestJob(matches labels.MatchSet) *Job {
 	}
 }
 
-func GenerateGoJobs(matches labels.MatchSet) []*Job {
-	if !matches[labels.DepsGo].Valid {
+func GenerateGoJobs(ls labels.LabelSet) []*Job {
+	if !ls[labels.DepsGo].Valid {
 		return nil
 	}
-	return []*Job{goTestJob(matches)}
+	return []*Job{goTestJob(ls)}
 }

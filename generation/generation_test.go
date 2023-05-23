@@ -34,21 +34,21 @@ func testEncode(t *testing.T, node config.Node, expected string) {
 func TestGenerateConfig(t *testing.T) {
 	tests := []struct {
 		testName string
-		matches  labels.MatchSet
+		labels   labels.LabelSet
 		expected string
 	}{
 		{
 			testName: "node and go codebases in subdirs",
-			matches: labels.MatchSet{
-				labels.DepsNode: labels.Match{
-					Label:     labels.DepsNode,
+			labels: labels.LabelSet{
+				labels.DepsNode: labels.Label{
+					Key:       labels.DepsNode,
 					Valid:     true,
-					MatchData: labels.MatchData{BasePath: "node-dir"},
+					LabelData: labels.LabelData{BasePath: "node-dir"},
 				},
-				labels.DepsGo: labels.Match{
-					Label:     labels.DepsGo,
+				labels.DepsGo: labels.Label{
+					Key:       labels.DepsGo,
 					Valid:     true,
-					MatchData: labels.MatchData{BasePath: "go-dir"},
+					LabelData: labels.LabelData{BasePath: "go-dir"},
 				}},
 			expected: "# This config was automatically generated from your source code\n" +
 				"# Stacks detected: deps:go:go-dir,deps:node:node-dir\n" +
@@ -102,7 +102,7 @@ func TestGenerateConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			gotConfig := GenerateConfig(tt.matches)
+			gotConfig := GenerateConfig(tt.labels)
 			testEncode(t, gotConfig, tt.expected)
 		})
 	}
@@ -112,7 +112,7 @@ func TestDogfood(t *testing.T) {
 	expectedConfig := "# This config was automatically generated from your source code\n# Stacks detected: deps:go:.\nversion: 2.1\njobs:\n  test-go:\n    # Install go modules, run go vet and tests\n    docker:\n      - image: cimg/go\n    steps:\n      - checkout\n      - restore_cache:\n          key: go-mod-{{ checksum \"go.sum\" }}\n      - run:\n          name: Download Go modules\n          command: go mod download\n      - save_cache:\n          key: go-mod-{{ checksum \"go.sum\" }}\n          paths:\n            - /home/circleci/go/pkg/mod\n      - run:\n          name: Run go vet\n          command: go vet ./...\n      - run:\n          name: Run tests\n          command: gotestsum --junitfile junit.xml\n      - store_test_results:\n          path: junit.xml\nworkflows:\n  ci:\n    jobs:\n      - test-go\n"
 
 	c := codebase.LocalCodebase{BasePath: ".."}
-	matches := labeling.ApplyAllRules(c)
-	gotConfig := GenerateConfig(matches)
+	ls := labeling.ApplyAllRules(c)
+	gotConfig := GenerateConfig(ls)
 	testEncode(t, gotConfig, expectedConfig)
 }

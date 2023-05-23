@@ -7,11 +7,11 @@ import (
 )
 
 var GoRules = []labels.Rule{
-	func(c codebase.Codebase, ms *labels.MatchSet) (m labels.Match, err error) {
-		m.Label = labels.DepsGo
+	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+		label.Key = labels.DepsGo
 		goModPath, err := c.FindFile("go.mod")
-		m.Valid = goModPath != ""
-		m.BasePath = path.Dir(goModPath)
-		return m, err
+		label.Valid = goModPath != ""
+		label.BasePath = path.Dir(goModPath)
+		return label, err
 	},
 }

@@ -47,7 +47,7 @@ func goTestJob(ls labels.LabelSet) *Job {
 		Job: config.Job{
 			Name:        "test-go",
 			Comment:     "Install go modules, run go vet and tests",
-			DockerImage: "cimg/go",
+			DockerImage: "cimg/go:1.20",
 			Steps:       steps,
 		},
 		Type: TestJob,
@@ -70,7 +70,7 @@ func goBuildJob(ls labels.LabelSet) *Job {
 		Job: config.Job{
 			Name:        "build-go-executables",
 			Comment:     "Build go executables and store them as artifacts",
-			DockerImage: "cimg/go",
+			DockerImage: "cimg/go:1.20",
 			Steps:       steps,
 		},
 		Type: ArtifactJob,

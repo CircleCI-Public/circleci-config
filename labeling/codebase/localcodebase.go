@@ -11,12 +11,30 @@ type LocalCodebase struct {
 	BasePath string
 }
 
-func (c LocalCodebase) FindFile(glob string) (path string, err error) {
-	filesFound, err := filepath.Glob(filepath.Join(c.BasePath, glob))
-	if len(filesFound) < 1 {
-		return path, fmt.Errorf("not found")
+func (c LocalCodebase) FindFileMatching(
+	predicate func(string) bool,
+	glob ...string,
+) (string, error) {
+	for _, g := range glob {
+		filesFound, err := filepath.Glob(filepath.Join(c.BasePath, g))
+
+		if err != nil {
+			continue
+		}
+
+		for _, path := range filesFound {
+			relPath, err := filepath.Rel(c.BasePath, path)
+			if predicate(relPath) {
+				return relPath, err
+			}
+		}
 	}
-	return filepath.Rel(c.BasePath, filesFound[0])
+
+	return "", fmt.Errorf("not found")
+}
+
+func (c LocalCodebase) FindFile(glob ...string) (path string, err error) {
+	return c.FindFileMatching(func(string) bool { return true }, glob...)
 }
 
 func (c LocalCodebase) ReadFile(path string) (contents []byte, err error) {

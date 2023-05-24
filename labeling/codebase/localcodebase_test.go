@@ -4,6 +4,50 @@ import (
 	"testing"
 )
 
+func TestLocalCodebase_FindFileMatching(t *testing.T) {
+	tests := []struct {
+		name         string
+		BasePath     string
+		predicate    func(string) bool
+		globs        []string
+		expectedPath string
+		expectErr    bool
+	}{
+		{
+			name:      "find.me found, but doesn't match predicate",
+			predicate: func(s string) bool { return false },
+			BasePath:  "./testdata",
+			globs:     []string{"find.me"},
+			expectErr: true,
+		}, {
+			name:         "*.go found, localcodebase.go matches predicate",
+			predicate:    func(s string) bool { return s == "localcodebase.go" },
+			globs:        []string{"*.go"},
+			expectedPath: "localcodebase.go",
+			expectErr:    false,
+		}, {
+			name:         "multiple globs",
+			predicate:    func(s string) bool { return true },
+			globs:        []string{"find.me", "testdata/find.me"},
+			expectedPath: "testdata/find.me",
+			expectErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := LocalCodebase{BasePath: tt.BasePath}
+			gotPath, err := c.FindFileMatching(tt.predicate, tt.globs...)
+			if (err != nil) != tt.expectErr {
+				t.Errorf("FindFile() error %v, expectErr %v", err, tt.expectErr)
+				return
+			}
+			if gotPath != tt.expectedPath {
+				t.Errorf(" got %q, expected %q", gotPath, tt.expectedPath)
+			}
+		})
+	}
+}
+
 func TestLocalCodebase_FindFile(t *testing.T) {
 	tests := []struct {
 		name         string

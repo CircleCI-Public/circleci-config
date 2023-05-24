@@ -12,21 +12,27 @@ import (
 // a codebase.Codebase for testing that just reads filenames and contents from a map
 type fakeCodebase struct {
 	// map of filename to file contents
-	fileContents map[string]string
+	contentsByPath map[string]string
 }
 
-func (r fakeCodebase) FindFile(glob string) (path string, err error) {
-	for k := range r.fileContents {
-		matched, _ := filepath.Match(glob, k)
-		if matched {
-			return k, nil
+func (c fakeCodebase) FindFileMatching(predicate func(string) bool, globs ...string) (string, error) {
+	for _, g := range globs {
+		for path := range c.contentsByPath {
+			matched, _ := filepath.Match(g, path)
+			if matched && predicate(path) {
+				return path, nil
+			}
 		}
 	}
 	return "", fmt.Errorf("not found")
 }
 
-func (r fakeCodebase) ReadFile(path string) (contents []byte, err error) {
-	contentString := r.fileContents[path]
+func (c fakeCodebase) FindFile(globs ...string) (path string, err error) {
+	return c.FindFileMatching(func(string) bool { return true }, globs...)
+}
+
+func (c fakeCodebase) ReadFile(path string) (contents []byte, err error) {
+	contentString := c.contentsByPath[path]
 	if contentString != "" {
 		return []byte(contentString), nil
 	}

@@ -1,15 +1,15 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
-const goCacheKey = `go-mod-{{ checksum "go.sum" }}`
+func goInitialSteps(ls labels.LabelSet) []config.Step {
+	const goCacheKey = `go-mod-{{ checksum "go.sum" }}`
 
-func goTestJob(ls labels.LabelSet) *Job {
 	steps := initialSteps(ls[labels.DepsGo])
-
 	steps = append(steps, []config.Step{
 		{
 			Type:     config.RestoreCache,
@@ -22,7 +22,15 @@ func goTestJob(ls labels.LabelSet) *Job {
 			Type:     config.SaveCache,
 			CacheKey: goCacheKey,
 			Path:     "/home/circleci/go/pkg/mod",
-		}, {
+		}}...)
+	return steps
+}
+
+func goTestJob(ls labels.LabelSet) *Job {
+	steps := goInitialSteps(ls)
+
+	steps = append(steps, []config.Step{
+		{
 			Type:    config.Run,
 			Name:    "Run go vet",
 			Command: "go vet ./...",
@@ -46,9 +54,39 @@ func goTestJob(ls labels.LabelSet) *Job {
 	}
 }
 
-func GenerateGoJobs(ls labels.LabelSet) []*Job {
+func goBuildJob(ls labels.LabelSet) *Job {
+	steps := goInitialSteps(ls)
+
+	steps = append(steps,
+		createArtifactsDirStep,
+		config.Step{
+			Type:    config.Run,
+			Name:    "Build executables",
+			Command: fmt.Sprintf("go build -o %s ./...", artifactsPath),
+		},
+		storeArtifactsStep)
+
+	return &Job{
+		Job: config.Job{
+			Name:        "build-go-executables",
+			Comment:     "Build go executables and store them as artifacts",
+			DockerImage: "cimg/go",
+			Steps:       steps,
+		},
+		Type: ArtifactJob,
+	}
+}
+
+func GenerateGoJobs(ls labels.LabelSet) (jobs []*Job) {
 	if !ls[labels.DepsGo].Valid {
 		return nil
 	}
-	return []*Job{goTestJob(ls)}
+
+	jobs = append(jobs, goTestJob(ls))
+
+	if ls[labels.ArtifactGoExecutable].Valid {
+		jobs = append(jobs, goBuildJob(ls))
+	}
+
+	return jobs
 }

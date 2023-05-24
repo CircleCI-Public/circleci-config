@@ -24,3 +24,16 @@ func initialSteps(depsLabel labels.Label) []config.Step {
 
 	return steps
 }
+
+const artifactsPath = "~/artifacts"
+
+var createArtifactsDirStep = config.Step{
+	Type:    config.Run,
+	Name:    fmt.Sprintf("Create the %s directory if it doesn't exist", artifactsPath),
+	Command: fmt.Sprintf("mkdir -p %s", artifactsPath),
+}
+
+var storeArtifactsStep = config.Step{
+	Type: config.StoreArtifacts,
+	Path: artifactsPath,
+}

@@ -46,23 +46,30 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 		expectedLabels []labels.Label
 	}{
 		{
-			name: "go & node rules apply",
+			name: "All rules apply",
 			files: map[string]string{
 				"go.mod":       "",
-				"package.json": "{}",
+				"package.json": `{"devDependencies":{"jest": "version"}}`,
+				"cmd/cmd.go":   "package main",
 			},
 			expectedLabels: []labels.Label{
 				{
 					Key: labels.DepsNode,
 					LabelData: labels.LabelData{
 						BasePath:     ".",
-						Dependencies: map[string]string{},
+						Dependencies: map[string]string{"jest": "version"},
 					},
+				}, {
+					Key:       labels.TestJest,
+					LabelData: labels.LabelData{},
 				}, {
 					Key: labels.DepsGo,
 					LabelData: labels.LabelData{
 						BasePath: ".",
 					},
+				}, {
+					Key:       labels.ArtifactGoExecutable,
+					LabelData: labels.LabelData{},
 				},
 			},
 		},
@@ -192,7 +199,7 @@ func TestCodebase_ApplyRules_Go(t *testing.T) {
 		expectedLabels []labels.Label
 	}{
 		{
-			name: "deps:go",
+			name: "go.mod => deps:go",
 			files: map[string]string{
 				"go.mod": "module mymod\n\ngo 1.18\n",
 			},
@@ -204,6 +211,73 @@ func TestCodebase_ApplyRules_Go(t *testing.T) {
 					},
 				},
 			},
+		}, {
+			name: "go.mod in subdir => deps.go",
+			files: map[string]string{
+				"x/go.mod": "module mymod\n\ngo 1.18\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsGo,
+					LabelData: labels.LabelData{
+						BasePath: "x",
+					},
+				},
+			},
+		}, {
+			name: "go.mod & go main package => artifact:go-executable",
+			files: map[string]string{
+				"go.mod":  "module mymod\n\ngo 1.18\n",
+				"main.go": "package main",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsGo,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				}, {
+					Key: labels.ArtifactGoExecutable,
+				},
+			},
+		}, {
+			name: "go.mod & go main package in subdir => artifact:go-executable",
+			files: map[string]string{
+				"go.mod":      "module mymod\n\ngo 1.18\n",
+				"pkg/main.go": "package main",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsGo,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				}, {
+					Key: labels.ArtifactGoExecutable,
+				},
+			},
+		}, {
+			name: "go.mod & go main package in subdir of cmd => artifact:go-executable",
+			files: map[string]string{
+				"go.mod":        "module mymod\n\ngo 1.18\n",
+				"cmd/x/main.go": "//this is package main\npackage main",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsGo,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				}, {
+					Key: labels.ArtifactGoExecutable,
+				},
+			},
+		}, {
+			name: "go main package without go.mod => no labels",
+			files: map[string]string{
+				"main.go": "package main",
+			},
+			expectedLabels: []labels.Label{},
 		},
 	}
 	for _, tt := range tests {

@@ -2,12 +2,14 @@ package labels
 
 import (
 	"fmt"
-	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
 	"sort"
 	"strings"
+
+	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
 )
 
 const (
+	PackageManagerYarn   = "package_manager:yarn"
 	DepsNode             = "deps:node"
 	TestJest             = "test:jest"
 	DepsGo               = "deps:go"

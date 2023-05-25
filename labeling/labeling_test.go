@@ -2,11 +2,12 @@ package labeling
 
 import (
 	"fmt"
-	"github.com/CircleCI-Public/circleci-config/labeling/internal"
-	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/CircleCI-Public/circleci-config/labeling/internal"
+	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
 // a codebase.Codebase for testing that just reads filenames and contents from a map
@@ -163,6 +164,30 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 						},
 					},
 				}, {
+					Key: labels.TestJest,
+				},
+			},
+		},
+		{
+			name: "deps:node, scripts and package_manager:yarn",
+			files: map[string]string{
+				"package.json": `{"dependencies": {"mylib": ">3.0"}, "devDependencies": {"jest": "1.0"}}`,
+				"yarn.lock":    "yarn.lock file",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsNode,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"mylib": ">3.0",
+							"jest":  "1.0",
+						},
+					},
+				}, {
+					Key: labels.PackageManagerYarn,
+				},
+				{
 					Key: labels.TestJest,
 				},
 			},

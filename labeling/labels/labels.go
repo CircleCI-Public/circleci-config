@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	DepsNode = "deps:node"
-	TestJest = "test:jest"
-	DepsGo   = "deps:go"
+	DepsNode             = "deps:node"
+	TestJest             = "test:jest"
+	DepsGo               = "deps:go"
+	ArtifactGoExecutable = "artifact:go-executable"
 )
 
 type LabelData struct {

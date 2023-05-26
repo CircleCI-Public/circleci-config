@@ -65,6 +65,6 @@ Of course, also add tests for the new rules and config generation code.
 A simple CLI for experimenting with inference is included.
 Build it with
 ```sh
-go build ./cmd/inferconfig.go
+go build ./cmd/inferconfig/inferconfig.go
 ```
 Then invoke it with a path to print config for the codebase in that path to stdout.

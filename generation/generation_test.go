@@ -50,54 +50,55 @@ func TestGenerateConfig(t *testing.T) {
 					Valid:     true,
 					LabelData: labels.LabelData{BasePath: "go-dir"},
 				}},
-			expected: "# This config was automatically generated from your source code\n" +
-				"# Stacks detected: deps:go:go-dir,deps:node:node-dir\n" +
-				"version: 2.1\n" +
-				"orbs:\n" +
-				"  node: circleci/node@5\n" +
-				"jobs:\n" +
-				"  test-node:\n" +
-				"    # Install node dependencies and run tests\n" +
-				"    executor: node/default\n" +
-				"    steps:\n" +
-				"      - checkout\n" +
-				"      - run:\n" +
-				"          name: Change into 'node-dir' directory\n" +
-				"          command: cd 'node-dir'\n" +
-				"      - node/install-packages\n" +
-				"      - run:\n" +
-				"          command: npm test\n" +
-				"  test-go:\n" +
-				"    # Install go modules, run go vet and tests\n" +
-				"    docker:\n" +
-				"      - image: cimg/go\n" +
-				"    steps:\n" +
-				"      - checkout\n" +
-				"      - run:\n" +
-				"          name: Change into 'go-dir' directory\n" +
-				"          command: cd 'go-dir'\n" +
-				"      - restore_cache:\n" +
-				"          key: go-mod-{{ checksum \"go.sum\" }}\n" +
-				"      - run:\n" +
-				"          name: Download Go modules\n" +
-				"          command: go mod download\n" +
-				"      - save_cache:\n" +
-				"          key: go-mod-{{ checksum \"go.sum\" }}\n" +
-				"          paths:\n" +
-				"            - /home/circleci/go/pkg/mod\n" +
-				"      - run:\n" +
-				"          name: Run go vet\n" +
-				"          command: go vet ./...\n" +
-				"      - run:\n" +
-				"          name: Run tests\n" +
-				"          command: gotestsum --junitfile junit.xml\n" +
-				"      - store_test_results:\n" +
-				"          path: junit.xml\n" +
-				"workflows:\n" +
-				"  ci:\n" +
-				"    jobs:\n" +
-				"      - test-node\n" +
-				"      - test-go\n",
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:go:go-dir,deps:node:node-dir
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    steps:
+      - checkout
+      - run:
+          name: Change into 'node-dir' directory
+          command: cd 'node-dir'
+      - node/install-packages
+      - run:
+          command: npm test
+  test-go:
+    # Install go modules, run go vet and tests
+    docker:
+      - image: cimg/go:1.20
+    steps:
+      - checkout
+      - run:
+          name: Change into 'go-dir' directory
+          command: cd 'go-dir'
+      - restore_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+      - run:
+          name: Download Go modules
+          command: go mod download
+      - save_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+          paths:
+            - /home/circleci/go/pkg/mod
+      - run:
+          name: Run go vet
+          command: go vet ./...
+      - run:
+          name: Run tests
+          command: gotestsum --junitfile junit.xml
+      - store_test_results:
+          path: junit.xml
+workflows:
+  ci:
+    jobs:
+      - test-node
+      - test-go
+`,
 		},
 	}
 	for _, tt := range tests {
@@ -109,7 +110,62 @@ func TestGenerateConfig(t *testing.T) {
 }
 
 func TestDogfood(t *testing.T) {
-	expectedConfig := "# This config was automatically generated from your source code\n# Stacks detected: deps:go:.\nversion: 2.1\njobs:\n  test-go:\n    # Install go modules, run go vet and tests\n    docker:\n      - image: cimg/go\n    steps:\n      - checkout\n      - restore_cache:\n          key: go-mod-{{ checksum \"go.sum\" }}\n      - run:\n          name: Download Go modules\n          command: go mod download\n      - save_cache:\n          key: go-mod-{{ checksum \"go.sum\" }}\n          paths:\n            - /home/circleci/go/pkg/mod\n      - run:\n          name: Run go vet\n          command: go vet ./...\n      - run:\n          name: Run tests\n          command: gotestsum --junitfile junit.xml\n      - store_test_results:\n          path: junit.xml\nworkflows:\n  ci:\n    jobs:\n      - test-go\n"
+	expectedConfig := `# This config was automatically generated from your source code
+# Stacks detected: artifact:go-executable:,deps:go:.
+version: 2.1
+jobs:
+  test-go:
+    # Install go modules, run go vet and tests
+    docker:
+      - image: cimg/go:1.20
+    steps:
+      - checkout
+      - restore_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+      - run:
+          name: Download Go modules
+          command: go mod download
+      - save_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+          paths:
+            - /home/circleci/go/pkg/mod
+      - run:
+          name: Run go vet
+          command: go vet ./...
+      - run:
+          name: Run tests
+          command: gotestsum --junitfile junit.xml
+      - store_test_results:
+          path: junit.xml
+  build-go-executables:
+    # Build go executables and store them as artifacts
+    docker:
+      - image: cimg/go:1.20
+    steps:
+      - checkout
+      - restore_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+      - run:
+          name: Download Go modules
+          command: go mod download
+      - save_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+          paths:
+            - /home/circleci/go/pkg/mod
+      - run:
+          name: Create the ~/artifacts directory if it doesn't exist
+          command: mkdir -p ~/artifacts
+      - run:
+          name: Build executables
+          command: go build -o ~/artifacts ./...
+      - store_artifacts:
+          path: ~/artifacts
+workflows:
+  ci:
+    jobs:
+      - test-go
+      - build-go-executables
+`
 
 	c := codebase.LocalCodebase{BasePath: ".."}
 	ls := labeling.ApplyAllRules(c)

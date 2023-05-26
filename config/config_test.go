@@ -3,8 +3,9 @@ package config
 import (
 	"bytes"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
 func mustEncode(node *yaml.Node) string {
@@ -204,6 +205,37 @@ func TestJob_YamlNode(t *testing.T) {
 				Executor: "x",
 			},
 			expected: "executor: x\nsteps: []\n",
+		},
+		{
+			testName: "job with docker image and environment variables",
+			job: Job{
+				Name:        "job",
+				Comment:     "This is a job that uses docker",
+				DockerImage: "cimg/base",
+				Environment: map[string]string{
+					"FOO": "bar",
+					"BAZ": "qux",
+				},
+				Steps: []Step{{
+					Type: Checkout,
+				}, {
+					Type:    Run,
+					Comment: "get deps",
+					Command: "npm install",
+				}},
+			},
+			expected: `# This is a job that uses docker
+docker:
+  - image: cimg/base
+environment:
+  FOO: bar
+  BAZ: qux
+steps:
+  - checkout
+  # get deps
+  - run:
+      command: npm install
+`,
 		},
 	}
 	for _, tt := range tests {

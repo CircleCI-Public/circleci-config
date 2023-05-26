@@ -3,12 +3,13 @@ package generation
 import (
 	"bytes"
 	"fmt"
+	"testing"
+
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling"
 	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 	"gopkg.in/yaml.v3"
-	"testing"
 )
 
 func mustEncode(node *yaml.Node) string {
@@ -64,7 +65,8 @@ jobs:
       - run:
           name: Change into 'node-dir' directory
           command: cd 'node-dir'
-      - node/install-packages
+      - node/install-packages:
+          pkg-manager: npm
       - run:
           command: npm test
   test-go:
@@ -98,6 +100,41 @@ workflows:
     jobs:
       - test-node
       - test-go
+`,
+		},
+		{
+			testName: "node codebase with yarn.lock",
+			labels: labels.LabelSet{
+				labels.DepsNode: labels.Label{
+					Key:       labels.DepsNode,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.PackageManagerYarn: labels.Label{
+					Key:       labels.PackageManagerYarn,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:node:.,package_manager:yarn:.
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+      - run:
+          command: yarn test
+workflows:
+  ci:
+    jobs:
+      - test-node
 `,
 		},
 	}

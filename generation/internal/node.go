@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
@@ -11,34 +13,51 @@ func npmTaskDefined(ls labels.LabelSet, task string) bool {
 	return ls[labels.DepsNode].Tasks[task] != ""
 }
 
-func nodeTestSteps(ls labels.LabelSet) []config.Step {
+func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
+
+	if npmTaskDefined(ls, "test:ci") {
+		return []config.Step{{
+			Type:    config.Run,
+			Command: fmt.Sprintf("%s run test:ci", packageManager),
+		}}
+	}
+
+	if npmTaskDefined(ls, "test") {
+		return []config.Step{{
+			Type:    config.Run,
+			Command: fmt.Sprintf("%s run test", packageManager),
+		}}
+	}
+
 	if ls[labels.TestJest].Valid {
 		return []config.Step{{
 			Type:    config.Run,
 			Command: "jest",
 		}}
 	}
-	if npmTaskDefined(ls, "test:ci") {
-		return []config.Step{{
-			Type:    config.Run,
-			Command: "npm run test:ci",
-		}}
-	}
 
 	return []config.Step{{
 		Type:    config.Run,
-		Command: "npm test",
+		Command: fmt.Sprintf("%s test", packageManager),
 	}}
 }
 
 func nodeTestJob(ls labels.LabelSet) *Job {
 	steps := initialSteps(ls[labels.DepsNode])
 
+	packageManager := "npm"
+	if ls[labels.PackageManagerYarn].Valid {
+		packageManager = "yarn"
+	}
+
 	steps = append(steps, config.Step{
 		Type:    config.OrbCommand,
 		Command: "node/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": packageManager,
+		},
 	})
-	steps = append(steps, nodeTestSteps(ls)...)
+	steps = append(steps, nodeTestSteps(ls, packageManager)...)
 
 	return &Job{
 		Job: config.Job{Name: "test-node",

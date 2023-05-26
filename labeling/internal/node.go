@@ -2,9 +2,10 @@ package internal
 
 import (
 	"encoding/json"
+	"path"
+
 	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
-	"path"
 )
 
 var NodeRules = []labels.Rule{
@@ -16,6 +17,12 @@ var NodeRules = []labels.Rule{
 			return label, err
 		}
 		err = readPackageJSON(c, packagePath, &label)
+		return label, err
+	},
+	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+		label.Key = labels.PackageManagerYarn
+		yarnLock, _ := c.FindFile("yarn.lock")
+		label.Valid = yarnLock != ""
 		return label, err
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {

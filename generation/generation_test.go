@@ -137,6 +137,47 @@ workflows:
       - test-node
 `,
 		},
+		{
+			testName: "node codebase with jest tests",
+			labels: labels.LabelSet{
+				labels.DepsNode: labels.Label{
+					Key:       labels.DepsNode,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.TestJest: labels.Label{
+					Key:       labels.TestJest,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:node:.,test:jest:.
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    environment:
+      JEST_JUNIT_OUTPUT_DIR: ./test-results/
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          command: npm install jest-junit
+      - run:
+          command: jest --ci --runInBand --reporters=default --reporters=jest-junit
+      - store_test_results:
+          path: ./test-results/
+workflows:
+  ci:
+    jobs:
+      - test-node
+`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {

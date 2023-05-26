@@ -3,8 +3,9 @@ package config
 import (
 	"bytes"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"sort"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Node interface {
@@ -112,6 +113,7 @@ type Job struct {
 	DockerImage string
 	Executor    string
 	Steps       []Step
+	Environment map[string]string
 }
 
 func (j Job) YamlNode() *yaml.Node {
@@ -120,16 +122,31 @@ func (j Job) YamlNode() *yaml.Node {
 		stepsYaml[i] = s.YamlNode()
 	}
 
+	var contentNodes []*yaml.Node
+
 	if j.Executor != "" {
-		return yCommentedMap(j.Comment,
-			yScalar("executor"), yScalar(j.Executor),
-			yScalar("steps"), ySeq(stepsYaml...))
+		contentNodes = append(contentNodes, yScalar("executor"), yScalar(j.Executor))
 	} else {
-		return yCommentedMap(j.Comment,
+		contentNodes = append(contentNodes,
 			yScalar("docker"), ySeq(yMap(
-				yScalar("image"), yScalar(j.DockerImage))),
-			yScalar("steps"), ySeq(stepsYaml...))
+				yScalar("image"), yScalar(j.DockerImage))))
 	}
+
+	if len(j.Environment) > 0 {
+		keyValPairs := make([]*yaml.Node, 2*len(j.Environment))
+		i := 0
+		for k, v := range j.Environment {
+			keyValPairs[2*i] = yScalar(k)
+			keyValPairs[2*i+1] = yScalar(v)
+			i++
+		}
+
+		contentNodes = append(contentNodes, yScalar("environment"), yMap(keyValPairs...))
+	}
+
+	contentNodes = append(contentNodes, yScalar("steps"), ySeq(stepsYaml...))
+
+	return yCommentedMap(j.Comment, contentNodes...)
 }
 
 type StepType uint32

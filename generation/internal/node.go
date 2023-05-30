@@ -14,35 +14,49 @@ func npmTaskDefined(ls labels.LabelSet, task string) bool {
 }
 
 func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
+	hasJestLabel := ls[labels.TestJest].Valid
 
 	if npmTaskDefined(ls, "test:ci") {
 		return []config.Step{{
+			Name:    "Run tests",
 			Type:    config.Run,
 			Command: fmt.Sprintf("%s run test:ci", packageManager),
 		}}
 	}
 
 	if npmTaskDefined(ls, "test") {
+		if hasJestLabel {
+			return []config.Step{{
+				Name:    "Run tests",
+				Type:    config.Run,
+				Command: fmt.Sprintf("%s run test --ci --runInBand --reporters=default --reporters=jest-junit", packageManager),
+			}}
+		}
+
 		return []config.Step{{
+			Name:    "Run tests",
 			Type:    config.Run,
 			Command: fmt.Sprintf("%s run test", packageManager),
 		}}
 	}
 
-	if ls[labels.TestJest].Valid {
+	if hasJestLabel {
 		return []config.Step{{
 			Type:    config.Run,
-			Command: "jest",
+			Name:    "Run tests with Jest",
+			Command: "jest --ci --runInBand --reporters=default --reporters=jest-junit",
 		}}
 	}
 
 	return []config.Step{{
+		Name:    "Run tests",
 		Type:    config.Run,
 		Command: fmt.Sprintf("%s test", packageManager),
 	}}
 }
 
 func nodeTestJob(ls labels.LabelSet) *Job {
+	hasJestLabel := ls[labels.TestJest].Valid
 	steps := initialSteps(ls[labels.DepsNode])
 
 	packageManager := "npm"
@@ -57,13 +71,38 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 			"pkg-manager": packageManager,
 		},
 	})
+	if hasJestLabel {
+		steps = append(steps, config.Step{
+			Type:    config.Run,
+			Command: "npm install jest-junit",
+		})
+	}
 	steps = append(steps, nodeTestSteps(ls, packageManager)...)
 
+	if hasJestLabel {
+		steps = append(steps, config.Step{
+			Type:    config.OrbCommand,
+			Command: "store_test_results",
+			Parameters: config.OrbCommandParameters{
+				"path": "./test-results/",
+			},
+		})
+	}
+
+	job := config.Job{
+		Name:     "test-node",
+		Comment:  "Install node dependencies and run tests",
+		Executor: "node/default",
+		Steps:    steps}
+
+	if hasJestLabel {
+		job.Environment = map[string]string{
+			"JEST_JUNIT_OUTPUT_DIR": "./test-results/",
+		}
+	}
+
 	return &Job{
-		Job: config.Job{Name: "test-node",
-			Comment:  "Install node dependencies and run tests",
-			Executor: "node/default",
-			Steps:    steps},
+		Job:  job,
 		Type: TestJob,
 		Orbs: map[string]string{"node": nodeOrb},
 	}
@@ -73,5 +112,6 @@ func GenerateNodeJobs(ls labels.LabelSet) []*Job {
 	if !ls[labels.DepsNode].Valid {
 		return nil
 	}
+
 	return []*Job{nodeTestJob(ls)}
 }

@@ -260,6 +260,123 @@ workflows:
     # - deploy
 `,
 		},
+		{
+			testName: "python codebase with pip package manager",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:       labels.DepsPython,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          app-dir: .
+          pkg-manager: pip
+      - python/install-packages:
+          args: pytest
+          pkg-manager: pip
+          pypi-cache: false
+      - run:
+          name: Run tests
+          command: mkdir test-results && pytest  --junitxml=test-results/junit.xml
+      - store_test_results:
+          path: test-results
+workflows:
+  ci:
+    jobs:
+      - test-python
+`,
+		},
+		{
+			testName: "python codebase with pipenv package manager",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:       labels.DepsPython,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.PackageManagerPipenv: labels.Label{
+					Key:       labels.PackageManagerPipenv,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.,package_manager:pipenv:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          app-dir: .
+          pkg-manager: pipenv
+      - run:
+          name: Run tests
+          command: mkdir test-results && pipenv run pytest --junitxml=test-results/junit.xml
+      - store_test_results:
+          path: test-results
+workflows:
+  ci:
+    jobs:
+      - test-python
+`,
+		},
+		{
+
+			testName: "python codebase with poetry package manager",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:       labels.DepsPython,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.PackageManagerPoetry: labels.Label{
+					Key:       labels.PackageManagerPoetry,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.,package_manager:poetry:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          app-dir: .
+          pkg-manager: poetry
+      - run:
+          name: Run tests
+          command: mkdir test-results && poetry run pytest --junitxml=test-results/junit.xml
+      - store_test_results:
+          path: test-results
+workflows:
+  ci:
+    jobs:
+      - test-python
+`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {

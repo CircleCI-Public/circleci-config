@@ -326,3 +326,106 @@ func TestCodebase_ApplyRules_Go(t *testing.T) {
 		})
 	}
 }
+
+func TestCodebase_ApplyRules_Python(t *testing.T) {
+	rules := internal.PythonRules
+	tests := []struct {
+		name           string
+		files          map[string]string
+		rules          []labels.Rule
+		expectedLabels []labels.Label
+	}{
+		{
+			name: "requirements.txt => deps:python",
+			files: map[string]string{
+				"requirements.txt": "mylib==1.0",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		}, {
+			name: "requirements.txt in subdir => deps:python",
+			files: map[string]string{
+				"x/requirements.txt": "mylib==1.0",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: "x",
+					},
+					Valid: true,
+				},
+			},
+		}, {
+			name: "Pipfile => package_manager:pipenv",
+			files: map[string]string{
+				"Pipfile": "[packages]\nmylib = \"==1.0\"\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+				{
+					Key: labels.PackageManagerPipenv,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "poetry.lock => package_manager:poetry",
+			files: map[string]string{
+				"poetry.lock": "mylib==1.0",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+				{
+					Key: labels.PackageManagerPoetry,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := fakeCodebase{tt.files}
+			expected := make(labels.LabelSet)
+			for _, label := range tt.expectedLabels {
+				// all should be Valid
+				label.Valid = true
+				expected[label.Key] = label
+			}
+			got := ApplyRules(c, rules)
+
+			if !reflect.DeepEqual(got, expected) {
+				t.Errorf("\n"+
+					"got      %v\n"+
+					"expected %v",
+					got,
+					expected)
+			}
+		})
+	}
+}

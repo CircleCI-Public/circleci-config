@@ -14,6 +14,9 @@ const (
 	TestJest             = "test:jest"
 	DepsGo               = "deps:go"
 	ArtifactGoExecutable = "artifact:go-executable"
+	DepsPython           = "deps:python"
+	PackageManagerPipenv = "package_manager:pipenv"
+	PackageManagerPoetry = "package_manager:poetry"
 )
 
 type LabelData struct {

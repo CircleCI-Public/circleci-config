@@ -1,28 +1,11 @@
 package config
 
 import (
-	"bytes"
-	"fmt"
 	"testing"
-
-	"gopkg.in/yaml.v3"
 )
 
-func mustEncode(node *yaml.Node) string {
-	buf := new(bytes.Buffer)
-	encoder := yaml.NewEncoder(buf)
-	// Just to make it more compact to write expected results
-	encoder.SetIndent(2)
-	err := encoder.Encode(node)
-	if err != nil {
-		fmt.Print(err)
-		panic("error encoding yaml")
-	}
-	return buf.String()
-}
-
 func testEncode(t *testing.T, node Node, expected string) {
-	yamlStr := mustEncode(node.YamlNode())
+	yamlStr := yamlNodeToString(node.YamlNode())
 	if yamlStr != expected {
 		t.Errorf("\ngot:     %q\nexpected:%q", yamlStr, expected)
 	}
@@ -132,40 +115,248 @@ func TestConfig_String(t *testing.T) {
 	}
 }
 
-func TestWorkflowJob_YamlNode(t *testing.T) {
+func TestWorkflow_YamlNode(t *testing.T) {
 	var job1 = Job{Name: "job1"}
 	var job2 = Job{Name: "job2"}
 	var job3 = Job{Name: "job3"}
 
 	tests := []struct {
 		testName string
-		job      *Job
-		requires []*Job
+		workflow Workflow
 		expected string
 	}{
 		{
-			testName: "no requires",
-			job:      &job1,
-			expected: "job1\n",
+			testName: "no jobs",
+			workflow: Workflow{
+				Name: "w",
+			},
+			expected: "jobs: []\n",
 		}, {
-			testName: "empty requires",
-			job:      &job1,
-			requires: []*Job{},
-			expected: "job1\n",
+			testName: "3 jobs independent",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job: &job1,
+					}, {
+						Job: &job2,
+					}, {
+						Job: &job3,
+					},
+				},
+			},
+			expected: "jobs:\n  - job1\n  - job2\n  - job3\n",
 		}, {
-			testName: "2 requires",
-			job:      &job1,
-			requires: []*Job{&job2, &job3},
-			expected: "job1:\n  requires:\n    - job2\n    - job3\n",
+			testName: "3 jobs sequential",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job: &job1,
+					}, {
+						Job:      &job2,
+						Requires: []*Job{&job1},
+					}, {
+						Job:      &job3,
+						Requires: []*Job{&job2},
+					},
+				},
+			},
+			expected: `jobs:
+  - job1
+  - job2:
+      requires:
+        - job1
+  - job3:
+      requires:
+        - job2
+`,
+		}, {
+			testName: "3 jobs fan-out",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job: &job1,
+					}, {
+						Job:      &job2,
+						Requires: []*Job{&job1},
+					}, {
+						Job:      &job3,
+						Requires: []*Job{&job1},
+					},
+				},
+			},
+			expected: `jobs:
+  - job1
+  - job2:
+      requires:
+        - job1
+  - job3:
+      requires:
+        - job1
+`,
+		}, {
+			testName: "3 jobs fan-in",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job: &job1,
+					}, {
+						Job: &job2,
+					}, {
+						Job:      &job3,
+						Requires: []*Job{&job1, &job2},
+					},
+				},
+			},
+			expected: `jobs:
+  - job1
+  - job2
+  - job3:
+      requires:
+        - job1
+        - job2
+`,
+		}, {
+			testName: "3 jobs, job1 commented out",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job:          &job1,
+						CommentedOut: true,
+					}, {
+						Job: &job2,
+					}, {
+						Job: &job3,
+					},
+				},
+			},
+			expected: `jobs:
+  # - job1
+  - job2
+  - job3
+`,
+		}, {
+			testName: "3 jobs, job2 (with requires) commented out",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job: &job1,
+					}, {
+						Job:          &job2,
+						CommentedOut: true,
+						Requires:     []*Job{&job1},
+					}, {
+						Job: &job3,
+					},
+				},
+			},
+			expected: `jobs:
+  - job1
+  # - job2:
+  #     requires:
+  #       - job1
+  - job3
+`,
+		}, {
+			testName: "3 jobs, job3 (with requires) commented out",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job: &job1,
+					}, {
+						Job: &job2,
+					}, {
+						Job:          &job3,
+						CommentedOut: true,
+						Requires:     []*Job{&job1, &job2},
+					},
+				},
+			},
+			// Note that when the last job is commented out the indentation is different
+			expected: `jobs:
+  - job1
+  - job2
+# - job3:
+#     requires:
+#       - job1
+#       - job2
+`,
+		}, {
+			testName: "3 jobs, job1 and job2 commented out",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job:          &job1,
+						CommentedOut: true,
+					}, {
+						Job:          &job2,
+						CommentedOut: true,
+					}, {
+						Job: &job3,
+					},
+				},
+			},
+			expected: `jobs:
+  # - job1
+  # - job2
+  - job3
+`,
+		}, {
+			testName: "3 jobs, job1 and job3 commented out",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job:          &job1,
+						CommentedOut: true,
+					}, {
+						Job: &job2,
+					}, {
+						Job:          &job3,
+						CommentedOut: true,
+					},
+				},
+			},
+			// Note that when the last job is commented out the indentation is different
+			expected: `jobs:
+  # - job1
+  - job2
+# - job3
+`,
+		}, {
+			testName: "3 jobs, job2 and job3 commented out",
+			workflow: Workflow{
+				Name: "w",
+				Jobs: []WorkflowJob{
+					{
+						Job: &job1,
+					}, {
+						Job:          &job2,
+						CommentedOut: true,
+					}, {
+						Job:          &job3,
+						CommentedOut: true,
+					},
+				},
+			},
+			// Note that when the last jobs are commented out the indentation is different
+			expected: `jobs:
+  - job1
+# - job2
+# - job3
+`,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {
-			wj := WorkflowJob{
-				Job:      tt.job,
-				Requires: tt.requires,
-			}
-			testEncode(t, wj, tt.expected)
+			testEncode(t, tt.workflow, tt.expected)
 		})
 	}
 }

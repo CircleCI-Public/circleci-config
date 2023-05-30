@@ -20,14 +20,7 @@ type Config struct {
 }
 
 func (c Config) String() string {
-	buf := new(bytes.Buffer)
-	encoder := yaml.NewEncoder(buf)
-	encoder.SetIndent(2)
-	err := encoder.Encode(c.YamlNode())
-	if err != nil {
-		return fmt.Sprintf("[Could not encode config: %v])", err)
-	}
-	return buf.String()
+	return yamlNodeToString(c.YamlNode())
 }
 
 func (c Config) YamlNode() *yaml.Node {
@@ -68,12 +61,39 @@ type Workflow struct {
 }
 
 func (w Workflow) YamlNode() *yaml.Node {
-	workflowJobsYaml := make([]*yaml.Node, len(w.Jobs))
-	for i, j := range w.Jobs {
-		workflowJobsYaml[i] = j.YamlNode()
+	var workflowJobsYaml []*yaml.Node
+	commentedOutJobs := []*yaml.Node{}
+	for _, j := range w.Jobs {
+		// Somewhat hacky:
+		// If the WorkflowJob is marked as commented out...
+		if j.CommentedOut {
+			// we add it (in yaml form) to this array...
+			commentedOutJobs = append(commentedOutJobs, j.YamlNode())
+		} else {
+			node := j.YamlNode()
+			// then at the next opportunity we add a head comment with the "pending"
+			// commented out jobs...
+			if len(commentedOutJobs) != 0 {
+				node.HeadComment = yamlNodeToString(ySeq(commentedOutJobs...))
+			}
+			commentedOutJobs = []*yaml.Node{}
+			workflowJobsYaml = append(workflowJobsYaml, node)
+		}
 	}
 
-	return yMap(yScalar("jobs"), ySeq(workflowJobsYaml...))
+	// if there are remaining commented out jobs we add them directly to the "jobs" scalar
+	// the indentation will be inconsistent with the comments added above, but that's the best
+	// we can do, I think
+	jobsFootComment := ""
+	if len(commentedOutJobs) != 0 {
+		jobsFootComment = yamlNodeToString(ySeq(commentedOutJobs...))
+	}
+
+	return yMap(&yaml.Node{
+		Kind:        yaml.ScalarNode,
+		Value:       "jobs",
+		FootComment: jobsFootComment,
+	}, ySeq(workflowJobsYaml...))
 }
 
 type Orb struct {
@@ -88,8 +108,13 @@ func (o Orb) YamlNode() *yaml.Node {
 // WorkflowJob are the references to the jobs that appear in the Workflow definitions
 // For the actual job definitions (that appear under the top-level "jobs:" key) see Job type below
 type WorkflowJob struct {
-	Job      *Job
-	Requires []*Job
+	Job          *Job
+	Requires     []*Job
+	CommentedOut bool
+}
+
+func (wj WorkflowJob) String() string {
+	return yamlNodeToString(ySeq(wj.YamlNode()))
 }
 
 func (wj WorkflowJob) YamlNode() *yaml.Node {
@@ -219,6 +244,17 @@ func (s Step) YamlNode() *yaml.Node {
 			yMapFromStringsMap(s.Parameters))
 	}
 	panic("unknown step type")
+}
+
+func yamlNodeToString(y *yaml.Node) string {
+	buf := new(bytes.Buffer)
+	encoder := yaml.NewEncoder(buf)
+	encoder.SetIndent(2)
+	err := encoder.Encode(y)
+	if err != nil {
+		return fmt.Sprintf("[Could not encode node: %v])", err)
+	}
+	return buf.String()
 }
 
 // helper functions to generate YAML nodes and make the above code a bit more succinct

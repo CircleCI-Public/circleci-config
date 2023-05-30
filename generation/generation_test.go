@@ -68,6 +68,7 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
+          name: Run tests
           command: npm test
   test-go:
     # Install go modules, run go vet and tests
@@ -130,6 +131,7 @@ jobs:
       - node/install-packages:
           pkg-manager: yarn
       - run:
+          name: Run tests
           command: yarn test
 workflows:
   ci:
@@ -169,6 +171,7 @@ jobs:
       - run:
           command: npm install jest-junit
       - run:
+          name: Run tests with Jest
           command: jest --ci --runInBand --reporters=default --reporters=jest-junit
       - store_test_results:
           path: ./test-results/

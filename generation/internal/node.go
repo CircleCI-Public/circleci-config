@@ -18,6 +18,7 @@ func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
 
 	if npmTaskDefined(ls, "test:ci") {
 		return []config.Step{{
+			Name:    "Run tests",
 			Type:    config.Run,
 			Command: fmt.Sprintf("%s run test:ci", packageManager),
 		}}
@@ -26,12 +27,14 @@ func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
 	if npmTaskDefined(ls, "test") {
 		if hasJestLabel {
 			return []config.Step{{
+				Name:    "Run tests",
 				Type:    config.Run,
 				Command: fmt.Sprintf("%s run test --ci --runInBand --reporters=default --reporters=jest-junit", packageManager),
 			}}
 		}
 
 		return []config.Step{{
+			Name:    "Run tests",
 			Type:    config.Run,
 			Command: fmt.Sprintf("%s run test", packageManager),
 		}}
@@ -40,11 +43,13 @@ func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
 	if hasJestLabel {
 		return []config.Step{{
 			Type:    config.Run,
+			Name:    "Run tests with Jest",
 			Command: "jest --ci --runInBand --reporters=default --reporters=jest-junit",
 		}}
 	}
 
 	return []config.Step{{
+		Name:    "Run tests",
 		Type:    config.Run,
 		Command: fmt.Sprintf("%s test", packageManager),
 	}}
@@ -84,7 +89,8 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 		})
 	}
 
-	job := config.Job{Name: "test-node",
+	job := config.Job{
+		Name:     "test-node",
 		Comment:  "Install node dependencies and run tests",
 		Executor: "node/default",
 		Steps:    steps}

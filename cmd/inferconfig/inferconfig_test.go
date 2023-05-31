@@ -61,3 +61,16 @@ func TestInferConfig(t *testing.T) {
 	}
 
 }
+
+func TestDogfood(t *testing.T) {
+	got := inferConfig("../..")
+	expected, err := os.ReadFile("testdata/expected/dogfood.yml")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	if got != string(expected) {
+		t.Errorf("\ngot       %q\nexpected: %q", got, expected)
+	}
+}

@@ -6,8 +6,6 @@ import (
 	"testing"
 
 	"github.com/CircleCI-Public/circleci-config/config"
-	"github.com/CircleCI-Public/circleci-config/labeling"
-	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 	"gopkg.in/yaml.v3"
 )
@@ -188,68 +186,4 @@ workflows:
 			testEncode(t, gotConfig, tt.expected)
 		})
 	}
-}
-
-func TestDogfood(t *testing.T) {
-	expectedConfig := `# This config was automatically generated from your source code
-# Stacks detected: artifact:go-executable:,deps:go:.
-version: 2.1
-jobs:
-  test-go:
-    # Install go modules, run go vet and tests
-    docker:
-      - image: cimg/go:1.20
-    steps:
-      - checkout
-      - restore_cache:
-          key: go-mod-{{ checksum "go.sum" }}
-      - run:
-          name: Download Go modules
-          command: go mod download
-      - save_cache:
-          key: go-mod-{{ checksum "go.sum" }}
-          paths:
-            - /home/circleci/go/pkg/mod
-      - run:
-          name: Run go vet
-          command: go vet ./...
-      - run:
-          name: Run tests
-          command: gotestsum --junitfile junit.xml
-      - store_test_results:
-          path: junit.xml
-  build-go-executables:
-    # Build go executables and store them as artifacts
-    docker:
-      - image: cimg/go:1.20
-    steps:
-      - checkout
-      - restore_cache:
-          key: go-mod-{{ checksum "go.sum" }}
-      - run:
-          name: Download Go modules
-          command: go mod download
-      - save_cache:
-          key: go-mod-{{ checksum "go.sum" }}
-          paths:
-            - /home/circleci/go/pkg/mod
-      - run:
-          name: Create the ~/artifacts directory if it doesn't exist
-          command: mkdir -p ~/artifacts
-      - run:
-          name: Build executables
-          command: go build -o ~/artifacts ./...
-      - store_artifacts:
-          path: ~/artifacts
-workflows:
-  ci:
-    jobs:
-      - test-go
-      - build-go-executables
-`
-
-	c := codebase.LocalCodebase{BasePath: ".."}
-	ls := labeling.ApplyAllRules(c)
-	gotConfig := GenerateConfig(ls)
-	testEncode(t, gotConfig, expectedConfig)
 }

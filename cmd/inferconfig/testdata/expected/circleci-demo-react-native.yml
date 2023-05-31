@@ -1,0 +1,26 @@
+# This config was automatically generated from your source code
+# Stacks detected: deps:node:.,package_manager:yarn:,test:jest:
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    environment:
+      JEST_JUNIT_OUTPUT_DIR: ./test-results/
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+      - run:
+          command: npm install jest-junit
+      - run:
+          name: Run tests
+          command: yarn run test --ci --runInBand --reporters=default --reporters=jest-junit
+      - store_test_results:
+          path: ./test-results/
+workflows:
+  ci:
+    jobs:
+      - test-node

@@ -228,8 +228,8 @@ func TestJob_YamlNode(t *testing.T) {
 docker:
   - image: cimg/base
 environment:
-  FOO: bar
   BAZ: qux
+  FOO: bar
 steps:
   - checkout
   # get deps

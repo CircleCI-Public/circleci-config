@@ -133,15 +133,8 @@ func (j Job) YamlNode() *yaml.Node {
 	}
 
 	if len(j.Environment) > 0 {
-		keyValPairs := make([]*yaml.Node, 2*len(j.Environment))
-		i := 0
-		for k, v := range j.Environment {
-			keyValPairs[2*i] = yScalar(k)
-			keyValPairs[2*i+1] = yScalar(v)
-			i++
-		}
-
-		contentNodes = append(contentNodes, yScalar("environment"), yMap(keyValPairs...))
+		contentNodes = append(contentNodes,
+			yScalar("environment"), yMapFromStringsMap(j.Environment))
 	}
 
 	contentNodes = append(contentNodes, yScalar("steps"), ySeq(stepsYaml...))
@@ -218,30 +211,12 @@ func (s Step) YamlNode() *yaml.Node {
 			yMap(
 				yScalar("path"), yScalar(s.Path)))
 	case OrbCommand:
-		numParams := len(s.Parameters)
-		if numParams == 0 {
+		if len(s.Parameters) == 0 {
 			return yCommentedScalar(s.Comment, s.Command)
 		}
-		// we want the parameters of the orb command to be sorted by key for consistency
-		// make an array of parameter keys
-		orbParameterKeys := make([]string, numParams)
-		i := 0
-		for k := range s.Parameters {
-			orbParameterKeys[i] = k
-			i++
-		}
-		// then sort it
-		sort.Strings(orbParameterKeys)
-		// and use it to populate an array yaml scalars representing key, value, key, value...
-		orbCommandYaml := make([]*yaml.Node, 2*numParams)
-		for j, k := range orbParameterKeys {
-			orbCommandYaml[2*j] = yScalar(k)
-			orbCommandYaml[2*j+1] = yScalar(s.Parameters[k])
-		}
-
 		return yCommentedMap(s.Comment,
 			yScalar(s.Command),
-			yMap(orbCommandYaml...))
+			yMapFromStringsMap(s.Parameters))
 	}
 	panic("unknown step type")
 }
@@ -266,4 +241,25 @@ func yMap(keyValuePairs ...*yaml.Node) *yaml.Node {
 
 func yCommentedMap(comment string, keyValuePairs ...*yaml.Node) *yaml.Node {
 	return &yaml.Node{Kind: yaml.MappingNode, HeadComment: comment, Content: keyValuePairs}
+}
+
+func yMapFromStringsMap(m map[string]string) *yaml.Node {
+	// we want the resulting map to be sorted by key for consistency:
+	// 1. make an array of keys
+	numKeys := len(m)
+	mapKeys := make([]string, numKeys)
+	i := 0
+	for k := range m {
+		mapKeys[i] = k
+		i++
+	}
+	// 2. then sort it
+	sort.Strings(mapKeys)
+	// 3. use it to populate an array yaml scalars representing key, value, key, value...
+	contentYaml := make([]*yaml.Node, 2*numKeys)
+	for j, k := range mapKeys {
+		contentYaml[2*j] = yScalar(k)
+		contentYaml[2*j+1] = yScalar(m[k])
+	}
+	return yMap(contentYaml...)
 }

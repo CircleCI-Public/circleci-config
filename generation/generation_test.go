@@ -3,6 +3,7 @@ package generation
 import (
 	"bytes"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 
 	"github.com/CircleCI-Public/circleci-config/config"
@@ -25,8 +26,10 @@ func mustEncode(node *yaml.Node) string {
 
 func testEncode(t *testing.T, node config.Node, expected string) {
 	yamlStr := mustEncode(node.YamlNode())
-	if yamlStr != expected {
+	d := cmp.Diff(expected, yamlStr)
+	if d != "" {
 		t.Errorf("\ngot:     %q\nexpected:%q", yamlStr, expected)
+		fmt.Printf("diff: %s", d)
 	}
 }
 

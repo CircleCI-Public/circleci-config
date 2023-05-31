@@ -31,8 +31,12 @@ func main() {
 		os.Exit(3)
 	}
 
+	cfg := inferConfig(dir)
+	fmt.Print(cfg)
+}
+
+func inferConfig(dir string) string {
 	cb := codebase.LocalCodebase{BasePath: dir}
 	labels := labeling.ApplyAllRules(cb)
-	config := generation.GenerateConfig(labels)
-	fmt.Print(config)
+	return generation.GenerateConfig(labels).String()
 }

@@ -35,8 +35,7 @@ var possiblePythonFiles = append(
 var PythonRules = []labels.Rule{
 	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
 		label := labels.Label{
-			Key:   labels.DepsPython,
-			Valid: false,
+			Key: labels.DepsPython,
 		}
 		filePath, _ := c.FindFile(possiblePythonFiles...)
 		label.Valid = filePath != ""
@@ -45,8 +44,7 @@ var PythonRules = []labels.Rule{
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
 		label := labels.Label{
-			Key:   labels.PackageManagerPipenv,
-			Valid: false,
+			Key: labels.PackageManagerPipenv,
 		}
 		pipfile, _ := c.FindFile(pipenvFiles...)
 		label.Valid = pipfile != ""
@@ -55,8 +53,7 @@ var PythonRules = []labels.Rule{
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
 		label := labels.Label{
-			Key:   labels.PackageManagerPoetry,
-			Valid: false,
+			Key: labels.PackageManagerPoetry,
 		}
 		poetryLock, _ := c.FindFile(poetryFiles...)
 		label.Valid = poetryLock != ""

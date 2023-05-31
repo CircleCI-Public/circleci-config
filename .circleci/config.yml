@@ -21,8 +21,11 @@ jobs:
           paths:
             - /home/circleci/go/pkg/mod
       - run:
-          name: Build inference CLI
+          name: Run inference CLI
           command: go run ./cmd/inferconfig/inferconfig.go  > ./config.yml
+      - run:
+          name: Check we got expected config
+          command: diff ./config.yml cmd/inferconfig/testdata/expected/dogfood.yml
       - continuation/continue:
           configuration_path: ./config.yml
 

@@ -72,10 +72,17 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 		},
 	})
 	if hasJestLabel {
-		steps = append(steps, config.Step{
-			Type:    config.Run,
-			Command: "npm install jest-junit",
-		})
+		if packageManager == "yarn" {
+			steps = append(steps, config.Step{
+				Type:    config.Run,
+				Command: "yarn add jest-junit",
+			})
+		} else {
+			steps = append(steps, config.Step{
+				Type:    config.Run,
+				Command: "npm install jest-junit",
+			})
+		}
 	}
 	steps = append(steps, nodeTestSteps(ls, packageManager)...)
 

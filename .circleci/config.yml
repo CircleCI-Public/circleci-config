@@ -28,8 +28,21 @@ jobs:
           command: diff ./config.yml cmd/inferconfig/testdata/expected/dogfood.yml
       - continuation/continue:
           configuration_path: ./config.yml
+  validate-inferred-configs:
+    docker:
+        - image: circleci/circleci-cli
+    steps:
+      - checkout
+      - run:
+          name: Validate inferred configs
+          command: |
+            set -e
+            for file in ./cmd/inferconfig/testdata/expected/*; do
+                circleci config validate "$file"
+            done
 
 workflows:
   inference:
     jobs:
       - infer-own-config
+      - validate-inferred-configs

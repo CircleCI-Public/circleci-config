@@ -3,8 +3,9 @@ package generation
 import (
 	"bytes"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
@@ -293,10 +294,20 @@ jobs:
           command: poetry run pytest --junitxml=junit.xml
       - store_test_results:
           path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
 workflows:
   ci:
     jobs:
       - test-python
+    # - deploy
 `,
 		},
 		{
@@ -335,10 +346,20 @@ jobs:
           command: poetry run pytest --junitxml=junit.xml
       - store_test_results:
           path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
 workflows:
   ci:
     jobs:
       - test-python
+    # - deploy
 `,
 		},
 	}

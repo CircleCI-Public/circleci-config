@@ -29,7 +29,7 @@ func pipSteps(l labels.Label) []config.Step {
 		{
 			Name:    "Run tests",
 			Type:    config.Run,
-			Command: "mkdir test-results && pytest  --junitxml=test-results/junit.xml",
+			Command: "pytest --junitxml=junit.xml",
 		},
 	}
 }
@@ -47,7 +47,7 @@ func pipenvSteps(l labels.Label) []config.Step {
 		{
 			Name:    "Run tests",
 			Type:    config.Run,
-			Command: "mkdir test-results && pipenv run pytest --junitxml=test-results/junit.xml",
+			Command: "pipenv run pytest --junitxml=junit.xml",
 		},
 	}
 }
@@ -65,7 +65,7 @@ func poetrySteps(l labels.Label) []config.Step {
 		{
 			Name:    "Run tests",
 			Type:    config.Run,
-			Command: "mkdir test-results && poetry run pytest --junitxml=test-results/junit.xml",
+			Command: "poetry run pytest --junitxml=junit.xml",
 		},
 	}
 }
@@ -85,11 +85,8 @@ func pythonTestJob(ls labels.LabelSet) *Job {
 
 	// Store test results
 	steps = append(steps, config.Step{
-		Type:    config.OrbCommand,
-		Command: "store_test_results",
-		Parameters: config.OrbCommandParameters{
-			"path": "test-results",
-		},
+		Type: config.StoreTestResults,
+		Path: "junit.xml",
 	})
 
 	return &Job{

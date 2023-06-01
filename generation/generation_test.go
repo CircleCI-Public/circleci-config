@@ -291,9 +291,9 @@ jobs:
           pkg-manager: poetry
       - run:
           name: Run tests
-          command: mkdir test-results && poetry run pytest --junitxml=test-results/junit.xml
+          command: poetry run pytest --junitxml=junit.xml
       - store_test_results:
-          path: test-results
+          path: junit.xml
 workflows:
   ci:
     jobs:

@@ -14,9 +14,9 @@ jobs:
           pkg-manager: pipenv
       - run:
           name: Run tests
-          command: mkdir test-results && pipenv run pytest --junitxml=test-results/junit.xml
+          command: pipenv run pytest --junitxml=junit.xml
       - store_test_results:
-          path: test-results
+          path: junit.xml
 workflows:
   ci:
     jobs:

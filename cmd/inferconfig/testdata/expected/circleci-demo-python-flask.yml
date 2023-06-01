@@ -10,7 +10,6 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          app-dir: .
           pkg-manager: pip
       - python/install-packages:
           args: pytest

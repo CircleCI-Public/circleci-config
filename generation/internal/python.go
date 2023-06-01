@@ -13,7 +13,6 @@ func pipSteps(l labels.Label) []config.Step {
 			Type:    config.OrbCommand,
 			Command: "python/install-packages",
 			Parameters: config.OrbCommandParameters{
-				"app-dir":     l.BasePath,
 				"pkg-manager": "pip",
 			},
 		},
@@ -40,7 +39,6 @@ func pipenvSteps(l labels.Label) []config.Step {
 			Type:    config.OrbCommand,
 			Command: "python/install-packages",
 			Parameters: config.OrbCommandParameters{
-				"app-dir":     l.BasePath,
 				"pkg-manager": "pipenv",
 			},
 		},
@@ -58,7 +56,6 @@ func poetrySteps(l labels.Label) []config.Step {
 			Type:    config.OrbCommand,
 			Command: "python/install-packages",
 			Parameters: config.OrbCommandParameters{
-				"app-dir":     l.BasePath,
 				"pkg-manager": "poetry",
 			},
 		},

@@ -287,7 +287,6 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
-          app-dir: .
           pkg-manager: poetry
       - run:
           name: Run tests
@@ -330,7 +329,6 @@ jobs:
           name: Change into 'x' directory
           command: cd 'x'
       - python/install-packages:
-          app-dir: x
           pkg-manager: poetry
       - run:
           name: Run tests

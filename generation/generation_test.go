@@ -300,6 +300,49 @@ workflows:
       - test-python
 `,
 		},
+		{
+
+			testName: "python codebase in a subdirectory with poetry package manager",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:       labels.DepsPython,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "x"},
+				},
+				labels.PackageManagerPoetry: labels.Label{
+					Key:       labels.PackageManagerPoetry,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "x"},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:x,package_manager:poetry:x
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - run:
+          name: Change into 'x' directory
+          command: cd 'x'
+      - python/install-packages:
+          app-dir: x
+          pkg-manager: poetry
+      - run:
+          name: Run tests
+          command: poetry run pytest --junitxml=junit.xml
+      - store_test_results:
+          path: junit.xml
+workflows:
+  ci:
+    jobs:
+      - test-python
+`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {

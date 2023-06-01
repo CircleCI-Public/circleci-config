@@ -1,25 +1,37 @@
 # This config was automatically generated from your source code
-# Stacks detected: deps:node:.,package_manager:bundler:android,package_manager:yarn:,test:jest:
+# Stacks detected: deps:node:.,package_manager:bundler:.,package_manager:yarn:,test:rspec:
 version: 2.1
 orbs:
   node: circleci/node@5
+  ruby: circleci/ruby@1.1.0
 jobs:
   test-node:
     # Install node dependencies and run tests
     executor: node/default
-    environment:
-      JEST_JUNIT_OUTPUT_DIR: ./test-results/
     steps:
       - checkout
       - node/install-packages:
           pkg-manager: yarn
       - run:
-          command: yarn add jest-junit
-      - run:
           name: Run tests
-          command: yarn run test --ci --runInBand --reporters=default --reporters=jest-junit
-      - store_test_results:
-          path: ./test-results/
+          command: yarn test
+  test-ruby:
+    # Install gems, run rspec tests
+    docker:
+      - image: cimg/ruby:2.7-node
+      - image: circleci/postgres:9.5-alpine
+    environment:
+      RAILS_ENV: test
+    steps:
+      - checkout
+      - ruby/install-deps
+      - run:
+          name: wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Database setup
+          command: bundle exec rake db:test:prepare
+      - ruby/rspec-test
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -33,4 +45,5 @@ workflows:
   ci:
     jobs:
       - test-node
+      - test-ruby
     # - deploy

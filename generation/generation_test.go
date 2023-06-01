@@ -3,8 +3,9 @@ package generation
 import (
 	"bytes"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
@@ -257,6 +258,107 @@ workflows:
   ci:
     jobs:
       - test-node
+    # - deploy
+`,
+		},
+		{
+
+			testName: "python codebase with poetry package manager",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:       labels.DepsPython,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.PackageManagerPoetry: labels.Label{
+					Key:       labels.PackageManagerPoetry,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.,package_manager:poetry:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: poetry
+      - run:
+          name: Run tests
+          command: poetry run pytest --junitxml=junit.xml
+      - store_test_results:
+          path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  ci:
+    jobs:
+      - test-python
+    # - deploy
+`,
+		},
+		{
+
+			testName: "python codebase in a subdirectory with poetry package manager",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:       labels.DepsPython,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "x"},
+				},
+				labels.PackageManagerPoetry: labels.Label{
+					Key:       labels.PackageManagerPoetry,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "x"},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:x,package_manager:poetry:x
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - run:
+          name: Change into 'x' directory
+          command: cd 'x'
+      - python/install-packages:
+          pkg-manager: poetry
+      - run:
+          name: Run tests
+          command: poetry run pytest --junitxml=junit.xml
+      - store_test_results:
+          path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  ci:
+    jobs:
+      - test-python
     # - deploy
 `,
 		},

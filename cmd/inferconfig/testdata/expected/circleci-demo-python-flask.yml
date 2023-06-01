@@ -1,0 +1,36 @@
+# This config was automatically generated from your source code
+# Stacks detected: deps:python:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          args: pytest
+          pkg-manager: pip
+          pypi-cache: false
+      - run:
+          name: Run tests
+          command: pytest --junitxml=junit.xml
+      - store_test_results:
+          path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  ci:
+    jobs:
+      - test-python
+    # - deploy

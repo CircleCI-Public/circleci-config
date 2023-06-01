@@ -8,8 +8,9 @@ import (
 	"os"
 	"path"
 	"testing"
+
+	"github.com/go-git/go-git/v5"
 )
-import "github.com/go-git/go-git/v5"
 
 func TestInferConfig(t *testing.T) {
 	// Adding inference tests:
@@ -21,6 +22,8 @@ func TestInferConfig(t *testing.T) {
 		{url: "https://github.com/CircleCI-Public/circleci-demo-go"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-react-native"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-javascript-express"},
+		{url: "https://github.com/CircleCI-Public/circleci-demo-python-flask"},
+		{url: "https://github.com/CircleCI-Public/circleci-demo-python-django"},
 	}
 
 	for _, tt := range tests {

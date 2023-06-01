@@ -30,6 +30,7 @@ func ApplyAllRules(c codebase.Codebase) labels.LabelSet {
 	allStacks := [][]labels.Rule{
 		internal.NodeRules,
 		internal.GoRules,
+		internal.PythonRules,
 		// Add other stacks here
 	}
 

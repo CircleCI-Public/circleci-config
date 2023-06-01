@@ -7,6 +7,7 @@ require gopkg.in/yaml.v3 v3.0.1
 require (
 	github.com/alessio/shellescape v1.4.1
 	github.com/go-git/go-git/v5 v5.7.0
+	github.com/google/go-cmp v0.5.9
 )
 
 require (

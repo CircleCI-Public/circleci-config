@@ -3,6 +3,7 @@ package generation
 import (
 	"bytes"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 
 	"github.com/CircleCI-Public/circleci-config/config"
@@ -25,8 +26,10 @@ func mustEncode(node *yaml.Node) string {
 
 func testEncode(t *testing.T, node config.Node, expected string) {
 	yamlStr := mustEncode(node.YamlNode())
-	if yamlStr != expected {
+	d := cmp.Diff(expected, yamlStr)
+	if d != "" {
 		t.Errorf("\ngot:     %q\nexpected:%q", yamlStr, expected)
+		fmt.Printf("diff: %s", d)
 	}
 }
 
@@ -37,6 +40,54 @@ func TestGenerateConfig(t *testing.T) {
 		expected string
 	}{
 		{
+			testName: "no labels generates fallback config",
+			labels:   labels.LabelSet{},
+			expected: `# Couldn't automatically generate a config from your source code.
+# This is generic template to serve as a base for your custom config
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      # Replace this with a real test runner invocation
+      - run:
+          name: Run tests
+          command: echo 'replace me with real tests!' && false
+  build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      # Replace this with steps to build a package, or executable
+      - run:
+          name: Build an artifact
+          command: touch example.txt
+      - store_artifacts:
+          path: example.txt
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  example:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+      - deploy:
+          requires:
+            - test
+`,
+		}, {
 			testName: "node and go codebases in subdirs",
 			labels: labels.LabelSet{
 				labels.DepsNode: labels.Label{
@@ -94,11 +145,21 @@ jobs:
           command: gotestsum --junitfile junit.xml
       - store_test_results:
           path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
 workflows:
   ci:
     jobs:
       - test-node
       - test-go
+    # - deploy
 `,
 		},
 		{
@@ -131,10 +192,20 @@ jobs:
       - run:
           name: Run tests
           command: yarn test
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
 workflows:
   ci:
     jobs:
       - test-node
+    # - deploy
 `,
 		},
 		{
@@ -173,10 +244,20 @@ jobs:
           command: jest --ci --runInBand --reporters=default --reporters=jest-junit
       - store_test_results:
           path: ./test-results/
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
 workflows:
   ci:
     jobs:
       - test-node
+    # - deploy
 `,
 		},
 	}

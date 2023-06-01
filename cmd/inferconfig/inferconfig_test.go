@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"net/url"
 	"os"
 	"path"
@@ -48,14 +49,17 @@ func TestInferConfig(t *testing.T) {
 
 			got := inferConfig(dir)
 			expectedConfigFile := fmt.Sprintf("testdata/expected/%s.yml", path.Base(u.Path))
-			expected, err := os.ReadFile(expectedConfigFile)
+			expectedBytes, err := os.ReadFile(expectedConfigFile)
 			if err != nil {
 				t.Error(err)
 				return
 			}
+			expected := string(expectedBytes)
 
-			if got != string(expected) {
-				t.Errorf("\ngot:\n%s\nexpected:\n%s", got, expected)
+			d := cmp.Diff(expected, got)
+			if d != "" {
+				t.Errorf("got:\n%s\nexpected:%s", got, expected)
+				fmt.Printf("diff: %s", d)
 			}
 		})
 	}
@@ -64,13 +68,16 @@ func TestInferConfig(t *testing.T) {
 
 func TestDogfood(t *testing.T) {
 	got := inferConfig("../..")
-	expected, err := os.ReadFile("testdata/expected/dogfood.yml")
+	expectedBytes, err := os.ReadFile("testdata/expected/dogfood.yml")
 	if err != nil {
 		t.Error(err)
 		return
 	}
+	expected := string(expectedBytes)
 
-	if got != string(expected) {
-		t.Errorf("\ngot       %q\nexpected: %q", got, expected)
+	d := cmp.Diff(expected, got)
+	if d != "" {
+		t.Errorf("got:\n%s\nexpected:%s", got, expected)
+		fmt.Printf("diff: %s", d)
 	}
 }

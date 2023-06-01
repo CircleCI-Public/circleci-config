@@ -12,6 +12,7 @@ type Type uint32
 const (
 	TestJob Type = iota // generic test job
 	ArtifactJob
+	DeployJob
 )
 
 type Job struct {
@@ -26,6 +27,8 @@ func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 	if len(jobs) == 0 {
 		return fallbackConfig
 	}
+
+	jobs = addStubJobs(jobs)
 
 	// Can jobs not just be "cast" to []*config.Jobs somehow?
 	configJobs := make([]*config.Job, len(jobs))
@@ -44,10 +47,21 @@ func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 	}
 }
 
-var fallbackConfig = config.Config{
-	Comment: "Couldn't automatically generate a config from your source code.\n" +
-		"This is generic template to serve as a base for your custom config",
-	// FIXME
+func addStubJobs(jobs []*Job) []*Job {
+	jobTypesPresent := map[Type]bool{}
+
+	for _, j := range jobs {
+		jobTypesPresent[j.Type] = true
+	}
+
+	if !jobTypesPresent[TestJob] {
+		jobs = append(jobs, &stubTestJob)
+	}
+	if !jobTypesPresent[DeployJob] {
+		jobs = append(jobs, &stubDeployJob)
+	}
+
+	return jobs
 }
 
 func buildOrbs(jobs []*Job) []config.Orb {
@@ -71,10 +85,12 @@ func buildOrbs(jobs []*Job) []config.Orb {
 
 func buildWorkflows(jobs []*Job) []*config.Workflow {
 	// For now, just generate one Workflow with all jobs, no "requires"
+	// DeployJobs are added, but commented out
 	// We might want to do something a bit smarter in the future
 	workflowJobs := make([]config.WorkflowJob, len(jobs))
 	for i, j := range jobs {
 		workflowJobs[i].Job = &j.Job
+		workflowJobs[i].CommentedOut = j.Type == DeployJob
 	}
 
 	return []*config.Workflow{{

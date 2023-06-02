@@ -139,6 +139,7 @@ type Job struct {
 	Executor    string
 	Steps       []Step
 	Environment map[string]string
+	Requires    []*Job
 }
 
 func (j Job) YamlNode() *yaml.Node {

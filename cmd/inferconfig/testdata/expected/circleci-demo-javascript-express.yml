@@ -27,4 +27,6 @@ workflows:
   ci:
     jobs:
       - test-node
-    # - deploy
+    # - deploy:
+    #     requires:
+    #       - test-node

@@ -29,4 +29,6 @@ workflows:
   ci:
     jobs:
       - test-python
-    # - deploy
+    # - deploy:
+    #     requires:
+    #       - test-python

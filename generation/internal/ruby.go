@@ -28,7 +28,6 @@ func rubyInitialSteps(ls labels.LabelSet) []config.Step {
 }
 
 const rubyOrb = "circleci/ruby@1.1.0"
-const rubyImage = "cimg/ruby:2.7-node"
 const postgresImage = "circleci/postgres:9.5-alpine"
 
 func rspecJob(ls labels.LabelSet) *Job {
@@ -53,7 +52,7 @@ func rspecJob(ls labels.LabelSet) *Job {
 			Name:         "test-ruby",
 			Comment:      "Install gems, run rspec tests",
 			Steps:        steps,
-			DockerImages: []string{rubyImage, postgresImage},
+			DockerImages: []string{rubyImageVersion(ls), postgresImage},
 			Environment: map[string]string{
 				"RAILS_ENV": "test"},
 		},
@@ -61,4 +60,11 @@ func rspecJob(ls labels.LabelSet) *Job {
 			"ruby": rubyOrb,
 		},
 	}
+}
+
+// Construct the ruby image tag based on the ruby version
+func rubyImageVersion(ls labels.LabelSet) string {
+	prefix := "cimg/ruby:"
+	suffix := "-node"
+	return prefix + ls[labels.PackageManagerBundler].Dependencies["ruby"] + suffix
 }

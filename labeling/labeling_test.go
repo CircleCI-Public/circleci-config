@@ -74,6 +74,24 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Ruby version",
+			files: map[string]string{
+				"Gemfile": rubyGemfile,
+			},
+
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.PackageManagerBundler,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"ruby": "2.7.8",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -429,3 +447,16 @@ func TestCodebase_ApplyRules_Python(t *testing.T) {
 		})
 	}
 }
+
+const rubyGemfile = `
+source 'https://rubygems.org'
+
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
+  "https://github.com/#{repo_name}.git"
+end
+
+ruby '2.7.8'
+
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '~> 6.0.1'`

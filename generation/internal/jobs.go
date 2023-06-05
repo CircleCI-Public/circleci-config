@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
@@ -84,17 +85,44 @@ func buildOrbs(jobs []*Job) []config.Orb {
 }
 
 func buildWorkflows(jobs []*Job) []*config.Workflow {
-	// For now, just generate one Workflow with all jobs, no "requires"
 	// DeployJobs are added, but commented out
-	// We might want to do something a bit smarter in the future
 	workflowJobs := make([]config.WorkflowJob, len(jobs))
 	for i, j := range jobs {
 		workflowJobs[i].Job = &j.Job
 		workflowJobs[i].CommentedOut = j.Type == DeployJob
+		workflowJobs[i].Requires = workflowJobRequires(j, jobs)
 	}
 
 	return []*config.Workflow{{
 		Name: "ci",
 		Jobs: workflowJobs,
 	}}
+}
+
+func workflowJobRequires(job *Job, allJobs []*Job) []*config.Job {
+	jobsByType := getJobsByType(allJobs)
+
+	if job.Type == ArtifactJob {
+		return jobsByType[TestJob]
+	}
+
+	if job.Type == DeployJob {
+		requires := []*config.Job{}
+		requires = append(requires, jobsByType[TestJob]...)
+		requires = append(requires, jobsByType[ArtifactJob]...)
+
+		return requires
+	}
+
+	return []*config.Job{}
+}
+
+func getJobsByType(jobs []*Job) map[Type][]*config.Job {
+	jobsByType := map[Type][]*config.Job{}
+
+	for _, j := range jobs {
+		jobsByType[j.Type] = append(jobsByType[j.Type], &j.Job)
+	}
+
+	return jobsByType
 }

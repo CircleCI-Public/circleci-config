@@ -160,7 +160,10 @@ workflows:
     jobs:
       - test-node
       - test-go
-    # - deploy
+    # - deploy:
+    #     requires:
+    #       - test-node
+    #       - test-go
 `,
 		},
 		{
@@ -206,7 +209,9 @@ workflows:
   ci:
     jobs:
       - test-node
-    # - deploy
+    # - deploy:
+    #     requires:
+    #       - test-node
 `,
 		},
 		{
@@ -258,7 +263,9 @@ workflows:
   ci:
     jobs:
       - test-node
-    # - deploy
+    # - deploy:
+    #     requires:
+    #       - test-node
 `,
 		},
 		{
@@ -307,11 +314,12 @@ workflows:
   ci:
     jobs:
       - test-python
-    # - deploy
+    # - deploy:
+    #     requires:
+    #       - test-python
 `,
 		},
 		{
-
 			testName: "python codebase in a subdirectory with poetry package manager",
 			labels: labels.LabelSet{
 				labels.DepsPython: labels.Label{
@@ -359,7 +367,9 @@ workflows:
   ci:
     jobs:
       - test-python
-    # - deploy
+    # - deploy:
+    #     requires:
+    #       - test-python
 `,
 		},
 	}

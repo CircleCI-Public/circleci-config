@@ -61,5 +61,10 @@ workflows:
   ci:
     jobs:
       - test-go
-      - build-go-executables
-    # - deploy
+      - build-go-executables:
+          requires:
+            - test-go
+    # - deploy:
+    #     requires:
+    #       - test-go
+    #       - build-go-executables

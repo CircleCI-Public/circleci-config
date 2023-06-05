@@ -30,7 +30,6 @@ func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 	}
 
 	jobs = addStubJobs(jobs)
-	jobs = addRequiredJobs(jobs)
 
 	// Can jobs not just be "cast" to []*config.Jobs somehow?
 	configJobs := make([]*config.Job, len(jobs))
@@ -47,25 +46,6 @@ func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 		Jobs:      configJobs,
 		Orbs:      buildOrbs(jobs),
 	}
-}
-
-func addRequiredJobs(jobs []*Job) []*Job {
-	jobsByType := map[Type][]*config.Job{}
-
-	for _, j := range jobs {
-		jobsByType[j.Type] = append(jobsByType[j.Type], &j.Job)
-	}
-
-	for _, j := range jobs {
-		j.Job.Requires = []*config.Job{}
-
-		if j.Type == DeployJob {
-			j.Job.Requires = append(j.Job.Requires, jobsByType[TestJob]...)
-			j.Job.Requires = append(j.Job.Requires, jobsByType[ArtifactJob]...)
-		}
-	}
-
-	return jobs
 }
 
 func addStubJobs(jobs []*Job) []*Job {
@@ -105,18 +85,44 @@ func buildOrbs(jobs []*Job) []config.Orb {
 }
 
 func buildWorkflows(jobs []*Job) []*config.Workflow {
-	// For now, just generate one Workflow with all jobs
 	// DeployJobs are added, but commented out
-	// We might want to do something a bit smarter in the future
 	workflowJobs := make([]config.WorkflowJob, len(jobs))
 	for i, j := range jobs {
 		workflowJobs[i].Job = &j.Job
 		workflowJobs[i].CommentedOut = j.Type == DeployJob
-		workflowJobs[i].Requires = append(workflowJobs[i].Requires, j.Job.Requires...)
+		workflowJobs[i].Requires = workflowJobRequires(j, jobs)
 	}
 
 	return []*config.Workflow{{
 		Name: "ci",
 		Jobs: workflowJobs,
 	}}
+}
+
+func workflowJobRequires(job *Job, allJobs []*Job) []*config.Job {
+	jobsByType := getJobsByType(allJobs)
+
+	if job.Type == ArtifactJob {
+		return jobsByType[TestJob]
+	}
+
+	if job.Type == DeployJob {
+		requires := []*config.Job{}
+		requires = append(requires, jobsByType[TestJob]...)
+		requires = append(requires, jobsByType[ArtifactJob]...)
+
+		return requires
+	}
+
+	return []*config.Job{}
+}
+
+func getJobsByType(jobs []*Job) map[Type][]*config.Job {
+	jobsByType := map[Type][]*config.Job{}
+
+	for _, j := range jobs {
+		jobsByType[j.Type] = append(jobsByType[j.Type], &j.Job)
+	}
+
+	return jobsByType
 }

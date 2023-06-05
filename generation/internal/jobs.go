@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
@@ -73,13 +74,17 @@ func buildOrbs(jobs []*Job) []config.Orb {
 			orbsByName[name] = registryKey
 		}
 	}
-
 	orbs := make([]config.Orb, len(orbsByName))
 	i := 0
 	for name, registryKey := range orbsByName {
 		orbs[i] = config.Orb{Name: name, RegistryKey: registryKey}
 		i++
 	}
+
+	// sort to make the slice order dependable for tests
+	sort.Slice(orbs, func(i, j int) bool {
+		return orbs[i].Name < orbs[j].Name
+	})
 
 	return orbs
 }

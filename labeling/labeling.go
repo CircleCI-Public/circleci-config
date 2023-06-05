@@ -31,6 +31,7 @@ func ApplyAllRules(c codebase.Codebase) labels.LabelSet {
 		internal.NodeRules,
 		internal.GoRules,
 		internal.PythonRules,
+		internal.RubyRules,
 		// Add other stacks here
 	}
 

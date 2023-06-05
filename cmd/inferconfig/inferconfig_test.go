@@ -3,11 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"net/url"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 
 	"github.com/go-git/go-git/v5"
 )
@@ -24,6 +25,7 @@ func TestInferConfig(t *testing.T) {
 		{url: "https://github.com/CircleCI-Public/circleci-demo-javascript-express"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-python-flask"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-python-django"},
+		{url: "https://github.com/CircleCI-Public/circleci-demo-ruby-rails"},
 	}
 
 	for _, tt := range tests {

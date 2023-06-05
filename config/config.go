@@ -135,11 +135,10 @@ type Job struct {
 	Name    string
 	Comment string
 	// The following two fields are mutually exclusive
-	DockerImage  string
+	DockerImages []string
 	Executor     string
 	Steps        []Step
 	Environment  map[string]string
-	DockerImages []string
 }
 
 func (j Job) YamlNode() *yaml.Node {
@@ -153,18 +152,11 @@ func (j Job) YamlNode() *yaml.Node {
 	if j.Executor != "" {
 		contentNodes = append(contentNodes, yScalar("executor"), yScalar(j.Executor))
 	} else {
-		// todo: decide how to handle multiple docker images
-		if len(j.DockerImages) > 0 {
-			imageNodes := make([]*yaml.Node, 0, len(j.DockerImages))
-			for _, img := range j.DockerImages {
-				imageNodes = append(imageNodes, yMap(yScalar("image"), yScalar(img)))
-			}
-			contentNodes = append(contentNodes, yScalar("docker"), ySeq(imageNodes...))
-		} else {
-			contentNodes = append(contentNodes,
-				yScalar("docker"), ySeq(yMap(
-					yScalar("image"), yScalar(j.DockerImage))))
+		imageNodes := make([]*yaml.Node, 0, len(j.DockerImages))
+		for _, img := range j.DockerImages {
+			imageNodes = append(imageNodes, yMap(yScalar("image"), yScalar(img)))
 		}
+		contentNodes = append(contentNodes, yScalar("docker"), ySeq(imageNodes...))
 	}
 
 	if len(j.Environment) > 0 {

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
@@ -45,10 +46,10 @@ func goTestJob(ls labels.LabelSet) *Job {
 
 	return &Job{
 		Job: config.Job{
-			Name:        "test-go",
-			Comment:     "Install go modules, run go vet and tests",
-			DockerImage: "cimg/go:1.20",
-			Steps:       steps,
+			Name:         "test-go",
+			Comment:      "Install go modules, run go vet and tests",
+			DockerImages: []string{"cimg/go:1.20"},
+			Steps:        steps,
 		},
 		Type: TestJob,
 	}
@@ -68,10 +69,10 @@ func goBuildJob(ls labels.LabelSet) *Job {
 
 	return &Job{
 		Job: config.Job{
-			Name:        "build-go-executables",
-			Comment:     "Build go executables and store them as artifacts",
-			DockerImage: "cimg/go:1.20",
-			Steps:       steps,
+			Name:         "build-go-executables",
+			Comment:      "Build go executables and store them as artifacts",
+			DockerImages: []string{"cimg/go:1.20"},
+			Steps:        steps,
 		},
 		Type: ArtifactJob,
 	}

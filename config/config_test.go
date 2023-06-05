@@ -13,8 +13,8 @@ func testEncode(t *testing.T, node Node, expected string) {
 
 func TestConfig_String(t *testing.T) {
 	var nodeTestJob = Job{
-		Name:        "node-test-job",
-		DockerImage: "cimg/base",
+		Name:         "node-test-job",
+		DockerImages: []string{"cimg/base"},
 		Steps: []Step{{
 			Type: Checkout,
 		}, {
@@ -34,8 +34,8 @@ func TestConfig_String(t *testing.T) {
 	}
 
 	var npmBuildJob = Job{
-		Name:        "node-build-job",
-		DockerImage: "cimg/base",
+		Name:         "node-build-job",
+		DockerImages: []string{"cimg/base"},
 		Steps: []Step{{
 			Type: Checkout,
 		}, {
@@ -370,9 +370,9 @@ func TestJob_YamlNode(t *testing.T) {
 		{
 			testName: "job with docker image",
 			job: Job{
-				Name:        "job",
-				Comment:     "This is a job that uses docker",
-				DockerImage: "cimg/base",
+				Name:         "job",
+				Comment:      "This is a job that uses docker",
+				DockerImages: []string{"cimg/base"},
 				Steps: []Step{{
 					Type: Checkout,
 				}, {
@@ -400,9 +400,9 @@ func TestJob_YamlNode(t *testing.T) {
 		{
 			testName: "job with docker image and environment variables",
 			job: Job{
-				Name:        "job",
-				Comment:     "This is a job that uses docker",
-				DockerImage: "cimg/base",
+				Name:         "job",
+				Comment:      "This is a job that uses docker",
+				DockerImages: []string{"cimg/base"},
 				Environment: map[string]string{
 					"FOO": "bar",
 					"BAZ": "qux",

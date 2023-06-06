@@ -6,9 +6,9 @@ import (
 
 var stubTestJob = Job{
 	Job: config.Job{
-		Name:        "test",
-		Comment:     "",
-		DockerImage: "cimg/base:stable",
+		Name:         "test",
+		Comment:      "",
+		DockerImages: []string{"cimg/base:stable"},
 		Steps: []config.Step{
 			{
 				Type: config.Checkout,
@@ -25,9 +25,9 @@ var stubTestJob = Job{
 
 var stubArtifactJob = Job{
 	Job: config.Job{
-		Name:        "build",
-		Comment:     "",
-		DockerImage: "cimg/base:stable",
+		Name:         "build",
+		Comment:      "",
+		DockerImages: []string{"cimg/base:stable"},
 		Steps: []config.Step{
 			{
 				Type: config.Checkout,
@@ -47,9 +47,9 @@ var stubArtifactJob = Job{
 
 var stubDeployJob = Job{
 	Job: config.Job{
-		Name:        "deploy",
-		Comment:     "This is an example deploy job, not actually used by the workflow",
-		DockerImage: "cimg/base:stable",
+		Name:         "deploy",
+		Comment:      "This is an example deploy job, not actually used by the workflow",
+		DockerImages: []string{"cimg/base:stable"},
 		Steps: []config.Step{{
 			Type:    config.Run,
 			Name:    "deploy",

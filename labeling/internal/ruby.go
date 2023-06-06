@@ -31,11 +31,14 @@ func readGemfile(c codebase.Codebase, label labels.Label, filePath string) (labe
 		return label, err
 	}
 	label.Dependencies = make(map[string]string)
+
 	for _, line := range strings.Split(string(fileContents), "\n") {
 		if strings.HasPrefix(line, "ruby ") {
-			version := strings.SplitAfter(line, "ruby ")[1]
+			version := strings.Split(line, ",")[0]
+			version = strings.SplitAfter(version, "ruby ")[1]
 			version = strings.ReplaceAll(version, "'", "")
 			label.Dependencies["ruby"] = version
+			break
 		}
 	}
 	return label, nil

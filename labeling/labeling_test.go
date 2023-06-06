@@ -92,6 +92,24 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Ruby version with engine info",
+			files: map[string]string{
+				"Gemfile": rubyGemfileWithEngine,
+			},
+
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.PackageManagerBundler,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"ruby": "1.9.3",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -457,6 +475,19 @@ git_source(:github) do |repo_name|
 end
 
 ruby '2.7.8'
+
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '~> 6.0.1'`
+
+const rubyGemfileWithEngine = `
+source 'https://rubygems.org'
+
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
+  "https://github.com/#{repo_name}.git"
+end
+
+ruby '1.9.3', :engine => 'jruby', :engine_version => '1.6.7'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0.1'`

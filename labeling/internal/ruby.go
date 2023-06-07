@@ -37,6 +37,10 @@ func readGemfile(c codebase.Codebase, label labels.Label, filePath string) (labe
 		if strings.Contains(line, "gem 'rspec-rails'") {
 			label.Dependencies["rspec"] = "true"
 		}
+
+		if strings.Contains(line, "gem 'pg'") {
+			label.Dependencies["pg"] = "true"
+		}
 	}
 	return label, nil
 }

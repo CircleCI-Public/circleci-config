@@ -47,12 +47,17 @@ func rspecJob(ls labels.LabelSet) *Job {
 			Name:    "rspec test",
 			Command: "ruby/rspec-test"})
 
+	images := []string{rubyImageVersion(ls)}
+	if ls[labels.DepsRuby].Dependencies["pg"] == "true" {
+		images = append(images, postgresImage)
+	}
+
 	return &Job{
 		Job: config.Job{
 			Name:         "test-ruby",
 			Comment:      "Install gems, run rspec tests",
 			Steps:        steps,
-			DockerImages: []string{rubyImageVersion(ls), postgresImage},
+			DockerImages: images,
 			Environment: map[string]string{
 				"RAILS_ENV": "test"},
 		},

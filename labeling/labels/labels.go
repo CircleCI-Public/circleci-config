@@ -18,7 +18,6 @@ const (
 	PackageManagerPoetry = "package_manager:poetry"
 	PackageManagerYarn   = "package_manager:yarn"
 	TestJest             = "test:jest"
-	TestRSpec            = "test:rspec"
 )
 
 type LabelData struct {

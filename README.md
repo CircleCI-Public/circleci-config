@@ -1,4 +1,5 @@
-# circleci-config
+# circleci-config 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/CircleCI-Public/circleci-config/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/CircleCI-Public/circleci-config/tree/main)
 
 Go library to work with CircleCI config files.
 

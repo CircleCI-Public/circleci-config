@@ -62,9 +62,18 @@ func rspecJob(ls labels.LabelSet) *Job {
 	}
 }
 
+const rubyFallbackVersion = "3.2"
+
 // Construct the ruby image tag based on the ruby version
 func rubyImageVersion(ls labels.LabelSet) string {
 	prefix := "cimg/ruby:"
 	suffix := "-node"
-	return prefix + ls[labels.PackageManagerBundler].Dependencies["ruby"] + suffix
+	version := rubyFallbackVersion
+
+	gemfileVersion := ls[labels.PackageManagerBundler].Dependencies["ruby"]
+	if gemfileVersion != "" {
+		version = gemfileVersion
+	}
+
+	return prefix + version + suffix
 }

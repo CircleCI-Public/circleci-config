@@ -1,5 +1,5 @@
 # This config was automatically generated from your source code
-# Stacks detected: deps:node:.,package_manager:bundler:android,package_manager:yarn:,test:jest:
+# Stacks detected: deps:node:.,deps:ruby:android,package_manager:yarn:,test:jest:
 version: 2.1
 orbs:
   node: circleci/node@5

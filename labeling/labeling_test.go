@@ -82,11 +82,30 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 
 			expectedLabels: []labels.Label{
 				{
-					Key: labels.PackageManagerBundler,
+					Key: labels.DepsRuby,
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
 							"ruby": "2.7.8",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Ruby version w/ rspec",
+			files: map[string]string{
+				"Gemfile": rubyGemfileWithRailsRSpec,
+			},
+
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsRuby,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"ruby":  "2.7.8",
+							"rspec": "true",
 						},
 					},
 				},
@@ -100,7 +119,7 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 
 			expectedLabels: []labels.Label{
 				{
-					Key: labels.PackageManagerBundler,
+					Key: labels.DepsRuby,
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
@@ -477,7 +496,25 @@ end
 ruby '2.7.8'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.0.1'`
+gem 'rails', '~> 6.0.1'
+`
+
+const rubyGemfileWithRailsRSpec = `
+source 'https://rubygems.org'
+
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?('/')
+  "https://github.com/#{repo_name}.git"
+end
+
+ruby '2.7.8'
+
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
+gem 'rails', '~> 6.0.1'
+
+gem 'rspec-rails', '4.0.0.beta3'
+
+`
 
 const rubyGemfileWithEngine = `
 source 'https://rubygems.org'

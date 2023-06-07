@@ -1,5 +1,5 @@
 # This config was automatically generated from your source code
-# Stacks detected: deps:node:.,package_manager:bundler:.,package_manager:yarn:,test:rspec:
+# Stacks detected: deps:node:.,deps:ruby:.,package_manager:yarn:
 version: 2.1
 orbs:
   node: circleci/node@5

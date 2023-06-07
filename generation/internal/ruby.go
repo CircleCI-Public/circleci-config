@@ -6,11 +6,11 @@ import (
 )
 
 func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
-	if !ls[labels.PackageManagerBundler].Valid {
+	if !ls[labels.DepsRuby].Valid {
 		return nil
 	}
 
-	if ls[labels.TestRSpec].Valid {
+	if ls[labels.DepsRuby].Dependencies["rspec"] == "true" {
 		jobs = append(jobs, rspecJob(ls))
 	}
 
@@ -18,7 +18,7 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 }
 
 func rubyInitialSteps(ls labels.LabelSet) []config.Step {
-	steps := initialSteps(ls[labels.PackageManagerBundler])
+	steps := initialSteps(ls[labels.DepsRuby])
 
 	steps = append(steps, config.Step{
 		Type:    config.OrbCommand,
@@ -70,7 +70,7 @@ func rubyImageVersion(ls labels.LabelSet) string {
 	suffix := "-node"
 	version := rubyFallbackVersion
 
-	gemfileVersion := ls[labels.PackageManagerBundler].Dependencies["ruby"]
+	gemfileVersion := ls[labels.DepsRuby].Dependencies["ruby"]
 	if gemfileVersion != "" {
 		version = gemfileVersion
 	}

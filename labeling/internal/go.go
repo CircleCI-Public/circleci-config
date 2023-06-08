@@ -11,7 +11,7 @@ import (
 var GoRules = []labels.Rule{
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.DepsGo
-		goModPath, err := c.FindFile("go.mod", "*/go.mod")
+		goModPath, err := c.FindFile("go.mod")
 		label.Valid = goModPath != ""
 		label.BasePath = path.Dir(goModPath)
 		return label, err
@@ -33,8 +33,6 @@ func containsMainGoFiles(c codebase.Codebase) bool {
 			return isMainPackageGoFile(c, path)
 		},
 		"*.go",
-		"*/*.go",
-		"cmd/*/*.go",
 	)
 	return err == nil
 }

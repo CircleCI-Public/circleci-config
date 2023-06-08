@@ -9,14 +9,11 @@ import (
 
 var pipenvFiles = []string{
 	"Pipfile",
-	"*/Pipfile",
 	"Pipfile.lock",
-	"*/Pipfile.lock",
 }
 
 var poetryFiles = []string{
 	"pyproject.toml",
-	"*/pyproject.toml",
 	"poetry.lock",
 }
 
@@ -25,7 +22,6 @@ var possiblePythonFiles = append(
 	append(
 		[]string{
 			"requirements.txt",
-			"*/requirements.txt",
 		},
 		pipenvFiles...,
 	),

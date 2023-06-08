@@ -10,17 +10,11 @@ import (
 
 var RubyRules = []labels.Rule{
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
-		label.Key = labels.PackageManagerBundler
+		label.Key = labels.DepsRuby
 		gemfilePath, err := c.FindFile("Gemfile", "*/Gemfile")
 		label.Valid = gemfilePath != ""
 		label.BasePath = path.Dir(gemfilePath)
 		return readGemfile(c, label, gemfilePath)
-	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
-		label.Key = labels.TestRSpec
-		rspecConfigPath, err := c.FindFile(".rspec")
-		label.Valid = rspecConfigPath != ""
-		return label, err
 	},
 }
 
@@ -38,7 +32,14 @@ func readGemfile(c codebase.Codebase, label labels.Label, filePath string) (labe
 			version = strings.SplitAfter(version, "ruby ")[1]
 			version = strings.ReplaceAll(version, "'", "")
 			label.Dependencies["ruby"] = version
-			break
+		}
+
+		if strings.Contains(line, "gem 'rspec-rails'") {
+			label.Dependencies["rspec"] = "true"
+		}
+
+		if strings.Contains(line, "gem 'pg'") {
+			label.Dependencies["pg"] = "true"
 		}
 	}
 	return label, nil

@@ -19,8 +19,9 @@ type fakeCodebase struct {
 func (c fakeCodebase) FindFileMatching(predicate func(string) bool, globs ...string) (string, error) {
 	for _, g := range globs {
 		for path := range c.contentsByPath {
-			matched, _ := filepath.Match(g, path)
-			if matched && predicate(path) {
+			matchesName, _ := filepath.Match(g, filepath.Base(path))
+			matchesPath, _ := filepath.Match(g, path)
+			if (matchesName || matchesPath) && predicate(path) {
 				return path, nil
 			}
 		}

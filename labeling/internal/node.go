@@ -40,7 +40,7 @@ type npmPackageJSON struct {
 }
 
 func findPackageJSON(c codebase.Codebase) string {
-	file, _ := c.FindFile("package.json", "*/package.json")
+	file, _ := c.FindFile("package.json")
 	return file
 }
 

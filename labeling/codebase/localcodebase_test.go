@@ -52,50 +52,55 @@ func TestLocalCodebase_FindFile(t *testing.T) {
 	tests := []struct {
 		name         string
 		BasePath     string
-		glob         string
+		globs        []string
 		expectedPath string
 		expectErr    bool
 	}{
 		{
 			name:         "find.me found in testdata dir",
 			BasePath:     "./testdata",
-			glob:         "find.me",
+			globs:        []string{"find.me"},
 			expectedPath: "find.me",
-			expectErr:    false,
 		}, {
 			name:         "find.me found in current dir by glob",
 			BasePath:     ".",
-			glob:         "*/find.me",
+			globs:        []string{"find.me"},
 			expectedPath: "testdata/find.me",
-			expectErr:    false,
+		}, {
+			name:         "find.me found in current dir by extension",
+			BasePath:     ".",
+			globs:        []string{"*.me"},
+			expectedPath: "testdata/find.me",
 		}, {
 			name:         "find.me found in current dir by exact path",
 			BasePath:     ".",
-			glob:         "testdata/find.me",
+			globs:        []string{"testdata/find.me"},
 			expectedPath: "testdata/find.me",
-			expectErr:    false,
+		}, {
+			name:         "find.me found in current dir, multiple globs, first matches",
+			BasePath:     ".",
+			globs:        []string{"find.me", "dontfind.me"},
+			expectedPath: "testdata/find.me",
+		}, {
+			name:         "find.me found in current dir, multiple globs, last matches",
+			BasePath:     ".",
+			globs:        []string{"dontfind.me", "find.me"},
+			expectedPath: "testdata/find.me",
 		}, {
 			name:         "localcodebase_test.go found in current dir",
 			BasePath:     ".",
-			glob:         "localcodebase_test.go",
+			globs:        []string{"localcodebase_test.go"},
 			expectedPath: "localcodebase_test.go",
-			expectErr:    false,
 		}, {
 			name:         "localcodebase_test.go found in current dir without BasePath",
-			glob:         "localcodebase_test.go",
+			globs:        []string{"localcodebase_test.go"},
 			expectedPath: "localcodebase_test.go",
-			expectErr:    false,
-		}, {
-			name:      "find.me not found in current dir",
-			BasePath:  ".",
-			glob:      "find.me",
-			expectErr: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := LocalCodebase{BasePath: tt.BasePath}
-			gotPath, err := c.FindFile(tt.glob)
+			gotPath, err := c.FindFile(tt.globs...)
 			if (err != nil) != tt.expectErr {
 				t.Errorf("FindFile() error %v, expectErr %v", err, tt.expectErr)
 				return

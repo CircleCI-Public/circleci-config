@@ -11,7 +11,7 @@ import (
 var RubyRules = []labels.Rule{
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.DepsRuby
-		gemfilePath, err := c.FindFile("Gemfile", "*/Gemfile")
+		gemfilePath, err := c.FindFile("Gemfile")
 		label.Valid = gemfilePath != ""
 		label.BasePath = path.Dir(gemfilePath)
 		return readGemfile(c, label, gemfilePath)

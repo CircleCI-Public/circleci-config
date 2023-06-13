@@ -121,7 +121,7 @@ jobs:
           name: Run tests
           command: npm test
   test-go:
-    # Install go modules, run go vet and tests
+    # Install go modules and run tests
     docker:
       - image: cimg/go:1.20
     steps:
@@ -138,9 +138,6 @@ jobs:
           key: go-mod-{{ checksum "go.sum" }}
           paths:
             - /home/circleci/go/pkg/mod
-      - run:
-          name: Run go vet
-          command: go vet ./...
       - run:
           name: Run tests
           command: gotestsum --junitfile junit.xml

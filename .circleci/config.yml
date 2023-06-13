@@ -40,9 +40,60 @@ jobs:
             for file in ./cmd/inferconfig/testdata/expected/*; do
                 circleci config validate "$file"
             done
+  test:
+    docker:
+      - image: cimg/go:1.20
+    steps:
+      - checkout
+      - restore_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+      - run:
+          name: Download Go modules
+          command: go mod download
+      - save_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+          paths:
+            - /home/circleci/go/pkg/mod
+      - run:
+          name: Run tests
+          command: gotestsum --junitfile junit.xml
+      - store_test_results:
+          path: junit.xml
+  build-and-push-docker-image:
+    docker:
+      - image: cimg/go:1.20
+    steps:
+      - checkout
+      - restore_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+      - run:
+          name: Build inferconfig CLI
+          command: go build -o out/circleci-inferconfig ./cmd/inferconfig
+      - run:
+          name: Docker Login
+          command: docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+      - run:
+          name: Build docker image
+          command: |
+            docker build -t circleci/circleci-inferconfig:0.$CIRCLE_BUILD_NUM .
+            docker tag      circleci/circleci-inferconfig:0.$CIRCLE_BUILD_NUM circleci/circleci-inferconfig:latest
+      - run:
+          name: Push docker image
+          command: |
+            docker push circleci/circleci-inferconfig:0.$CIRCLE_BUILD_NUM
+            docker push circleci/circleci-inferconfig:latest
 
 workflows:
-  inference:
+  test-and-release:
     jobs:
+      - test
       - infer-own-config
       - validate-inferred-configs
+      - build-and-push-docker-image:
+          requires:
+            - test
+          filters:
+            branches:
+              only: main
+          context:
+            - devex-release

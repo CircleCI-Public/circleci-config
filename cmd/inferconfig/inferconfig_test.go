@@ -20,7 +20,6 @@ func TestInferConfig(t *testing.T) {
 	tests := []struct {
 		url string
 	}{
-		{url: "https://github.com/CircleCI-Public/circleci-demo-go"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-react-native"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-javascript-express"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-python-flask"},

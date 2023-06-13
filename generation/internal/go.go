@@ -30,24 +30,19 @@ func goInitialSteps(ls labels.LabelSet) []config.Step {
 func goTestJob(ls labels.LabelSet) *Job {
 	steps := goInitialSteps(ls)
 
-	steps = append(steps, []config.Step{
-		{
-			Type:    config.Run,
-			Name:    "Run go vet",
-			Command: "go vet ./...",
-		}, {
-			Type:    config.Run,
-			Name:    "Run tests",
-			Command: "gotestsum --junitfile junit.xml",
-		}, {
-			Type: config.StoreTestResults,
-			Path: "junit.xml",
-		}}...)
+	steps = append(steps, []config.Step{{
+		Type:    config.Run,
+		Name:    "Run tests",
+		Command: "gotestsum --junitfile junit.xml",
+	}, {
+		Type: config.StoreTestResults,
+		Path: "junit.xml",
+	}}...)
 
 	return &Job{
 		Job: config.Job{
 			Name:         "test-go",
-			Comment:      "Install go modules, run go vet and tests",
+			Comment:      "Install go modules and run tests",
 			DockerImages: []string{"cimg/go:1.20"},
 			Steps:        steps,
 		},

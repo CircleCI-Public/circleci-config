@@ -135,10 +135,11 @@ type Job struct {
 	Name    string
 	Comment string
 	// The following two fields are mutually exclusive
-	DockerImages []string
-	Executor     string
-	Steps        []Step
-	Environment  map[string]string
+	DockerImages     []string
+	Executor         string
+	WorkingDirectory string
+	Steps            []Step
+	Environment      map[string]string
 }
 
 func (j Job) YamlNode() *yaml.Node {
@@ -157,6 +158,10 @@ func (j Job) YamlNode() *yaml.Node {
 			imageNodes = append(imageNodes, yMap(yScalar("image"), yScalar(img)))
 		}
 		contentNodes = append(contentNodes, yScalar("docker"), ySeq(imageNodes...))
+	}
+
+	if j.WorkingDirectory != "" && j.WorkingDirectory != "." {
+		contentNodes = append(contentNodes, yScalar("working_directory"), yScalar(j.WorkingDirectory))
 	}
 
 	if len(j.Environment) > 0 {

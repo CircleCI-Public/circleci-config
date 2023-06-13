@@ -428,6 +428,15 @@ steps:
       command: npm install
 `,
 		},
+		{
+			testName: "job with executor and working dir",
+			job: Job{
+				Name:             "job",
+				Executor:         "x",
+				WorkingDirectory: "dir",
+			},
+			expected: "executor: x\nworking_directory: dir\nsteps: []\n",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {

@@ -18,11 +18,13 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 }
 
 func rubyInitialSteps(ls labels.LabelSet) []config.Step {
-	steps := initialSteps(ls[labels.DepsRuby])
+	depsLabel := ls[labels.DepsRuby]
+	steps := initialSteps(depsLabel)
 
 	steps = append(steps, config.Step{
-		Type:    config.OrbCommand,
-		Command: "ruby/install-deps",
+		Type:       config.OrbCommand,
+		Command:    "ruby/install-deps",
+		Parameters: withOrbAppDir(config.OrbCommandParameters{}, depsLabel),
 	})
 	return steps
 }
@@ -32,6 +34,9 @@ const postgresImage = "circleci/postgres:9.5-alpine"
 
 func rspecJob(ls labels.LabelSet) *Job {
 	steps := rubyInitialSteps(ls)
+
+	depsLabel := ls[labels.DepsRuby]
+
 	steps = append(steps,
 		config.Step{
 			Type:    config.Run,
@@ -42,10 +47,10 @@ func rspecJob(ls labels.LabelSet) *Job {
 			Name:    "Database setup",
 			Command: "bundle exec rake db:test:prepare"},
 		config.Step{
-
-			Type:    config.OrbCommand,
-			Name:    "rspec test",
-			Command: "ruby/rspec-test"})
+			Type:       config.OrbCommand,
+			Name:       "rspec test",
+			Command:    "ruby/rspec-test",
+			Parameters: withOrbAppDir(config.OrbCommandParameters{}, depsLabel)})
 
 	images := []string{rubyImageVersion(ls)}
 	if ls[labels.DepsRuby].Dependencies["pg"] == "true" {

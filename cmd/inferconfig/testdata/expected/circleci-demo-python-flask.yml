@@ -30,7 +30,7 @@ jobs:
           name: deploy
           command: '#e.g. ./deploy.sh'
 workflows:
-  ci:
+  build-and-test:
     jobs:
       - test-python
     # - deploy:

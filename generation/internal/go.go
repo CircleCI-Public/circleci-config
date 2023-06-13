@@ -34,7 +34,7 @@ func goTestJob(ls labels.LabelSet) *Job {
 		{
 			Type:    config.Run,
 			Name:    "Run go vet",
-			Command: "go vet ./...",
+			Command: "go vet -composites=false ./...",
 		}, {
 			Type:    config.Run,
 			Name:    "Run tests",

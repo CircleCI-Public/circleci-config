@@ -140,7 +140,7 @@ jobs:
             - /home/circleci/go/pkg/mod
       - run:
           name: Run go vet
-          command: go vet ./...
+          command: go vet -composites=false ./...
       - run:
           name: Run tests
           command: gotestsum --junitfile junit.xml

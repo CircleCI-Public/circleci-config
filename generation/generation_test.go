@@ -110,11 +110,10 @@ jobs:
   test-node:
     # Install node dependencies and run tests
     executor: node/default
+    working_directory: ~/project/node-dir
     steps:
-      - checkout
-      - run:
-          name: Change into 'node-dir' directory
-          command: cd 'node-dir'
+      - checkout:
+          path: ~/project
       - node/install-packages:
           pkg-manager: npm
       - run:
@@ -124,11 +123,10 @@ jobs:
     # Install go modules and run tests
     docker:
       - image: cimg/go:1.20
+    working_directory: ~/project/go-dir
     steps:
-      - checkout
-      - run:
-          name: Change into 'go-dir' directory
-          command: cd 'go-dir'
+      - checkout:
+          path: ~/project
       - restore_cache:
           key: go-mod-{{ checksum "go.sum" }}
       - run:
@@ -339,11 +337,10 @@ jobs:
   test-python:
     # Install dependencies and run tests
     executor: python/default
+    working_directory: ~/project/x
     steps:
-      - checkout
-      - run:
-          name: Change into 'x' directory
-          command: cd 'x'
+      - checkout:
+          path: ~/project
       - python/install-packages:
           pkg-manager: poetry
       - run:

@@ -4,25 +4,26 @@ import (
 	"fmt"
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
-	"github.com/alessio/shellescape"
+	"path/filepath"
 )
 
-var checkoutStep = config.Step{Type: config.Checkout}
+const defaultCheckoutDir = "~/project"
 
-// initialSteps returns a checkout step and, if necessary cd step
-func initialSteps(depsLabel labels.Label) []config.Step {
-	steps := []config.Step{checkoutStep}
-
-	basePath := depsLabel.BasePath
-	if basePath != "." {
-		steps = append(steps, config.Step{
-			Type:    config.Run,
-			Name:    fmt.Sprintf("Change into '%s' directory", basePath),
-			Command: fmt.Sprintf("cd '%s'", shellescape.Quote(basePath)),
-		})
+func checkoutStep(depsLabel labels.Label) config.Step {
+	if depsLabel.BasePath == "." {
+		return config.Step{Type: config.Checkout}
 	}
+	return config.Step{
+		Type: config.Checkout,
+		Path: defaultCheckoutDir,
+	}
+}
 
-	return steps
+func workingDirectory(depsLabel labels.Label) string {
+	if depsLabel.BasePath == "." {
+		return "."
+	}
+	return filepath.Join(defaultCheckoutDir, depsLabel.BasePath)
 }
 
 const artifactsPath = "~/artifacts"

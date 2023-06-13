@@ -57,20 +57,20 @@ func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
 
 func nodeTestJob(ls labels.LabelSet) *Job {
 	hasJestLabel := ls[labels.TestJest].Valid
-	steps := initialSteps(ls[labels.DepsNode])
 
 	packageManager := "npm"
 	if ls[labels.PackageManagerYarn].Valid {
 		packageManager = "yarn"
 	}
 
-	steps = append(steps, config.Step{
-		Type:    config.OrbCommand,
-		Command: "node/install-packages",
-		Parameters: config.OrbCommandParameters{
-			"pkg-manager": packageManager,
+	steps := []config.Step{
+		checkoutStep(ls[labels.DepsNode]),
+		{
+			Type:       config.OrbCommand,
+			Command:    "node/install-packages",
+			Parameters: config.OrbCommandParameters{"pkg-manager": packageManager},
 		},
-	})
+	}
 	if hasJestLabel {
 		if packageManager == "yarn" {
 			steps = append(steps, config.Step{
@@ -97,10 +97,11 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 	}
 
 	job := config.Job{
-		Name:     "test-node",
-		Comment:  "Install node dependencies and run tests",
-		Executor: "node/default",
-		Steps:    steps}
+		Name:             "test-node",
+		Comment:          "Install node dependencies and run tests",
+		Executor:         "node/default",
+		WorkingDirectory: workingDirectory(ls[labels.DepsNode]),
+		Steps:            steps}
 
 	if hasJestLabel {
 		job.Environment = map[string]string{

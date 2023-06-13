@@ -116,6 +116,7 @@ jobs:
           name: Change into 'node-dir' directory
           command: cd 'node-dir'
       - node/install-packages:
+          app-dir: node-dir
           pkg-manager: npm
       - run:
           name: Run tests

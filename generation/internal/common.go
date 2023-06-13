@@ -25,6 +25,15 @@ func initialSteps(depsLabel labels.Label) []config.Step {
 	return steps
 }
 
+func withOrbAppDir(parameters config.OrbCommandParameters, depsLabel labels.Label) config.OrbCommandParameters {
+	basePath := depsLabel.BasePath
+	if basePath != "" && basePath != "." {
+		parameters["app-dir"] = basePath
+	}
+
+	return parameters
+}
+
 const artifactsPath = "~/artifacts"
 
 var createArtifactsDirStep = config.Step{

@@ -56,20 +56,23 @@ func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
 }
 
 func nodeTestJob(ls labels.LabelSet) *Job {
+	depsLabel := ls[labels.DepsNode]
 	hasJestLabel := ls[labels.TestJest].Valid
-	steps := initialSteps(ls[labels.DepsNode])
+	steps := initialSteps(depsLabel)
 
 	packageManager := "npm"
 	if ls[labels.PackageManagerYarn].Valid {
 		packageManager = "yarn"
 	}
 
+	installPackagesParameters := config.OrbCommandParameters{
+		"pkg-manager": packageManager,
+	}
+
 	steps = append(steps, config.Step{
-		Type:    config.OrbCommand,
-		Command: "node/install-packages",
-		Parameters: config.OrbCommandParameters{
-			"pkg-manager": packageManager,
-		},
+		Type:       config.OrbCommand,
+		Command:    "node/install-packages",
+		Parameters: withOrbAppDir(installPackagesParameters, depsLabel),
 	})
 	if hasJestLabel {
 		if packageManager == "yarn" {
@@ -88,11 +91,8 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 
 	if hasJestLabel {
 		steps = append(steps, config.Step{
-			Type:    config.OrbCommand,
-			Command: "store_test_results",
-			Parameters: config.OrbCommandParameters{
-				"path": "./test-results/",
-			},
+			Type: config.StoreTestResults,
+			Path: "./test-results/",
 		})
 	}
 

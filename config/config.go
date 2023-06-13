@@ -203,7 +203,12 @@ type Step struct {
 func (s Step) YamlNode() *yaml.Node {
 	switch s.Type {
 	case Checkout:
-		return yCommentedScalar(s.Comment, "checkout")
+		if s.Path == "" {
+			return yCommentedScalar(s.Comment, "checkout")
+		} else {
+			return yCommentedMap(s.Comment, yScalar("checkout"),
+				yMap(yScalar("path"), yScalar(s.Path)))
+		}
 
 	case Run:
 		var kvs []*yaml.Node

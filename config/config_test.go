@@ -458,6 +458,13 @@ func TestStep_YamlNode(t *testing.T) {
 			},
 			expected: "checkout\n",
 		}, {
+			testName: "checkout with path",
+			step: Step{
+				Type: Checkout,
+				Path: "subdir",
+			},
+			expected: "checkout:\n  path: subdir\n",
+		}, {
 			testName: "checkout with comment",
 			step: Step{
 				Type:    Checkout,

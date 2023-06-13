@@ -1,6 +1,7 @@
 package codebase
 
 import (
+	"path/filepath"
 	"testing"
 )
 
@@ -152,4 +153,64 @@ func TestLocalCodebase_ReadFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLocalCodebase_files(t *testing.T) {
+	t.Run("doesn't error", func(t *testing.T) {
+		_, err := LocalCodebase{BasePath: "../.."}.files()
+		if err != nil {
+			t.Errorf("got %v, expected no error", err)
+			return
+		}
+	})
+
+	t.Run("README.md (at the root) comes before this file (localcodebase_test.go)", func(t *testing.T) {
+		gotFiles, _ := LocalCodebase{BasePath: "../.."}.files()
+		thisFilePos := -1
+		readmePos := -1
+		for i, f := range gotFiles {
+			if f == "README.md" {
+				readmePos = i
+			} else if filepath.Base(f) == "localcodebase_test.go" {
+				thisFilePos = i
+			}
+		}
+		if thisFilePos == -1 {
+			t.Error("this file not found")
+		}
+		if readmePos == -1 {
+			t.Error("README.md file not found")
+		}
+		if readmePos > thisFilePos {
+			t.Errorf("expected the order to be ascending but found files at positions (%d, %d)",
+				readmePos,
+				thisFilePos)
+		}
+	})
+
+	t.Run("finds testdata contents", func(t *testing.T) {
+		gotFiles, _ := LocalCodebase{BasePath: "../..", maxDepth: 3}.files()
+
+		for _, f := range gotFiles {
+			if filepath.Base(f) == "find.me" {
+				// find.me file found
+				return
+			}
+		}
+
+		t.Error("find.me file not found")
+	})
+
+	t.Run("does not find testdata contents (too deep)", func(t *testing.T) {
+		gotFiles, _ := LocalCodebase{BasePath: "../..", maxDepth: 2}.files()
+
+		for _, f := range gotFiles {
+			if filepath.Base(f) == "find.me" {
+				t.Error("find.me file found, expected not to be found")
+				return
+			}
+		}
+		// find.me file not found
+	})
+
 }

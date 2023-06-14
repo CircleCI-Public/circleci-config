@@ -151,7 +151,7 @@ jobs:
           name: deploy
           command: '#e.g. ./deploy.sh'
 workflows:
-  ci:
+  build-and-test:
     jobs:
       - test-node
       - test-go
@@ -201,7 +201,7 @@ jobs:
           name: deploy
           command: '#e.g. ./deploy.sh'
 workflows:
-  ci:
+  build-and-test:
     jobs:
       - test-node
     # - deploy:
@@ -255,7 +255,7 @@ jobs:
           name: deploy
           command: '#e.g. ./deploy.sh'
 workflows:
-  ci:
+  build-and-test:
     jobs:
       - test-node
     # - deploy:
@@ -306,7 +306,7 @@ jobs:
           name: deploy
           command: '#e.g. ./deploy.sh'
 workflows:
-  ci:
+  build-and-test:
     jobs:
       - test-python
     # - deploy:
@@ -358,7 +358,7 @@ jobs:
           name: deploy
           command: '#e.g. ./deploy.sh'
 workflows:
-  ci:
+  build-and-test:
     jobs:
       - test-python
     # - deploy:

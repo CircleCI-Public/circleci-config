@@ -99,7 +99,7 @@ func buildWorkflows(jobs []*Job) []*config.Workflow {
 	}
 
 	return []*config.Workflow{{
-		Name: "ci",
+		Name: "build-and-test",
 		Jobs: workflowJobs,
 	}}
 }

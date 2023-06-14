@@ -264,7 +264,6 @@ workflows:
 `,
 		},
 		{
-
 			testName: "python codebase with poetry package manager",
 			labels: labels.LabelSet{
 				labels.DepsPython: labels.Label{
@@ -348,6 +347,166 @@ jobs:
           command: poetry run pytest --junitxml=junit.xml
       - store_test_results:
           path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-python
+    # - deploy:
+    #     requires:
+    #       - test-python
+`,
+		},
+		{
+			testName: "python project with a manage.py file using poetry",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:   labels.DepsPython,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				},
+				labels.FileManagePy: labels.Label{
+					Key:       labels.FileManagePy,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.,file:manage.py:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Run tests
+          command: python manage.py test
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-python
+    # - deploy:
+    #     requires:
+    #       - test-python
+`,
+		},
+		{
+			testName: "python project with a manage.py file using pipenv",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:   labels.DepsPython,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				},
+				labels.FileManagePy: labels.Label{
+					Key:       labels.FileManagePy,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.PackageManagerPipenv: labels.Label{
+					Key:       labels.PackageManagerPipenv,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.,file:manage.py:.,package_manager:pipenv:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pipenv
+      - run:
+          name: Run tests
+          command: pipenv run python manage.py test
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-python
+    # - deploy:
+    #     requires:
+    #       - test-python
+`,
+		},
+		{
+			testName: "python project with a manage.py file using poetry",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:   labels.DepsPython,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				},
+				labels.FileManagePy: labels.Label{
+					Key:       labels.FileManagePy,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.PackageManagerPoetry: labels.Label{
+					Key:       labels.PackageManagerPoetry,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.,file:manage.py:.,package_manager:poetry:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: poetry
+      - run:
+          name: Run tests
+          command: poetry run python manage.py test
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:

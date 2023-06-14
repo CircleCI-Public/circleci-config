@@ -71,7 +71,7 @@ jobs:
           command: go build -o out/circleci-inferconfig ./cmd/inferconfig
       - run:
           name: Docker Login
-          command: docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+          command: docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
       - run:
           name: Build docker image
           command: |
@@ -96,4 +96,4 @@ workflows:
             branches:
               only: main
           context:
-            - devex-release
+            - image-publishing

@@ -69,6 +69,7 @@ jobs:
       - run:
           name: Build inferconfig CLI
           command: go build -o out/circleci-inferconfig ./cmd/inferconfig
+      - setup_remote_docker
       - run:
           name: Docker Login
           command: docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD

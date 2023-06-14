@@ -72,7 +72,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Docker Login
-          command: echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_LOGIN" --password-stdin
+          command: docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
       - run:
           name: Build docker image
           command: |

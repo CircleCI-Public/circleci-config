@@ -5,13 +5,17 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 )
 
 const maxFiles = 250000
+const defaultMaxDepth = 3
 
 // LocalCodebase is a Codebase for files available on local disk
 type LocalCodebase struct {
 	BasePath string
+	maxDepth int // including root dir
 	fileSet  []string
 }
 
@@ -51,6 +55,10 @@ func (c LocalCodebase) files() ([]string, error) {
 		basePath = "."
 	}
 
+	if c.maxDepth == 0 {
+		c.maxDepth = defaultMaxDepth
+	}
+
 	filesVisited := 0
 	var fileList []string
 	err := filepath.WalkDir(
@@ -60,6 +68,9 @@ func (c LocalCodebase) files() ([]string, error) {
 				return fileError
 			}
 			relPath, innerErr := filepath.Rel(c.BasePath, path)
+			if d.IsDir() && pathDepth(relPath) > c.maxDepth {
+				return filepath.SkipDir
+			}
 			if innerErr != nil {
 				return innerErr
 			}
@@ -71,9 +82,16 @@ func (c LocalCodebase) files() ([]string, error) {
 			return nil
 		})
 
+	sort.Slice(fileList, func(i, j int) bool {
+		return pathDepth(fileList[i]) < pathDepth(fileList[j])
+	})
 	c.fileSet = fileList
 
 	return c.fileSet, err
+}
+
+func pathDepth(path string) int {
+	return strings.Count(path, string(os.PathSeparator)) + 1
 }
 
 func (c LocalCodebase) FindFile(glob ...string) (path string, err error) {

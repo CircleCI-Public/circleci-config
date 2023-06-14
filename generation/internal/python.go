@@ -68,7 +68,7 @@ func poetrySteps(l labels.Label) []config.Step {
 }
 
 func pythonTestJob(ls labels.LabelSet) *Job {
-	steps := initialSteps(ls[labels.DepsPython])
+	steps := []config.Step{checkoutStep(ls[labels.DepsPython])}
 
 	// Support for different package managers
 	switch {
@@ -88,10 +88,11 @@ func pythonTestJob(ls labels.LabelSet) *Job {
 
 	return &Job{
 		Job: config.Job{
-			Name:     "test-python",
-			Comment:  "Install dependencies and run tests",
-			Executor: "python/default",
-			Steps:    steps,
+			Name:             "test-python",
+			Comment:          "Install dependencies and run tests",
+			Executor:         "python/default",
+			WorkingDirectory: workingDirectory(ls[labels.DepsPython]),
+			Steps:            steps,
 		},
 		Type: TestJob,
 		Orbs: map[string]string{

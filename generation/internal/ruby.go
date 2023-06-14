@@ -18,13 +18,10 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 }
 
 func rubyInitialSteps(ls labels.LabelSet) []config.Step {
-	steps := initialSteps(ls[labels.DepsRuby])
-
-	steps = append(steps, config.Step{
-		Type:    config.OrbCommand,
-		Command: "ruby/install-deps",
-	})
-	return steps
+	return []config.Step{
+		checkoutStep(ls[labels.DepsRuby]),
+		{Type: config.OrbCommand, Command: "ruby/install-deps"},
+	}
 }
 
 const rubyOrb = "circleci/ruby@1.1.0"
@@ -54,10 +51,11 @@ func rspecJob(ls labels.LabelSet) *Job {
 
 	return &Job{
 		Job: config.Job{
-			Name:         "test-ruby",
-			Comment:      "Install gems, run rspec tests",
-			Steps:        steps,
-			DockerImages: images,
+			Name:             "test-ruby",
+			Comment:          "Install gems, run rspec tests",
+			Steps:            steps,
+			DockerImages:     images,
+			WorkingDirectory: workingDirectory(ls[labels.DepsRuby]),
 			Environment: map[string]string{
 				"RAILS_ENV": "test"},
 		},

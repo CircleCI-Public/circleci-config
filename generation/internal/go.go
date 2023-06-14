@@ -10,8 +10,8 @@ import (
 func goInitialSteps(ls labels.LabelSet) []config.Step {
 	const goCacheKey = `go-mod-{{ checksum "go.sum" }}`
 
-	steps := initialSteps(ls[labels.DepsGo])
-	steps = append(steps, []config.Step{
+	return []config.Step{
+		checkoutStep(ls[labels.DepsGo]),
 		{
 			Type:     config.RestoreCache,
 			CacheKey: goCacheKey,
@@ -23,8 +23,7 @@ func goInitialSteps(ls labels.LabelSet) []config.Step {
 			Type:     config.SaveCache,
 			CacheKey: goCacheKey,
 			Path:     "/home/circleci/go/pkg/mod",
-		}}...)
-	return steps
+		}}
 }
 
 func goTestJob(ls labels.LabelSet) *Job {
@@ -41,10 +40,11 @@ func goTestJob(ls labels.LabelSet) *Job {
 
 	return &Job{
 		Job: config.Job{
-			Name:         "test-go",
-			Comment:      "Install go modules and run tests",
-			DockerImages: []string{"cimg/go:1.20"},
-			Steps:        steps,
+			Name:             "test-go",
+			Comment:          "Install go modules and run tests",
+			DockerImages:     []string{"cimg/go:1.20"},
+			WorkingDirectory: workingDirectory(ls[labels.DepsGo]),
+			Steps:            steps,
 		},
 		Type: TestJob,
 	}

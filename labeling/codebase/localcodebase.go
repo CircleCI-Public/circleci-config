@@ -1,7 +1,7 @@
 package codebase
 
 import (
-	"fmt"
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -11,6 +11,8 @@ import (
 
 const maxFiles = 250000
 const defaultMaxDepth = 3
+
+var NotFoundError = errors.New("not found")
 
 // LocalCodebase is a Codebase for files available on local disk
 type LocalCodebase struct {
@@ -41,7 +43,7 @@ func (c LocalCodebase) FindFileMatching(
 		}
 	}
 
-	return "", fmt.Errorf("not found")
+	return "", NotFoundError
 
 }
 

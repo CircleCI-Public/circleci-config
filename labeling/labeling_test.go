@@ -1,11 +1,11 @@
 package labeling
 
 import (
-	"fmt"
 	"path/filepath"
 	"reflect"
 	"testing"
 
+	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
 	"github.com/CircleCI-Public/circleci-config/labeling/internal"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
@@ -26,7 +26,7 @@ func (c fakeCodebase) FindFileMatching(predicate func(string) bool, globs ...str
 			}
 		}
 	}
-	return "", fmt.Errorf("not found")
+	return "", codebase.NotFoundError
 }
 
 func (c fakeCodebase) FindFile(globs ...string) (path string, err error) {
@@ -38,7 +38,7 @@ func (c fakeCodebase) ReadFile(path string) (contents []byte, err error) {
 	if contentString != "" {
 		return []byte(contentString), nil
 	}
-	return nil, fmt.Errorf("not found")
+	return nil, codebase.NotFoundError
 }
 
 func TestCodebase_ApplyAllRules(t *testing.T) {

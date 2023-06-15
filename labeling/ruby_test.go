@@ -69,6 +69,23 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Ruby gemspec file",
+			files: map[string]string{
+				"mygem.gemspec": rubyGemSpecFile,
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsRuby,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"rake": "true",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -138,3 +155,12 @@ ruby '1.9.3', :engine => 'jruby', :engine_version => '1.6.7'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0.1'`
+
+const rubyGemSpecFile = `
+Gem::Specification.new do |spec|
+  spec.name        = 'mygem'
+  spec.version     = Mygem::VERSION
+  spec.platform    = Gem::Platform::RUBY
+  spec.add_development_dependency('rake', '13.0.6')
+end
+`

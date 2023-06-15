@@ -12,53 +12,60 @@ import (
 var RubyRules = []labels.Rule{
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.DepsRuby
+		label.Dependencies = make(map[string]string)
 		gemspecPath, err := c.FindFile("*.gemspec")
 		if err != nil && !errors.Is(err, codebase.NotFoundError) {
 			return label, err
 		}
+
 		if gemspecPath != "" {
 			label.Valid = true
 			label.BasePath = path.Dir(gemspecPath)
-			return readDepsFile(c, label, gemspecPath)
+			err = readDepsFile(c, label.Dependencies, gemspecPath)
+			if err != nil {
+				return label, err
+			}
 		}
 
 		gemfilePath, err := c.FindFile("Gemfile")
-		if err != nil {
+		if err != nil && !errors.Is(err, codebase.NotFoundError) {
 			return label, err
 		}
-		label.Valid = gemfilePath != ""
-		label.BasePath = path.Dir(gemfilePath)
-		return readDepsFile(c, label, gemfilePath)
+		if gemfilePath != "" {
+			label.Valid = true
+			label.BasePath = path.Dir(gemfilePath)
+			err = readDepsFile(c, label.Dependencies, gemfilePath)
+		}
+		return label, nil
 	},
 }
 
 // Parse the Gemfile to add dependencies to the label
-func readDepsFile(c codebase.Codebase, label labels.Label, filePath string) (labels.Label, error) {
+func readDepsFile(c codebase.Codebase, deps map[string]string, filePath string) error {
 	fileContents, err := c.ReadFile(filePath)
 	if err != nil {
-		return label, err
+		return err
 	}
-	label.Dependencies = make(map[string]string)
-
 	for _, line := range strings.Split(string(fileContents), "\n") {
 		if strings.HasPrefix(line, "ruby ") {
 			version := strings.Split(line, ",")[0]
 			version = strings.SplitAfter(version, "ruby ")[1]
 			version = strings.ReplaceAll(version, "'", "")
-			label.Dependencies["ruby"] = version
+			deps["ruby"] = version
 		}
 
-		if strings.Contains(line, "gem 'rspec-rails'") {
-			label.Dependencies["rspec"] = "true"
+		if strings.Contains(line, "gem 'rspec-rails'") ||
+			strings.Contains(line, "gem 'rspec'") {
+			deps["rspec"] = "true"
 		}
 
 		if strings.Contains(line, "development_dependency('rake'") {
-			label.Dependencies["rake"] = "true"
+			deps["rake"] = "true"
 		}
 
 		if strings.Contains(line, "gem 'pg'") {
-			label.Dependencies["pg"] = "true"
+			deps["pg"] = "true"
 		}
 	}
-	return label, nil
+	return nil
 }

@@ -408,6 +408,28 @@ func TestCodebase_ApplyRules_Python(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "manage.py => file:manage.py",
+			files: map[string]string{
+				"manage.py": "mylib==1.0",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+				{
+					Key: labels.FileManagePy,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

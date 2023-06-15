@@ -14,6 +14,10 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 		jobs = append(jobs, rspecJob(ls))
 	}
 
+	if ls[labels.DepsRuby].Dependencies["rake"] == "true" {
+		jobs = append(jobs, rakeJob(ls))
+	}
+
 	return jobs
 }
 
@@ -59,6 +63,30 @@ func rspecJob(ls labels.LabelSet) *Job {
 			Environment: map[string]string{
 				"RAILS_ENV": "test"},
 		},
+		Orbs: map[string]string{
+			"ruby": rubyOrb,
+		},
+	}
+}
+
+func rakeJob(ls labels.LabelSet) *Job {
+	steps := rubyInitialSteps(ls)
+	steps = append(steps,
+		config.Step{
+			Type:    config.Run,
+			Name:    "rake test",
+			Command: "bundle exec rake test",
+		})
+
+	return &Job{
+		Job: config.Job{
+			Name:             "test-ruby",
+			Comment:          "Install gems, run rake tests",
+			Steps:            steps,
+			DockerImages:     []string{rubyImageVersion(ls)},
+			WorkingDirectory: workingDirectory(ls[labels.DepsRuby]),
+		},
+
 		Orbs: map[string]string{
 			"ruby": rubyOrb,
 		},

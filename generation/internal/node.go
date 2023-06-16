@@ -75,17 +75,17 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 				"pkg-manager": packageManager,
 			}})
 	} else {
-		// override the default ci command to not use the lockfile
 		steps = append(steps, config.Step{
+			Comment: "Update the default install command as the project doesn't have a lock file",
 			Type:    config.OrbCommand,
 			Command: "node/install-packages",
 			Parameters: config.OrbCommandParameters{
-				"pkg-manager":         packageManager,
+				"cache-path":          "~/project/node_modules",
 				"override-ci-command": fmt.Sprintf("%s install", packageManager),
 			}})
 	}
 
-	if hasJestLabel {
+	if hasJestLabel && ls[labels.DepsNode].Dependencies["jest-junit"] == "" {
 		if packageManager == "yarn" {
 			steps = append(steps, config.Step{
 				Type:    config.Run,

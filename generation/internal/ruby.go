@@ -33,25 +33,27 @@ const postgresImage = "circleci/postgres:9.5-alpine"
 
 func rspecJob(ls labels.LabelSet) *Job {
 	steps := rubyInitialSteps(ls)
+	images := []string{rubyImageVersion(ls)}
+
+	if ls[labels.DepsRuby].Dependencies["pg"] == "true" {
+		images = append(images, postgresImage)
+
+		steps = append(steps,
+			config.Step{
+				Type:    config.Run,
+				Name:    "wait for DB",
+				Command: "dockerize -wait tcp://localhost:5432 -timeout 1m"},
+			config.Step{
+				Type:    config.Run,
+				Name:    "Database setup",
+				Command: "bundle exec rake db:test:prepare"})
+	}
 	steps = append(steps,
-		config.Step{
-			Type:    config.Run,
-			Name:    "wait for DB",
-			Command: "dockerize -wait tcp://localhost:5432 -timeout 1m"},
-		config.Step{
-			Type:    config.Run,
-			Name:    "Database setup",
-			Command: "bundle exec rake db:test:prepare"},
 		config.Step{
 
 			Type:    config.OrbCommand,
 			Name:    "rspec test",
 			Command: "ruby/rspec-test"})
-
-	images := []string{rubyImageVersion(ls)}
-	if ls[labels.DepsRuby].Dependencies["pg"] == "true" {
-		images = append(images, postgresImage)
-	}
 
 	return &Job{
 		Job: config.Job{

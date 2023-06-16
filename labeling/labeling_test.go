@@ -184,12 +184,31 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 							"mylib": ">3.0",
 							"jest":  "1.0",
 						},
+						HasLockFile: true,
 					},
 				}, {
 					Key: labels.PackageManagerYarn,
 				},
 				{
 					Key: labels.TestJest,
+				},
+			},
+		},
+		{
+			name: "deps:node without any lock file",
+			files: map[string]string{
+				"package.json": `{"dependencies": {"mylib": ">3.0"}}`,
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsNode,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"mylib": ">3.0",
+						},
+						HasLockFile: false,
+					},
 				},
 			},
 		},

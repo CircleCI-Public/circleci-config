@@ -94,7 +94,7 @@ workflows:
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: "node-dir"},
+					LabelData: labels.LabelData{BasePath: "node-dir", HasLockFile: true},
 				},
 				labels.DepsGo: labels.Label{
 					Key:       labels.DepsGo,
@@ -167,7 +167,7 @@ workflows:
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: "."},
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: true},
 				},
 				labels.PackageManagerYarn: labels.Label{
 					Key:       labels.PackageManagerYarn,
@@ -210,12 +210,57 @@ workflows:
 `,
 		},
 		{
+			testName: "node codebase without a lock file",
+			labels: labels.LabelSet{
+				labels.DepsNode: labels.Label{
+					Key:       labels.DepsNode,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: false},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:node:.
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    steps:
+      - checkout
+      # Update the default install command as the project doesn't have a lock file
+      - node/install-packages:
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
+      - run:
+          name: Run tests
+          command: npm test
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-node
+    # - deploy:
+    #     requires:
+    #       - test-node
+`,
+		},
+		{
 			testName: "node codebase with jest tests",
 			labels: labels.LabelSet{
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: "."},
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: true},
 				},
 				labels.TestJest: labels.Label{
 					Key:       labels.TestJest,

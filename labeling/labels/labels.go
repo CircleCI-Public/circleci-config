@@ -25,6 +25,7 @@ type LabelData struct {
 	BasePath     string
 	Dependencies map[string]string
 	Tasks        map[string]string
+	HasLockFile  bool
 }
 
 // Label is the result of applying a Rule

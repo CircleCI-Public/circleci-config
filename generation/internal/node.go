@@ -65,13 +65,27 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 
 	steps := []config.Step{
 		checkoutStep(ls[labels.DepsNode]),
-		{
-			Type:       config.OrbCommand,
-			Command:    "node/install-packages",
-			Parameters: config.OrbCommandParameters{"pkg-manager": packageManager},
-		},
 	}
-	if hasJestLabel {
+
+	if ls[labels.DepsNode].HasLockFile {
+		steps = append(steps, config.Step{
+			Type:    config.OrbCommand,
+			Command: "node/install-packages",
+			Parameters: config.OrbCommandParameters{
+				"pkg-manager": packageManager,
+			}})
+	} else {
+		steps = append(steps, config.Step{
+			Comment: "Update the default install command as the project doesn't have a lock file",
+			Type:    config.OrbCommand,
+			Command: "node/install-packages",
+			Parameters: config.OrbCommandParameters{
+				"cache-path":          "~/project/node_modules",
+				"override-ci-command": fmt.Sprintf("%s install", packageManager),
+			}})
+	}
+
+	if hasJestLabel && ls[labels.DepsNode].Dependencies["jest-junit"] == "" {
 		if packageManager == "yarn" {
 			steps = append(steps, config.Step{
 				Type:    config.Run,

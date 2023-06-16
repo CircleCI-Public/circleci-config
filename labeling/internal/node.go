@@ -8,6 +8,11 @@ import (
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
+var lockFiles = []string{
+	"package-lock.json",
+	"yarn.lock",
+}
+
 var NodeRules = []labels.Rule{
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.DepsNode
@@ -17,6 +22,11 @@ var NodeRules = []labels.Rule{
 			return label, err
 		}
 		err = readPackageJSON(c, packagePath, &label)
+
+		// Lock files
+		lockFilesPath, _ := c.FindFile(lockFiles...)
+		label.LabelData.HasLockFile = lockFilesPath != ""
+
 		return label, err
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {

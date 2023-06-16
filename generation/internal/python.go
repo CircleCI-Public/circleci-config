@@ -52,6 +52,7 @@ func pipenvSteps(l labels.Label, hasManagePy bool) []config.Step {
 			Type:    config.OrbCommand,
 			Command: "python/install-packages",
 			Parameters: config.OrbCommandParameters{
+				"args":        "--dev",
 				"pkg-manager": "pipenv",
 			},
 		},

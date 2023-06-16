@@ -86,6 +86,25 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Ruby Gemfile and gemspec file",
+			files: map[string]string{
+				"mygem.gemspec": rubyGemSpecFile,
+				"Gemfile":       rubyGemfile,
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsRuby,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"rake": "true",
+							"ruby": "2.7.8",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -448,6 +448,7 @@ jobs:
     steps:
       - checkout
       - python/install-packages:
+          args: --dev
           pkg-manager: pipenv
       - run:
           name: Run tests

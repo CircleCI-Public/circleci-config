@@ -35,6 +35,9 @@ var RubyRules = []labels.Rule{
 			label.Valid = true
 			label.BasePath = path.Dir(gemfilePath)
 			err = readDepsFile(c, label.Dependencies, gemfilePath)
+			if err != nil {
+				return label, err
+			}
 		}
 		return label, nil
 	},
@@ -47,6 +50,7 @@ func readDepsFile(c codebase.Codebase, deps map[string]string, filePath string) 
 		return err
 	}
 	for _, line := range strings.Split(string(fileContents), "\n") {
+		line = strings.ReplaceAll(line, "\"", "'")
 		if strings.HasPrefix(line, "ruby ") {
 			version := strings.Split(line, ",")[0]
 			version = strings.SplitAfter(version, "ruby ")[1]
@@ -59,7 +63,8 @@ func readDepsFile(c codebase.Codebase, deps map[string]string, filePath string) 
 			deps["rspec"] = "true"
 		}
 
-		if strings.Contains(line, "development_dependency('rake'") {
+		if strings.Contains(line, "development_dependency('rake'") ||
+			strings.Contains(line, "gem 'rake'") {
 			deps["rake"] = "true"
 		}
 

@@ -18,6 +18,7 @@ const (
 	PackageManagerPoetry = "package_manager:poetry"
 	PackageManagerYarn   = "package_manager:yarn"
 	TestJest             = "test:jest"
+	FileManagePy         = "file:manage.py"
 )
 
 type LabelData struct {

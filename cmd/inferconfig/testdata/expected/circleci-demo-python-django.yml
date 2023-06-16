@@ -1,5 +1,5 @@
 # This config was automatically generated from your source code
-# Stacks detected: deps:python:.,package_manager:pipenv:.
+# Stacks detected: deps:python:.,file:manage.py:.,package_manager:pipenv:.
 version: 2.1
 orbs:
   python: circleci/python@2
@@ -13,9 +13,7 @@ jobs:
           pkg-manager: pipenv
       - run:
           name: Run tests
-          command: pipenv run pytest --junitxml=junit.xml
-      - store_test_results:
-          path: junit.xml
+          command: pipenv run python manage.py test
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:

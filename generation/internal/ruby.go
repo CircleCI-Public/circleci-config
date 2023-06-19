@@ -10,12 +10,10 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 		return nil
 	}
 
-	if ls[labels.DepsRuby].Dependencies["rspec"] == "true" {
-		jobs = append(jobs, rspecJob(ls))
-	}
-
 	if ls[labels.DepsRuby].Dependencies["rake"] == "true" {
 		jobs = append(jobs, rakeJob(ls))
+	} else if ls[labels.DepsRuby].Dependencies["rspec"] == "true" {
+		jobs = append(jobs, rspecJob(ls))
 	}
 
 	return jobs

@@ -36,7 +36,7 @@ func rubyInitialSteps(ls labels.LabelSet) []config.Step {
 	return []config.Step{checkout, installDeps}
 }
 
-const rubyOrb = "circleci/ruby@1.1.0"
+const rubyOrb = "circleci/ruby@2.0.1"
 const postgresImage = "circleci/postgres:9.5-alpine"
 
 func rspecJob(ls labels.LabelSet) *Job {

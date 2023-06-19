@@ -110,11 +110,8 @@ func Test_rubyInitialSteps(t *testing.T) {
 			},
 			want: []config.Step{
 				{Type: config.Checkout},
-				{Type: config.OrbCommand,
-					Command: "ruby/install-deps",
-					Parameters: config.OrbCommandParameters{
-						"override-cache-file": "./my.gemspec",
-					},
+				{Type: config.Run,
+					Command: "bundle install",
 				},
 			},
 		},

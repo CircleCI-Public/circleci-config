@@ -24,11 +24,8 @@ func rubyInitialSteps(ls labels.LabelSet) []config.Step {
 	checkout := checkoutStep(ls[labels.DepsRuby])
 
 	installDeps := config.Step{Type: config.OrbCommand, Command: "ruby/install-deps"}
-
 	if !ls[labels.DepsRuby].LabelData.HasLockFile && ls[labels.PackageManagerGemspec].Valid == true {
-		installDeps.Parameters = config.OrbCommandParameters{
-			"override-cache-file": ls[labels.PackageManagerGemspec].Path,
-		}
+		installDeps = config.Step{Type: config.Run, Command: "bundle install"}
 
 	}
 	return []config.Step{checkout, installDeps}

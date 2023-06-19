@@ -13,19 +13,6 @@ var RubyRules = []labels.Rule{
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.DepsRuby
 		label.Dependencies = make(map[string]string)
-		gemspecPath, err := c.FindFile("*.gemspec")
-		if err != nil && !errors.Is(err, codebase.NotFoundError) {
-			return label, err
-		}
-
-		if gemspecPath != "" {
-			label.Valid = true
-			label.BasePath = path.Dir(gemspecPath)
-			err = readDepsFile(c, label.Dependencies, gemspecPath)
-			if err != nil {
-				return label, err
-			}
-		}
 
 		gemfilePath, err := c.FindFile("Gemfile")
 		if err != nil && !errors.Is(err, codebase.NotFoundError) {
@@ -35,6 +22,26 @@ var RubyRules = []labels.Rule{
 			label.Valid = true
 			label.BasePath = path.Dir(gemfilePath)
 			err = readDepsFile(c, label.Dependencies, gemfilePath)
+			if err != nil {
+				return label, err
+			}
+			label.HasLockFile = hasPath(c, path.Join(path.Dir(gemfilePath), "Gemfile.lock"))
+		}
+		return label, nil
+	},
+	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+		label.Key = labels.PackageManagerGemspec
+		label.Dependencies = make(map[string]string)
+
+		gemspecPath, err := c.FindFile("*.gemspec")
+		if err != nil && !errors.Is(err, codebase.NotFoundError) {
+			return label, err
+		}
+
+		if gemspecPath != "" {
+			label.Valid = true
+			label.BasePath = path.Dir(gemspecPath)
+			err = readDepsFile(c, label.Dependencies, gemspecPath)
 			if err != nil {
 				return label, err
 			}

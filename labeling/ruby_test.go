@@ -12,11 +12,13 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 		name           string
 		files          map[string]string
 		expectedLabels []labels.Label
+		hasLockFile    bool
 	}{
 		{
 			name: "Ruby version",
 			files: map[string]string{
-				"Gemfile": rubyGemfile,
+				"Gemfile":      rubyGemfile,
+				"Gemfile.lock": "<lockfile contents>",
 			},
 
 			expectedLabels: []labels.Label{
@@ -27,6 +29,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 						Dependencies: map[string]string{
 							"ruby": "2.7.8",
 						},
+						HasLockFile: true,
 					},
 				},
 			},
@@ -76,7 +79,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 			},
 			expectedLabels: []labels.Label{
 				{
-					Key: labels.DepsRuby,
+					Key: labels.PackageManagerGemspec,
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
@@ -98,9 +101,16 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
-							"rake": "true",
 							"ruby": "2.7.8",
 						},
+					},
+				},
+				{
+					Key: labels.PackageManagerGemspec,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"rake": "true"},
 					},
 				},
 			},

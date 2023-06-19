@@ -9,16 +9,17 @@ import (
 )
 
 const (
-	ArtifactGoExecutable = "artifact:go-executable"
-	DepsGo               = "deps:go"
-	DepsNode             = "deps:node"
-	DepsPython           = "deps:python"
-	DepsRuby             = "deps:ruby"
-	PackageManagerPipenv = "package_manager:pipenv"
-	PackageManagerPoetry = "package_manager:poetry"
-	PackageManagerYarn   = "package_manager:yarn"
-	TestJest             = "test:jest"
-	FileManagePy         = "file:manage.py"
+	ArtifactGoExecutable  = "artifact:go-executable"
+	DepsGo                = "deps:go"
+	DepsNode              = "deps:node"
+	DepsPython            = "deps:python"
+	DepsRuby              = "deps:ruby"
+	PackageManagerPipenv  = "package_manager:pipenv"
+	PackageManagerPoetry  = "package_manager:poetry"
+	PackageManagerYarn    = "package_manager:yarn"
+	PackageManagerGemspec = "package_manager:gemspec"
+	TestJest              = "test:jest"
+	FileManagePy          = "file:manage.py"
 )
 
 type LabelData struct {

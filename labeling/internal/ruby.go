@@ -41,6 +41,7 @@ var RubyRules = []labels.Rule{
 		if gemspecPath != "" {
 			label.Valid = true
 			label.BasePath = path.Dir(gemspecPath)
+			label.Path = gemspecPath
 			err = readDepsFile(c, label.Dependencies, gemspecPath)
 			if err != nil {
 				return label, err

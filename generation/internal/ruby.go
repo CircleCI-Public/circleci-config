@@ -22,10 +22,18 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 }
 
 func rubyInitialSteps(ls labels.LabelSet) []config.Step {
-	return []config.Step{
-		checkoutStep(ls[labels.DepsRuby]),
-		{Type: config.OrbCommand, Command: "ruby/install-deps"},
+
+	checkout := checkoutStep(ls[labels.DepsRuby])
+
+	installDeps := config.Step{Type: config.OrbCommand, Command: "ruby/install-deps"}
+
+	if !ls[labels.DepsRuby].LabelData.HasLockFile && ls[labels.PackageManagerGemspec].Valid == true {
+		installDeps.Parameters = config.OrbCommandParameters{
+			"override-cache-file": ls[labels.PackageManagerGemspec].Path,
+		}
+
 	}
+	return []config.Step{checkout, installDeps}
 }
 
 const rubyOrb = "circleci/ruby@1.1.0"

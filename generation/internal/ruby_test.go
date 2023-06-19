@@ -1,9 +1,11 @@
 package internal
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
+	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
@@ -46,6 +48,84 @@ func Test_rubyImageVersion(t *testing.T) {
 					"expected %v",
 					got,
 					tt.expectedVersion)
+			}
+		})
+	}
+}
+
+// func Test_rubyInitialSteps(t *testing.T) {
+//	tests := []struct{
+//		name string
+//		labels labels.LabelSet
+//		[]config.Step
+//	}{
+
+//	}
+//	for _, tt ::= range tests  {
+
+//	}
+
+// }
+
+func Test_rubyInitialSteps(t *testing.T) {
+	tests := []struct {
+		name string
+		ls   labels.LabelSet
+		want []config.Step
+	}{
+		{
+			name: "gemfile w/lockfile",
+			ls: labels.LabelSet{
+				labels.DepsRuby: labels.Label{
+					Key: labels.DepsRuby,
+					LabelData: labels.LabelData{
+						BasePath:    ".",
+						HasLockFile: true,
+					},
+				},
+			},
+			want: []config.Step{
+				{Type: config.Checkout},
+				{Type: config.OrbCommand, Command: "ruby/install-deps"},
+			},
+		},
+		{
+			name: "gemfile w/o lockfile",
+			ls: labels.LabelSet{
+				labels.DepsRuby: labels.Label{
+					Key:   labels.DepsRuby,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath:    ".",
+						HasLockFile: false,
+					},
+				},
+				labels.PackageManagerGemspec: labels.Label{
+					Key:   labels.PackageManagerGemspec,
+					Valid: true,
+					LabelData: labels.LabelData{
+						Path: "./my.gemspec",
+					},
+				},
+			},
+			want: []config.Step{
+				{Type: config.Checkout},
+				{Type: config.OrbCommand,
+					Command: "ruby/install-deps",
+					Parameters: config.OrbCommandParameters{
+						"override-cache-file": "./my.gemspec",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := rubyInitialSteps(tt.ls); !reflect.DeepEqual(got, tt.want) {
+				fmt.Println("want", tt.want)
+				fmt.Println("got", got)
+				t.Errorf("rubyInitialSteps() = %v, want %v", got, tt.want)
 			}
 		})
 	}

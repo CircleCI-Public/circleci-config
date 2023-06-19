@@ -82,6 +82,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					Key: labels.PackageManagerGemspec,
 					LabelData: labels.LabelData{
 						BasePath: ".",
+						Path:     "mygem.gemspec",
 						Dependencies: map[string]string{
 							"rake": "true",
 						},
@@ -109,6 +110,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					Key: labels.PackageManagerGemspec,
 					LabelData: labels.LabelData{
 						BasePath: ".",
+						Path:     "mygem.gemspec",
 						Dependencies: map[string]string{
 							"rake": "true"},
 					},

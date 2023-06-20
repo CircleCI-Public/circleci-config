@@ -10,13 +10,21 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 		return nil
 	}
 
-	if ls[labels.DepsRuby].Dependencies["rake"] == "true" {
+	if hasGem(ls, "rake") {
 		jobs = append(jobs, rakeJob(ls))
-	} else if ls[labels.DepsRuby].Dependencies["rspec"] == "true" {
+	} else if hasGem(ls, "rspec") {
 		jobs = append(jobs, rspecJob(ls))
 	}
-
 	return jobs
+}
+
+func hasGem(ls labels.LabelSet, gem string) bool {
+	for _, label := range []string{labels.DepsRuby, labels.PackageManagerGemspec} {
+		if ls[label].Valid == true && ls[label].LabelData.Dependencies[gem] != "" {
+			return true
+		}
+	}
+	return false
 }
 
 func rubyInitialSteps(ls labels.LabelSet) []config.Step {

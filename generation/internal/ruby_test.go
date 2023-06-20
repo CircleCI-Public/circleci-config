@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -89,9 +88,6 @@ func Test_rubyInitialSteps(t *testing.T) {
 				labels.PackageManagerGemspec: labels.Label{
 					Key:   labels.PackageManagerGemspec,
 					Valid: true,
-					LabelData: labels.LabelData{
-						Path: "./my.gemspec",
-					},
 				},
 			},
 			want: []config.Step{
@@ -106,8 +102,6 @@ func Test_rubyInitialSteps(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := rubyInitialSteps(tt.ls); !reflect.DeepEqual(got, tt.want) {
-				fmt.Println("want", tt.want)
-				fmt.Println("got", got)
 				t.Errorf("rubyInitialSteps() = %v, want %v", got, tt.want)
 			}
 		})

@@ -89,7 +89,7 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 		if packageManager == "yarn" {
 			steps = append(steps, config.Step{
 				Type:    config.Run,
-				Command: "yarn add jest-junit",
+				Command: "yarn add jest-junit --ignore-workspace-root-check",
 			})
 		} else {
 			steps = append(steps, config.Step{

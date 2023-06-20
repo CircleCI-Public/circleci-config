@@ -10,25 +10,37 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 		return nil
 	}
 
-	if ls[labels.DepsRuby].Dependencies["rspec"] == "true" {
+	if hasGem(ls, "rake") {
+		jobs = append(jobs, rakeJob(ls))
+	} else if hasGem(ls, "rspec") {
 		jobs = append(jobs, rspecJob(ls))
 	}
-
-	if ls[labels.DepsRuby].Dependencies["rake"] == "true" {
-		jobs = append(jobs, rakeJob(ls))
-	}
-
 	return jobs
 }
 
-func rubyInitialSteps(ls labels.LabelSet) []config.Step {
-	return []config.Step{
-		checkoutStep(ls[labels.DepsRuby]),
-		{Type: config.OrbCommand, Command: "ruby/install-deps"},
+func hasGem(ls labels.LabelSet, gem string) bool {
+	for _, label := range []string{labels.DepsRuby, labels.PackageManagerGemspec} {
+		if ls[label].Valid == true && ls[label].LabelData.Dependencies[gem] != "" {
+			return true
+		}
 	}
+	return false
 }
 
-const rubyOrb = "circleci/ruby@1.1.0"
+func rubyInitialSteps(ls labels.LabelSet) []config.Step {
+
+	checkout := checkoutStep(ls[labels.DepsRuby])
+
+	installDeps := config.Step{Type: config.OrbCommand, Command: "ruby/install-deps"}
+
+	// ruby orb requires Gemfile.lockfile, so revert to basic bundle command when not found
+	if !ls[labels.DepsRuby].LabelData.HasLockFile && ls[labels.PackageManagerGemspec].Valid == true {
+		installDeps = config.Step{Type: config.Run, Command: "bundle install"}
+	}
+	return []config.Step{checkout, installDeps}
+}
+
+const rubyOrb = "circleci/ruby@2.0.1"
 const postgresImage = "circleci/postgres:9.5-alpine"
 
 func rspecJob(ls labels.LabelSet) *Job {

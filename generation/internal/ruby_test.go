@@ -53,20 +53,6 @@ func Test_rubyImageVersion(t *testing.T) {
 	}
 }
 
-// func Test_rubyInitialSteps(t *testing.T) {
-//	tests := []struct{
-//		name string
-//		labels labels.LabelSet
-//		[]config.Step
-//	}{
-
-//	}
-//	for _, tt ::= range tests  {
-
-//	}
-
-// }
-
 func Test_rubyInitialSteps(t *testing.T) {
 	tests := []struct {
 		name string

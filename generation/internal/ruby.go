@@ -24,9 +24,10 @@ func rubyInitialSteps(ls labels.LabelSet) []config.Step {
 	checkout := checkoutStep(ls[labels.DepsRuby])
 
 	installDeps := config.Step{Type: config.OrbCommand, Command: "ruby/install-deps"}
+
+	// ruby orb requires Gemfile.lockfile, so revert to basic bundle command when not found
 	if !ls[labels.DepsRuby].LabelData.HasLockFile && ls[labels.PackageManagerGemspec].Valid == true {
 		installDeps = config.Step{Type: config.Run, Command: "bundle install"}
-
 	}
 	return []config.Step{checkout, installDeps}
 }

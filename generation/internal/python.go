@@ -7,14 +7,11 @@ import (
 
 const pythonOrb = "circleci/python@2"
 
-func pipSteps(l labels.Label, hasManagePy bool) []config.Step {
+func defaultSteps(l labels.Label, hasManagePy bool) []config.Step {
 	steps := []config.Step{
 		{
 			Type:    config.OrbCommand,
 			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"pkg-manager": "pip",
-			},
 		},
 	}
 
@@ -116,7 +113,7 @@ func pythonTestJob(ls labels.LabelSet) *Job {
 	case ls[labels.PackageManagerPoetry].Valid:
 		steps = append(steps, poetrySteps(ls[labels.PackageManagerPoetry], hasManagePy)...)
 	default:
-		steps = append(steps, pipSteps(ls[labels.DepsPython], hasManagePy)...)
+		steps = append(steps, defaultSteps(ls[labels.DepsPython], hasManagePy)...)
 	}
 
 	if !hasManagePy {

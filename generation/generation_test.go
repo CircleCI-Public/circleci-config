@@ -437,8 +437,7 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: pip
+      - python/install-packages
       - run:
           name: Run tests
           command: python manage.py test

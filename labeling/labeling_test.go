@@ -50,9 +50,10 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 		{
 			name: "All rules apply",
 			files: map[string]string{
-				"go.mod":       "",
-				"package.json": `{"devDependencies":{"jest": "version"}}`,
-				"cmd/cmd.go":   "package main",
+				"go.mod":              "",
+				"package.json":        `{"devDependencies":{"jest": "version"}}`,
+				"cmd/cmd.go":          "package main",
+				"rust-dir/Cargo.toml": "",
 			},
 			expectedLabels: []labels.Label{
 				{
@@ -72,6 +73,11 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 				}, {
 					Key:       labels.ArtifactGoExecutable,
 					LabelData: labels.LabelData{},
+				}, {
+					Key: labels.DepsRust,
+					LabelData: labels.LabelData{
+						BasePath: "rust-dir",
+					},
 				},
 			},
 		},

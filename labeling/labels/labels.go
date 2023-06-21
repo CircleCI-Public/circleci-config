@@ -10,10 +10,12 @@ import (
 
 const (
 	ArtifactGoExecutable  = "artifact:go-executable"
+	ArtifactRustCrate     = "artifact:rust-crate"
 	DepsGo                = "deps:go"
 	DepsNode              = "deps:node"
 	DepsPython            = "deps:python"
 	DepsRuby              = "deps:ruby"
+	DepsRust              = "deps:rust"
 	PackageManagerPipenv  = "package_manager:pipenv"
 	PackageManagerPoetry  = "package_manager:poetry"
 	PackageManagerYarn    = "package_manager:yarn"

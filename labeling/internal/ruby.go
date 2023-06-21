@@ -62,6 +62,7 @@ func readDepsFile(c codebase.Codebase, deps map[string]string, filePath string) 
 			version := strings.Split(line, ",")[0]
 			version = strings.SplitAfter(version, "ruby ")[1]
 			version = strings.ReplaceAll(version, "'", "")
+			version = strings.TrimSpace(version)
 			deps["ruby"] = version
 		}
 

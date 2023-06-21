@@ -35,6 +35,26 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 			},
 		},
 		{
+			name: "Ruby version w/ extra trailing whitespace",
+			files: map[string]string{
+				"Gemfile":      "ruby '2.7.8'\r",
+				"Gemfile.lock": "<lockfile contents>",
+			},
+
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsRuby,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"ruby": "2.7.8",
+						},
+						HasLockFile: true,
+					},
+				},
+			},
+		},
+		{
 			name: "Ruby version w/ rspec, pg",
 			files: map[string]string{
 				"Gemfile": rubyGemfileWithRailsRSpec,

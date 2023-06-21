@@ -71,6 +71,11 @@ func readDepsFile(c codebase.Codebase, deps map[string]string, filePath string) 
 			deps["rspec"] = "true"
 		}
 
+		if strings.Contains(line, "gem 'rspec_junit_formatter'") ||
+			strings.Contains(line, "development_dependency('rspec_junit_formatter'") {
+			deps["rspec_junit_formatter"] = "true"
+		}
+
 		if strings.Contains(line, "development_dependency('rake'") ||
 			strings.Contains(line, "gem 'rake'") {
 			deps["rake"] = "true"

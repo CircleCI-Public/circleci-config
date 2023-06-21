@@ -1,10 +1,11 @@
 package labeling
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestCodebase_ApplyRubyRules(t *testing.T) {
@@ -27,7 +28,8 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
-							"ruby": "2.7.8",
+							"ruby":                  "2.7.8",
+							"rspec_junit_formatter": "true",
 						},
 						HasLockFile: true,
 					},
@@ -103,7 +105,8 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
-							"rake": "true",
+							"rake":                  "true",
+							"rspec_junit_formatter": "true",
 						},
 					},
 				},
@@ -121,7 +124,8 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
-							"ruby": "2.7.8",
+							"ruby":                  "2.7.8",
+							"rspec_junit_formatter": "true",
 						},
 					},
 				},
@@ -130,7 +134,9 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
-							"rake": "true"},
+							"rake":                  "true",
+							"rspec_junit_formatter": "true",
+						},
 					},
 				},
 			},
@@ -146,13 +152,8 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 				expected[label.Key] = label
 			}
 			got := ApplyAllRules(c)
-
-			if !reflect.DeepEqual(got, expected) {
-				t.Errorf("\n"+
-					"got      %v\n"+
-					"expected %v",
-					got,
-					expected)
+			if diff := cmp.Diff(expected, got); diff != "" {
+				t.Errorf("ApplyAllRules mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -170,6 +171,10 @@ ruby '2.7.8'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0.1'
+
+group :development, :test do
+  gem 'rspec_junit_formatter'
+end
 `
 
 const rubyGemfileWithRailsRSpec = `
@@ -211,5 +216,6 @@ Gem::Specification.new do |spec|
   spec.version     = Mygem::VERSION
   spec.platform    = Gem::Platform::RUBY
   spec.add_development_dependency('rake', '13.0.6')
+  spec.add_development_dependency('rspec_junit_formatter')
 end
 `

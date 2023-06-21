@@ -25,6 +25,8 @@ func TestInferConfig(t *testing.T) {
 		{url: "https://github.com/CircleCI-Public/circleci-demo-python-flask"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-python-django"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-ruby-rails"},
+		// There is no "demo" for rust, but the rust-orb repo contains a sample dir
+		{url: "https://github.com/CircleCI-Public/rust-orb"},
 	}
 
 	for _, tt := range tests {

@@ -60,12 +60,20 @@ func rspecJob(ls labels.LabelSet) *Job {
 				Name:    "Database setup",
 				Command: "bundle exec rake db:test:prepare"})
 	}
-	steps = append(steps,
-		config.Step{
 
-			Type:    config.OrbCommand,
-			Name:    "rspec test",
-			Command: "ruby/rspec-test"})
+	if hasGem(ls, "rspec_junit_formatter") {
+		steps = append(steps,
+			config.Step{
+				Type:    config.OrbCommand,
+				Name:    "rspec test",
+				Command: "ruby/rspec-test"})
+	} else {
+		steps = append(steps,
+			config.Step{
+				Type:    config.Run,
+				Name:    "rspec test",
+				Command: "bundle exec rspec"})
+	}
 
 	return &Job{
 		Job: config.Job{

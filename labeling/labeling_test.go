@@ -194,6 +194,9 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 					},
 				}, {
 					Key: labels.PackageManagerYarn,
+					LabelData: labels.LabelData{
+						Version: "classic",
+					},
 				},
 				{
 					Key: labels.TestJest,
@@ -214,6 +217,32 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 							"mylib": ">3.0",
 						},
 						HasLockFile: false,
+					},
+				},
+			},
+		},
+		{
+			name: "deps:node and package_manager:yarn with version berry",
+			files: map[string]string{
+				"package.json": `{"dependencies": {"mylib": ">3.0"}}`,
+				"yarn.lock":    "yarn.lock file",
+				".yarnrc.yml":  "yarnrc file",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsNode,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"mylib": ">3.0",
+						},
+						HasLockFile: true,
+					},
+				},
+				{
+					Key: labels.PackageManagerYarn,
+					LabelData: labels.LabelData{
+						Version: "berry",
 					},
 				},
 			},

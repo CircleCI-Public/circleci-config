@@ -87,9 +87,15 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 
 	if hasJestLabel && ls[labels.DepsNode].Dependencies["jest-junit"] == "" {
 		if packageManager == "yarn" {
+			command := "yarn add jest-junit --ignore-workspace-root-check"
+
+			if ls[labels.PackageManagerYarn].Version == "berry" {
+				// yarn-berry doesn't support --ignore-workspace-root-check and it's not needed in this case
+				command = "yarn add jest-junit"
+			}
 			steps = append(steps, config.Step{
 				Type:    config.Run,
-				Command: "yarn add jest-junit --ignore-workspace-root-check",
+				Command: command,
 			})
 		} else {
 			steps = append(steps, config.Step{

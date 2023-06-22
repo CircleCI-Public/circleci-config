@@ -210,6 +210,65 @@ workflows:
 `,
 		},
 		{
+			testName: "node codebase with yarn.lock and .yarnrc.yml file",
+			labels: labels.LabelSet{
+				labels.DepsNode: labels.Label{
+					Key:       labels.DepsNode,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: true},
+				},
+				labels.TestJest: labels.Label{
+					Key:       labels.TestJest,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.PackageManagerYarn: labels.Label{
+					Key:       labels.PackageManagerYarn,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: ".", Version: "berry"},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:node:.,package_manager:yarn:.,test:jest:.
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    environment:
+      JEST_JUNIT_OUTPUT_DIR: ./test-results/
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: yarn
+      - run:
+          command: yarn add jest-junit
+      - run:
+          name: Run tests with Jest
+          command: jest --ci --runInBand --reporters=default --reporters=jest-junit
+      - store_test_results:
+          path: ./test-results/
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-node
+    # - deploy:
+    #     requires:
+    #       - test-node
+`,
+		},
+		{
 			testName: "node codebase without a lock file",
 			labels: labels.LabelSet{
 				labels.DepsNode: labels.Label{

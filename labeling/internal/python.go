@@ -2,6 +2,7 @@ package internal
 
 import (
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
@@ -39,6 +40,14 @@ var PythonRules = []labels.Rule{
 		filePath, _ := c.FindFile(possiblePythonFiles...)
 		label.Valid = filePath != ""
 		label.BasePath = path.Dir(filePath)
+
+		pythonVersion := getPythonVersion(c)
+		if pythonVersion != "" {
+			label.Dependencies = map[string]string{
+				"python": getPythonVersion(c),
+			}
+		}
+
 		return label, nil
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
@@ -96,4 +105,25 @@ func fileContainsString(c codebase.Codebase, filePath string, str string) bool {
 	}
 
 	return strings.Contains(fileStr, str)
+}
+
+func getPythonVersion(c codebase.Codebase) string {
+	versionRegex := regexp.MustCompile(`[0-9.]+`)
+
+	versionFilePath, _ := c.FindFile(".python-version")
+	if versionFilePath == "" {
+		return ""
+	}
+
+	file, err := c.ReadFile(versionFilePath)
+	if err != nil {
+		return ""
+	}
+
+	version := versionRegex.FindString(string(file))
+	if version != "" {
+		return version
+	}
+
+	return ""
 }

@@ -128,7 +128,7 @@ func pythonTestJob(ls labels.LabelSet) *Job {
 		Job: config.Job{
 			Name:             "test-python",
 			Comment:          "Install dependencies and run tests",
-			Executor:         "python/default",
+			DockerImages:     []string{pythonImageVersion(ls)},
 			WorkingDirectory: workingDirectory(ls[labels.DepsPython]),
 			Steps:            steps,
 		},
@@ -147,4 +147,20 @@ func GeneratePythonJobs(ls labels.LabelSet) []*Job {
 	return []*Job{
 		pythonTestJob(ls),
 	}
+}
+
+const pythonFallbackVersion = "3.8"
+
+// Construct the python image tag based on the python version
+func pythonImageVersion(ls labels.LabelSet) string {
+	prefix := "cimg/python:"
+	suffix := "-node"
+	version := pythonFallbackVersion
+
+	pythonVersion := ls[labels.DepsPython].Dependencies["python"]
+	if pythonVersion != "" {
+		version = pythonVersion
+	}
+
+	return prefix + version + suffix
 }

@@ -6,8 +6,7 @@ import (
 
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
-
-	"github.com/go-test/deep"
+	"github.com/google/go-cmp/cmp"
 )
 
 func Test_rubyImageVersion(t *testing.T) {
@@ -238,9 +237,11 @@ func TestGenerateRubyJobs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotJobs := GenerateRubyJobs(tt.args.ls)
-			if diff := deep.Equal(gotJobs, tt.wantJobs); diff != nil {
-				t.Error(diff)
+			diff := cmp.Diff(tt.wantJobs, gotJobs)
+			if diff != "" {
+				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
+
 		})
 	}
 }

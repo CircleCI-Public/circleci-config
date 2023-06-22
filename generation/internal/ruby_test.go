@@ -183,9 +183,9 @@ func TestGenerateRubyJobs(t *testing.T) {
 								Type:    config.OrbCommand,
 							},
 							{
-								Type:    config.OrbCommand,
+								Type:    config.Run,
 								Name:    "rspec test",
-								Command: "ruby/rspec-test",
+								Command: "bundle exec rspec",
 							},
 						}},
 					Type: TestJob,
@@ -223,9 +223,9 @@ func TestGenerateRubyJobs(t *testing.T) {
 								Type:    config.Run,
 							},
 							{
-								Type:    config.OrbCommand,
+								Type:    config.Run,
 								Name:    "rspec test",
-								Command: "ruby/rspec-test",
+								Command: "bundle exec rspec",
 							},
 						}},
 					Type: TestJob,

@@ -484,6 +484,91 @@ func TestCodebase_ApplyRules_Python(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "pyproject.toml contains pipenv => package_manager:pipenv",
+			files: map[string]string{
+				"pyproject.toml": "[tool.pipenv]\nname = \"mylib\"\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+				{
+					Key: labels.PackageManagerPipenv,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "pyproject.toml contains poetry => package_manager:poetry",
+			files: map[string]string{
+				"pyproject.toml": "[tool.poetry]\nname = \"mylib\"\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+				{
+					Key: labels.PackageManagerPoetry,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "pyproject.toml in subdir contains poetry => package_manager:poetry",
+			files: map[string]string{
+				"x/pyproject.toml": "[tool.poetry]\nname = \"mylib\"\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: "x",
+					},
+					Valid: true,
+				},
+				{
+					Key: labels.PackageManagerPoetry,
+					LabelData: labels.LabelData{
+						BasePath: "x",
+					},
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "project contains .python-version => python:3.7 dependency",
+			files: map[string]string{
+				"requirements.txt": "mylib==1.0",
+				".python-version":  "3.7\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"python": "3.7",
+						},
+					},
+					Valid: true,
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

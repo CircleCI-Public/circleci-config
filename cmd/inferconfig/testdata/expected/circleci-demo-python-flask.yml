@@ -6,11 +6,11 @@ orbs:
 jobs:
   test-python:
     # Install dependencies and run tests
-    executor: python/default
+    docker:
+      - image: cimg/python:3.8-node
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: pip
+      - python/install-packages
       - run:
           name: Run tests
           command: python manage.py test

@@ -7,14 +7,11 @@ import (
 
 const pythonOrb = "circleci/python@2"
 
-func pipSteps(l labels.Label, hasManagePy bool) []config.Step {
+func defaultSteps(l labels.Label, hasManagePy bool) []config.Step {
 	steps := []config.Step{
 		{
 			Type:    config.OrbCommand,
 			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"pkg-manager": "pip",
-			},
 		},
 	}
 
@@ -116,7 +113,7 @@ func pythonTestJob(ls labels.LabelSet) *Job {
 	case ls[labels.PackageManagerPoetry].Valid:
 		steps = append(steps, poetrySteps(ls[labels.PackageManagerPoetry], hasManagePy)...)
 	default:
-		steps = append(steps, pipSteps(ls[labels.DepsPython], hasManagePy)...)
+		steps = append(steps, defaultSteps(ls[labels.DepsPython], hasManagePy)...)
 	}
 
 	if !hasManagePy {
@@ -131,7 +128,7 @@ func pythonTestJob(ls labels.LabelSet) *Job {
 		Job: config.Job{
 			Name:             "test-python",
 			Comment:          "Install dependencies and run tests",
-			Executor:         "python/default",
+			DockerImages:     []string{pythonImageVersion(ls)},
 			WorkingDirectory: workingDirectory(ls[labels.DepsPython]),
 			Steps:            steps,
 		},
@@ -150,4 +147,20 @@ func GeneratePythonJobs(ls labels.LabelSet) []*Job {
 	return []*Job{
 		pythonTestJob(ls),
 	}
+}
+
+const pythonFallbackVersion = "3.8"
+
+// Construct the python image tag based on the python version
+func pythonImageVersion(ls labels.LabelSet) string {
+	prefix := "cimg/python:"
+	suffix := "-node"
+	version := pythonFallbackVersion
+
+	pythonVersion := ls[labels.DepsPython].Dependencies["python"]
+	if pythonVersion != "" {
+		version = pythonVersion
+	}
+
+	return prefix + version + suffix
 }

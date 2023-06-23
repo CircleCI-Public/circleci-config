@@ -2,6 +2,8 @@ package internal
 
 import (
 	"path"
+	"regexp"
+	"strings"
 
 	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
@@ -13,7 +15,6 @@ var pipenvFiles = []string{
 }
 
 var poetryFiles = []string{
-	"pyproject.toml",
 	"poetry.lock",
 }
 
@@ -22,6 +23,7 @@ var possiblePythonFiles = append(
 	append(
 		[]string{
 			"requirements.txt",
+			"pyproject.toml",
 			"setup.py",
 			"manage.py",
 		},
@@ -38,6 +40,14 @@ var PythonRules = []labels.Rule{
 		filePath, _ := c.FindFile(possiblePythonFiles...)
 		label.Valid = filePath != ""
 		label.BasePath = path.Dir(filePath)
+
+		pythonVersion := getPythonVersion(c)
+		if pythonVersion != "" {
+			label.Dependencies = map[string]string{
+				"python": getPythonVersion(c),
+			}
+		}
+
 		return label, nil
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
@@ -47,6 +57,13 @@ var PythonRules = []labels.Rule{
 		pipfile, _ := c.FindFile(pipenvFiles...)
 		label.Valid = pipfile != ""
 		label.BasePath = path.Dir(pipfile)
+
+		pyprojectPath, _ := c.FindFile("pyproject.toml")
+		if pyprojectPath != "" && fileContainsString(c, pyprojectPath, "pipenv") {
+			label.Valid = true
+			label.BasePath = path.Dir(pyprojectPath)
+		}
+
 		return label, nil
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
@@ -56,6 +73,13 @@ var PythonRules = []labels.Rule{
 		poetryLock, _ := c.FindFile(poetryFiles...)
 		label.Valid = poetryLock != ""
 		label.BasePath = path.Dir(poetryLock)
+
+		pyprojectPath, _ := c.FindFile("pyproject.toml")
+		if pyprojectPath != "" && fileContainsString(c, pyprojectPath, "poetry") {
+			label.Valid = true
+			label.BasePath = path.Dir(pyprojectPath)
+		}
+
 		return label, nil
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
@@ -67,4 +91,39 @@ var PythonRules = []labels.Rule{
 		label.BasePath = path.Dir(managePyPath)
 		return label, nil
 	},
+}
+
+func fileContainsString(c codebase.Codebase, filePath string, str string) bool {
+	file, err := c.ReadFile(filePath)
+	if err != nil {
+		return false
+	}
+
+	fileStr := string(file)
+	if fileStr == "" {
+		return false
+	}
+
+	return strings.Contains(fileStr, str)
+}
+
+func getPythonVersion(c codebase.Codebase) string {
+	versionRegex := regexp.MustCompile(`[0-9.]+`)
+
+	versionFilePath, _ := c.FindFile(".python-version")
+	if versionFilePath == "" {
+		return ""
+	}
+
+	file, err := c.ReadFile(versionFilePath)
+	if err != nil {
+		return ""
+	}
+
+	version := versionRegex.FindString(string(file))
+	if version != "" {
+		return version
+	}
+
+	return ""
 }

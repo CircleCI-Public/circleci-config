@@ -330,7 +330,8 @@ orbs:
 jobs:
   test-python:
     # Install dependencies and run tests
-    executor: python/default
+    docker:
+      - image: cimg/python:3.8-node
     steps:
       - checkout
       - python/install-packages:
@@ -380,7 +381,8 @@ orbs:
 jobs:
   test-python:
     # Install dependencies and run tests
-    executor: python/default
+    docker:
+      - image: cimg/python:3.8-node
     working_directory: ~/project/x
     steps:
       - checkout:
@@ -434,7 +436,8 @@ orbs:
 jobs:
   test-python:
     # Install dependencies and run tests
-    executor: python/default
+    docker:
+      - image: cimg/python:3.8-node
     steps:
       - checkout
       - python/install-packages
@@ -488,7 +491,8 @@ orbs:
 jobs:
   test-python:
     # Install dependencies and run tests
-    executor: python/default
+    docker:
+      - image: cimg/python:3.8-node
     steps:
       - checkout
       - python/install-packages:
@@ -544,7 +548,8 @@ orbs:
 jobs:
   test-python:
     # Install dependencies and run tests
-    executor: python/default
+    docker:
+      - image: cimg/python:3.8-node
     steps:
       - checkout
       - python/install-packages:
@@ -552,6 +557,63 @@ jobs:
       - run:
           name: Run tests
           command: poetry run python manage.py test
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-python
+    # - deploy:
+    #     requires:
+    #       - test-python
+`,
+		},
+		{
+			testName: "python project with a .python-version file",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:   labels.DepsPython,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"python": "3.1.1",
+						},
+					},
+				},
+				labels.PackageManagerPipenv: labels.Label{
+					Key:       labels.PackageManagerPipenv,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.,package_manager:pipenv:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    docker:
+      - image: cimg/python:3.1.1-node
+    steps:
+      - checkout
+      - python/install-packages:
+          args: --dev
+          pkg-manager: pipenv
+      - run:
+          name: Run tests
+          command: pipenv run pytest --junitxml=junit.xml
+      - store_test_results:
+          path: junit.xml
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:

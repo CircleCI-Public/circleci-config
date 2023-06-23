@@ -521,6 +521,25 @@ func TestCodebase_ApplyRules_Python(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "project contains .python-version => python:3.7 dependency",
+			files: map[string]string{
+				"requirements.txt": "mylib==1.0",
+				".python-version":  "3.7\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"python": "3.7",
+						},
+					},
+					Valid: true,
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

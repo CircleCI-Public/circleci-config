@@ -32,7 +32,19 @@ var NodeRules = []labels.Rule{
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.PackageManagerYarn
 		yarnLock, _ := c.FindFile("yarn.lock")
-		label.Valid = yarnLock != ""
+
+		if yarnLock == "" {
+			return label, err
+		}
+
+		label.Valid = true
+		label.Version = "classic"
+
+		yarnrc, _ := c.FindFile(".yarnrc.yml", ".yarnrc.yaml")
+		if yarnrc != "" {
+			label.Version = "berry"
+		}
+
 		return label, err
 	},
 	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {

@@ -34,7 +34,10 @@ var createArtifactsDirStep = config.Step{
 	Command: fmt.Sprintf("mkdir -p %s", artifactsPath),
 }
 
-var storeArtifactsStep = config.Step{
-	Type: config.StoreArtifacts,
-	Path: artifactsPath,
+func storeArtifactsStep(destination string) config.Step {
+	return config.Step{
+		Type:        config.StoreArtifacts,
+		Path:        artifactsPath,
+		Destination: destination,
+	}
 }

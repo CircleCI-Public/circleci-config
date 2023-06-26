@@ -191,13 +191,14 @@ type OrbCommandParameters map[string]string
 // Step definitions for Jobs. Go has no sum types, so for now just throw all supported fields under
 // one struct
 type Step struct {
-	Type       StepType
-	Comment    string
-	Name       string // only used for run step
-	Command    string // for run steps or orb-defined commands
-	CacheKey   string
-	Path       string               // cache, artifact or test results path
-	Parameters OrbCommandParameters // for orb-defined steps
+	Type        StepType
+	Comment     string
+	Name        string // only used for run step
+	Command     string // for run steps or orb-defined commands
+	CacheKey    string
+	Path        string               // cache, artifact or test results path
+	Destination string               // artifact destination
+	Parameters  OrbCommandParameters // for orb-defined steps
 }
 
 func (s Step) YamlNode() *yaml.Node {
@@ -237,10 +238,11 @@ func (s Step) YamlNode() *yaml.Node {
 				yScalar("key"), yScalar(s.CacheKey)))
 
 	case StoreArtifacts:
-		return yCommentedMap(s.Comment,
-			yScalar("store_artifacts"),
-			yMap(
-				yScalar("path"), yScalar(s.Path)))
+		kvs := []*yaml.Node{yScalar("path"), yScalar(s.Path)}
+		if s.Destination != "" {
+			kvs = append(kvs, yScalar("destination"), yScalar(s.Destination))
+		}
+		return yCommentedMap(s.Comment, yScalar("store_artifacts"), yMap(kvs...))
 
 	case StoreTestResults:
 		return yCommentedMap(s.Comment,

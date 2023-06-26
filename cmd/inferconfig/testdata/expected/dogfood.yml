@@ -64,5 +64,4 @@ workflows:
             - test-go
     # - deploy:
     #     requires:
-    #       - test-go
     #       - build-go-executables

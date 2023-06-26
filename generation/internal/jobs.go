@@ -112,11 +112,12 @@ func workflowJobRequires(job *Job, allJobs []*Job) []*config.Job {
 	}
 
 	if job.Type == DeployJob {
-		requires := []*config.Job{}
-		requires = append(requires, jobsByType[TestJob]...)
-		requires = append(requires, jobsByType[ArtifactJob]...)
-
-		return requires
+		// if there are artifact jobs, it's sufficient to depend on them,
+		// as they already depend on any test jobs themselves
+		if len(jobsByType[ArtifactJob]) > 0 {
+			return jobsByType[ArtifactJob]
+		}
+		return jobsByType[TestJob]
 	}
 
 	return []*config.Job{}

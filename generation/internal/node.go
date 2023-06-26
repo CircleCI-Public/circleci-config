@@ -13,6 +13,43 @@ func npmTaskDefined(ls labels.LabelSet, task string) bool {
 	return ls[labels.DepsNode].Tasks[task] != ""
 }
 
+func nodePackageManager(ls labels.LabelSet) string {
+	if ls[labels.PackageManagerYarn].Valid {
+		return "yarn"
+	}
+	return "npm"
+}
+
+func nodeRunCommand(ls labels.LabelSet, task string) string {
+	return fmt.Sprintf("%s run %s", nodePackageManager(ls), task)
+}
+
+func nodeInitialSteps(ls labels.LabelSet) []config.Step {
+	steps := []config.Step{
+		checkoutStep(ls[labels.DepsNode]),
+	}
+
+	if ls[labels.DepsNode].HasLockFile {
+		steps = append(steps, config.Step{
+			Type:    config.OrbCommand,
+			Command: "node/install-packages",
+			Parameters: config.OrbCommandParameters{
+				"pkg-manager": nodePackageManager(ls),
+			}})
+	} else {
+		steps = append(steps, config.Step{
+			Comment: "Update the default install command as the project doesn't have a lock file",
+			Type:    config.OrbCommand,
+			Command: "node/install-packages",
+			Parameters: config.OrbCommandParameters{
+				"cache-path":          "~/project/node_modules",
+				"override-ci-command": fmt.Sprintf("%s install", nodePackageManager(ls)),
+			}})
+	}
+
+	return steps
+}
+
 func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
 	hasJestLabel := ls[labels.TestJest].Valid
 
@@ -63,27 +100,7 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 		packageManager = "yarn"
 	}
 
-	steps := []config.Step{
-		checkoutStep(ls[labels.DepsNode]),
-	}
-
-	if ls[labels.DepsNode].HasLockFile {
-		steps = append(steps, config.Step{
-			Type:    config.OrbCommand,
-			Command: "node/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"pkg-manager": packageManager,
-			}})
-	} else {
-		steps = append(steps, config.Step{
-			Comment: "Update the default install command as the project doesn't have a lock file",
-			Type:    config.OrbCommand,
-			Command: "node/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"cache-path":          "~/project/node_modules",
-				"override-ci-command": fmt.Sprintf("%s install", packageManager),
-			}})
-	}
+	steps := nodeInitialSteps(ls)
 
 	if hasJestLabel && ls[labels.DepsNode].Dependencies["jest-junit"] == "" {
 		if packageManager == "yarn" {
@@ -136,10 +153,67 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 	}
 }
 
-func GenerateNodeJobs(ls labels.LabelSet) []*Job {
+func nodeBuildJob(ls labels.LabelSet) *Job {
+	// Possible build task names in order of preference
+	buildTasks := []string{
+		"build:ci",
+		"build:production",
+		"build:prod",
+		"build",
+		"build:development",
+		"build:dev",
+	}
+
+	steps := nodeInitialSteps(ls)
+
+	for _, task := range buildTasks {
+		if npmTaskDefined(ls, task) {
+
+			steps = append(steps, []config.Step{
+				{
+					Type:    config.Run,
+					Command: nodeRunCommand(ls, task),
+				},
+				createArtifactsDirStep,
+				{
+					Type:    config.Run,
+					Comment: "Copy output to artifacts dir",
+					Name:    "Copy artifacts",
+					Command: "cp -R build dist public .output .next .docusaurus ~/artifacts 2>/dev/null || true",
+				},
+				storeArtifactsStep("node-build")}...)
+
+			return &Job{
+				Job: config.Job{
+					Name:             "build-node",
+					Comment:          "Build node project",
+					Executor:         "node/default",
+					WorkingDirectory: workingDirectory(ls[labels.DepsNode]),
+					Steps:            steps,
+				},
+				Type: ArtifactJob,
+				Orbs: map[string]string{"node": nodeOrb},
+			}
+		}
+	}
+
+	return nil
+}
+
+func GenerateNodeJobs(ls labels.LabelSet) (jobs []*Job) {
 	if !ls[labels.DepsNode].Valid {
 		return nil
 	}
 
-	return []*Job{nodeTestJob(ls)}
+	testJob := nodeTestJob(ls)
+	if testJob != nil {
+		jobs = append(jobs, testJob)
+	}
+
+	buildJob := nodeBuildJob(ls)
+	if buildJob != nil {
+		jobs = append(jobs, buildJob)
+	}
+
+	return jobs
 }

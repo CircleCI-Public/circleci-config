@@ -29,6 +29,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 						BasePath: ".",
 						Dependencies: map[string]string{
 							"ruby":                  "2.7.8",
+							"rspec":                 "true",
 							"rspec_junit_formatter": "true",
 						},
 						HasLockFile: true,
@@ -106,7 +107,25 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 						BasePath: ".",
 						Dependencies: map[string]string{
 							"rake":                  "true",
+							"rspec":                 "true",
 							"rspec_junit_formatter": "true",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Ruby gemspec file - no parens",
+			files: map[string]string{
+				"mygem.gemspec": rubyGemSpecFileNoParens,
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.PackageManagerGemspec,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"rake": "true",
 						},
 					},
 				},
@@ -125,6 +144,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 						BasePath: ".",
 						Dependencies: map[string]string{
 							"ruby":                  "2.7.8",
+							"rspec":                 "true",
 							"rspec_junit_formatter": "true",
 						},
 					},
@@ -135,6 +155,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 						BasePath: ".",
 						Dependencies: map[string]string{
 							"rake":                  "true",
+							"rspec":                 "true",
 							"rspec_junit_formatter": "true",
 						},
 					},
@@ -217,5 +238,14 @@ Gem::Specification.new do |spec|
   spec.platform    = Gem::Platform::RUBY
   spec.add_development_dependency('rake', '13.0.6')
   spec.add_development_dependency('rspec_junit_formatter')
+end
+`
+
+const rubyGemSpecFileNoParens = `
+Gem::Specification.new do |spec|
+  spec.name        = 'mygem'
+  spec.version     = Mygem::VERSION
+  spec.platform    = Gem::Platform::RUBY
+  spec.add_development_dependency 'rake', '13.0.6'
 end
 `

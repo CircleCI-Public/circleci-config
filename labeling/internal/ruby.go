@@ -56,6 +56,7 @@ func readDepsFile(c codebase.Codebase, deps map[string]string, filePath string) 
 	if err != nil {
 		return err
 	}
+
 	for _, line := range strings.Split(string(fileContents), "\n") {
 		line = strings.ReplaceAll(line, "\"", "'")
 		if strings.HasPrefix(line, "ruby ") {
@@ -66,24 +67,28 @@ func readDepsFile(c codebase.Codebase, deps map[string]string, filePath string) 
 			deps["ruby"] = version
 		}
 
-		if strings.Contains(line, "gem 'rspec-rails'") ||
-			strings.Contains(line, "gem 'rspec'") {
-			deps["rspec"] = "true"
+		gems := map[string]string{
+			"rspec-rails":           "rspec",
+			"rspec":                 "rspec",
+			"rspec_junit_formatter": "rspec_junit_formatter",
+			"rake":                  "rake",
+			"pg":                    "pg",
 		}
-
-		if strings.Contains(line, "gem 'rspec_junit_formatter'") ||
-			strings.Contains(line, "development_dependency('rspec_junit_formatter'") {
-			deps["rspec_junit_formatter"] = "true"
-		}
-
-		if strings.Contains(line, "development_dependency('rake'") ||
-			strings.Contains(line, "gem 'rake'") {
-			deps["rake"] = "true"
-		}
-
-		if strings.Contains(line, "gem 'pg'") {
-			deps["pg"] = "true"
+		for k, v := range gems {
+			if hasGem(line, k) {
+				deps[v] = "true"
+			}
 		}
 	}
 	return nil
+}
+
+func hasGem(line string, gem string) bool {
+	forms := []string{"gem '", "development_dependency '", "development_dependency('"}
+	for _, f := range forms {
+		if strings.Contains(line, f+gem) {
+			return true
+		}
+	}
+	return false
 }

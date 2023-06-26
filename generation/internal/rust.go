@@ -6,6 +6,7 @@ import (
 )
 
 const rustOrb = "circleci/rust@1.6.0"
+const rustDockerImage = "cimg/rust:1.70"
 
 func rustInitialSteps(ls labels.LabelSet) []config.Step {
 	return []config.Step{checkoutStep(ls[labels.DepsRust])}
@@ -23,7 +24,7 @@ func rustTestJob(ls labels.LabelSet) *Job {
 		Job: config.Job{
 			Name:             "test-rust",
 			Comment:          "Run tests using the rust orb",
-			Executor:         "rust/default",
+			DockerImages:     []string{rustDockerImage},
 			WorkingDirectory: workingDirectory(ls[labels.DepsRust]),
 			Steps:            steps,
 		},

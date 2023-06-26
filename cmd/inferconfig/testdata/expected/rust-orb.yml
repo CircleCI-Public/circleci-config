@@ -6,7 +6,8 @@ orbs:
 jobs:
   test-rust:
     # Run tests using the rust orb
-    executor: rust/default
+    docker:
+      - image: cimg/rust:1.70
     working_directory: ~/project/sample
     steps:
       - checkout:

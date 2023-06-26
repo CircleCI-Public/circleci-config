@@ -14,6 +14,8 @@ func GenerateRubyJobs(ls labels.LabelSet) (jobs []*Job) {
 		jobs = append(jobs, rakeJob(ls))
 	} else if hasGem(ls, "rspec") {
 		jobs = append(jobs, rspecJob(ls))
+	} else if hasGem(ls, "rails") {
+		jobs = append(jobs, railsTestJob(ls))
 	}
 	return jobs
 }
@@ -104,6 +106,30 @@ func rakeJob(ls labels.LabelSet) *Job {
 		Job: config.Job{
 			Name:             "test-ruby",
 			Comment:          "Install gems, run rake tests",
+			Steps:            steps,
+			DockerImages:     []string{rubyImageVersion(ls)},
+			WorkingDirectory: workingDirectory(ls[labels.DepsRuby]),
+		},
+
+		Orbs: map[string]string{
+			"ruby": rubyOrb,
+		},
+	}
+}
+
+func railsTestJob(ls labels.LabelSet) *Job {
+	steps := rubyInitialSteps(ls)
+	steps = append(steps,
+		config.Step{
+			Type:    config.Run,
+			Name:    "rails test",
+			Command: "bundle exec rails test",
+		})
+
+	return &Job{
+		Job: config.Job{
+			Name:             "test-ruby",
+			Comment:          "Install gems, run rails tests",
 			Steps:            steps,
 			DockerImages:     []string{rubyImageVersion(ls)},
 			WorkingDirectory: workingDirectory(ls[labels.DepsRuby]),

@@ -45,6 +45,7 @@ jobs:
           command: go build -o ~/artifacts ./...
       - store_artifacts:
           path: ~/artifacts
+          destination: executables
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -63,5 +64,4 @@ workflows:
             - test-go
     # - deploy:
     #     requires:
-    #       - test-go
     #       - build-go-executables

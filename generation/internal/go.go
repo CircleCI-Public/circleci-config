@@ -60,7 +60,7 @@ func goBuildJob(ls labels.LabelSet) *Job {
 			Name:    "Build executables",
 			Command: fmt.Sprintf("go build -o %s ./...", artifactsPath),
 		},
-		storeArtifactsStep)
+		storeArtifactsStep("executables"))
 
 	return &Job{
 		Job: config.Job{

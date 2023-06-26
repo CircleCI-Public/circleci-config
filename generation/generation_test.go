@@ -94,7 +94,7 @@ workflows:
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: "node-dir", HasLockFile: true},
+					LabelData: labels.LabelData{BasePath: "node-dir", HasLockFile: true, Tasks: map[string]string{"test": "false"}},
 				},
 				labels.DepsGo: labels.Label{
 					Key:       labels.DepsGo,
@@ -167,7 +167,7 @@ workflows:
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: ".", HasLockFile: true},
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: true, Tasks: map[string]string{"test": "false"}},
 				},
 				labels.PackageManagerYarn: labels.Label{
 					Key:       labels.PackageManagerYarn,
@@ -274,7 +274,7 @@ workflows:
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: ".", HasLockFile: false},
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: false, Tasks: map[string]string{"test": "false"}},
 				},
 			},
 			expected: `# This config was automatically generated from your source code
@@ -288,7 +288,6 @@ jobs:
     executor: node/default
     steps:
       - checkout
-      # Update the default install command as the project doesn't have a lock file
       - node/install-packages:
           cache-path: ~/project/node_modules
           override-ci-command: npm install
@@ -365,6 +364,58 @@ workflows:
     # - deploy:
     #     requires:
     #       - test-node
+`,
+		},
+		{
+			testName: "node codebase with build task",
+			labels: labels.LabelSet{
+				labels.DepsNode: labels.Label{
+					Key:       labels.DepsNode,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: true, Tasks: map[string]string{"build": "echo hi"}},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:node:.
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  build-node:
+    # Build node project
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          command: npm run build
+      - run:
+          name: Create the ~/artifacts directory if it doesn't exist
+          command: mkdir -p ~/artifacts
+      # Copy output to artifacts dir
+      - run:
+          name: Copy artifacts
+          command: cp -R build dist public .output .next .docusaurus ~/artifacts 2>/dev/null || true
+      - store_artifacts:
+          path: ~/artifacts
+          destination: node-build
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build:
+    jobs:
+      - build-node
+    # - deploy:
+    #     requires:
+    #       - build-node
 `,
 		},
 		{

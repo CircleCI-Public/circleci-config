@@ -56,7 +56,7 @@ func addStubJobs(jobs []*Job) []*Job {
 		jobTypesPresent[j.Type] = true
 	}
 
-	if !jobTypesPresent[TestJob] {
+	if !jobTypesPresent[TestJob] && !jobTypesPresent[ArtifactJob] {
 		jobs = append(jobs, &stubTestJob)
 	}
 	if !jobTypesPresent[DeployJob] {
@@ -98,8 +98,16 @@ func buildWorkflows(jobs []*Job) []*config.Workflow {
 		workflowJobs[i].Requires = workflowJobRequires(j, jobs)
 	}
 
+	name := "build"
+
+	for _, j := range jobs {
+		if j.Type == TestJob {
+			name = "build-and-test"
+		}
+	}
+
 	return []*config.Workflow{{
-		Name: "build-and-test",
+		Name: name,
 		Jobs: workflowJobs,
 	}}
 }
@@ -112,11 +120,12 @@ func workflowJobRequires(job *Job, allJobs []*Job) []*config.Job {
 	}
 
 	if job.Type == DeployJob {
-		requires := []*config.Job{}
-		requires = append(requires, jobsByType[TestJob]...)
-		requires = append(requires, jobsByType[ArtifactJob]...)
-
-		return requires
+		// if there are artifact jobs, it's sufficient to depend on them,
+		// as they already depend on any test jobs themselves
+		if len(jobsByType[ArtifactJob]) > 0 {
+			return jobsByType[ArtifactJob]
+		}
+		return jobsByType[TestJob]
 	}
 
 	return []*config.Job{}

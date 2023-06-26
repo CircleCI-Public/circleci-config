@@ -28,8 +28,9 @@ func ApplyRules(c codebase.Codebase, rules []labels.Rule) labels.LabelSet {
 
 func ApplyAllRules(c codebase.Codebase) labels.LabelSet {
 	allStacks := [][]labels.Rule{
-		internal.NodeRules,
 		internal.GoRules,
+		internal.JavaRules,
+		internal.NodeRules,
 		internal.PythonRules,
 		internal.RubyRules,
 		internal.RustRules,

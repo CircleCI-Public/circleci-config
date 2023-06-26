@@ -12,6 +12,7 @@ const (
 	ArtifactGoExecutable  = "artifact:go-executable"
 	ArtifactRustCrate     = "artifact:rust-crate"
 	DepsGo                = "deps:go"
+	DepsJava              = "deps:java"
 	DepsNode              = "deps:node"
 	DepsPython            = "deps:python"
 	DepsRuby              = "deps:ruby"
@@ -21,6 +22,8 @@ const (
 	PackageManagerYarn    = "package_manager:yarn"
 	PackageManagerGemspec = "package_manager:gemspec"
 	TestJest              = "test:jest"
+	ToolGradle            = "tool:gradle"
+	FileBuildGradleKts    = "file:build.gradle.kts"
 	FileManagePy          = "file:manage.py"
 )
 

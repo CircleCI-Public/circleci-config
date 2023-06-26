@@ -591,3 +591,123 @@ func TestCodebase_ApplyRules_Python(t *testing.T) {
 		})
 	}
 }
+
+func TestCodebase_ApplyRules_Java(t *testing.T) {
+	rules := internal.JavaRules
+	tests := []struct {
+		name           string
+		files          map[string]string
+		rules          []labels.Rule
+		expectedLabels []labels.Label
+	}{
+		{
+			name: "pom.xml only",
+			files: map[string]string{
+				"pom.xml": "",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsJava,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		}, {
+			name: "gradlew only",
+			files: map[string]string{
+				"gradlew": "",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsJava,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				}, {
+					Key:   labels.ToolGradle,
+					Valid: true,
+				},
+			},
+		}, {
+			name: "pom.xml & gradlew ",
+			files: map[string]string{
+				"pom.xml": "",
+				"gradlew": "",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsJava,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				}, {
+					Key:   labels.ToolGradle,
+					Valid: true,
+				},
+			},
+		}, {
+			name: "gradlew & build.gradle",
+			files: map[string]string{
+				"gradlew":      "",
+				"build.gradle": "",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsJava,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				}, {
+					Key:   labels.ToolGradle,
+					Valid: true,
+				},
+			},
+		}, {
+			name: "gradlew & build.gradle.kts",
+			files: map[string]string{
+				"gradlew":          "",
+				"build.gradle.kts": "",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsJava,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				}, {
+					Key:   labels.ToolGradle,
+					Valid: true,
+				}, {
+					Key:   labels.FileBuildGradleKts,
+					Valid: true,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := fakeCodebase{tt.files}
+			expected := make(labels.LabelSet)
+			for _, label := range tt.expectedLabels {
+				// all should be Valid
+				label.Valid = true
+				expected[label.Key] = label
+			}
+			got := ApplyRules(c, rules)
+
+			if !reflect.DeepEqual(got, expected) {
+				t.Errorf("\n"+
+					"got      %v\n"+
+					"expected %v",
+					got,
+					expected)
+			}
+		})
+	}
+}

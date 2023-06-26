@@ -94,7 +94,7 @@ workflows:
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: "node-dir", HasLockFile: true},
+					LabelData: labels.LabelData{BasePath: "node-dir", HasLockFile: true, Tasks: map[string]string{"test": "false"}},
 				},
 				labels.DepsGo: labels.Label{
 					Key:       labels.DepsGo,
@@ -167,7 +167,7 @@ workflows:
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: ".", HasLockFile: true},
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: true, Tasks: map[string]string{"test": "false"}},
 				},
 				labels.PackageManagerYarn: labels.Label{
 					Key:       labels.PackageManagerYarn,
@@ -274,7 +274,7 @@ workflows:
 				labels.DepsNode: labels.Label{
 					Key:       labels.DepsNode,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: ".", HasLockFile: false},
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: false, Tasks: map[string]string{"test": "false"}},
 				},
 			},
 			expected: `# This config was automatically generated from your source code
@@ -382,16 +382,6 @@ version: 2.1
 orbs:
   node: circleci/node@5
 jobs:
-  test-node:
-    # Install node dependencies and run tests
-    executor: node/default
-    steps:
-      - checkout
-      - node/install-packages:
-          pkg-manager: npm
-      - run:
-          name: Run tests
-          command: npm test
   build-node:
     # Build node project
     executor: node/default
@@ -421,12 +411,9 @@ jobs:
           name: deploy
           command: '#e.g. ./deploy.sh'
 workflows:
-  build-and-test:
+  build:
     jobs:
-      - test-node
-      - build-node:
-          requires:
-            - test-node
+      - build-node
     # - deploy:
     #     requires:
     #       - build-node

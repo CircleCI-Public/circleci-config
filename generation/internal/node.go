@@ -21,6 +21,9 @@ func nodePackageManager(ls labels.LabelSet) string {
 }
 
 func nodeRunCommand(ls labels.LabelSet, task string) string {
+	if task == "test" {
+		return fmt.Sprintf("%s test", nodePackageManager(ls))
+	}
 	return fmt.Sprintf("%s run %s", nodePackageManager(ls), task)
 }
 
@@ -50,30 +53,40 @@ func nodeInitialSteps(ls labels.LabelSet) []config.Step {
 	return steps
 }
 
-func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
+func nodeTestSteps(ls labels.LabelSet) []config.Step {
 	hasJestLabel := ls[labels.TestJest].Valid
 
 	if npmTaskDefined(ls, "test:ci") {
 		return []config.Step{{
 			Name:    "Run tests",
 			Type:    config.Run,
-			Command: fmt.Sprintf("%s run test:ci", packageManager),
+			Command: nodeRunCommand(ls, "test:ci"),
 		}}
 	}
 
 	if npmTaskDefined(ls, "test") {
 		if hasJestLabel {
 			return []config.Step{{
-				Name:    "Run tests",
-				Type:    config.Run,
-				Command: fmt.Sprintf("%s run test --ci --runInBand --reporters=default --reporters=jest-junit", packageManager),
+				Name: "Run tests",
+				Type: config.Run,
+				Command: fmt.Sprintf(
+					"%s run test --ci --runInBand --reporters=default --reporters=jest-junit",
+					nodePackageManager(ls)),
 			}}
 		}
 
 		return []config.Step{{
 			Name:    "Run tests",
 			Type:    config.Run,
-			Command: fmt.Sprintf("%s run test", packageManager),
+			Command: nodeRunCommand(ls, "test"),
+		}}
+	}
+
+	if npmTaskDefined(ls, "test:unit") {
+		return []config.Step{{
+			Name:    "Run tests",
+			Type:    config.Run,
+			Command: nodeRunCommand(ls, "test:unit"),
 		}}
 	}
 
@@ -85,25 +98,16 @@ func nodeTestSteps(ls labels.LabelSet, packageManager string) []config.Step {
 		}}
 	}
 
-	return []config.Step{{
-		Name:    "Run tests",
-		Type:    config.Run,
-		Command: fmt.Sprintf("%s test", packageManager),
-	}}
+	return []config.Step{}
 }
 
 func nodeTestJob(ls labels.LabelSet) *Job {
 	hasJestLabel := ls[labels.TestJest].Valid
 
-	packageManager := "npm"
-	if ls[labels.PackageManagerYarn].Valid {
-		packageManager = "yarn"
-	}
-
 	steps := nodeInitialSteps(ls)
 
 	if hasJestLabel && ls[labels.DepsNode].Dependencies["jest-junit"] == "" {
-		if packageManager == "yarn" {
+		if nodePackageManager(ls) == "yarn" {
 			command := "yarn add jest-junit --ignore-workspace-root-check"
 
 			if ls[labels.PackageManagerYarn].Version == "berry" {
@@ -121,7 +125,12 @@ func nodeTestJob(ls labels.LabelSet) *Job {
 			})
 		}
 	}
-	steps = append(steps, nodeTestSteps(ls, packageManager)...)
+
+	testSteps := nodeTestSteps(ls)
+	if len(testSteps) == 0 {
+		return nil
+	}
+	steps = append(steps, testSteps...)
 
 	if hasJestLabel {
 		steps = append(steps, config.Step{

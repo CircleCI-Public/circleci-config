@@ -2,19 +2,8 @@
 # Stacks detected: deps:node:.,deps:ruby:.,package_manager:yarn:
 version: 2.1
 orbs:
-  node: circleci/node@5
   ruby: circleci/ruby@2.0.1
 jobs:
-  test-node:
-    # Install node dependencies and run tests
-    executor: node/default
-    steps:
-      - checkout
-      - node/install-packages:
-          pkg-manager: yarn
-      - run:
-          name: Run tests
-          command: yarn test
   test-ruby:
     # Install gems, run rspec tests
     docker:
@@ -44,9 +33,7 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - test-node
       - test-ruby
     # - deploy:
     #     requires:
-    #       - test-node
     #       - test-ruby

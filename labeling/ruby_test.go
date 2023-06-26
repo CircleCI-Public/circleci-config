@@ -28,6 +28,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
+							"rails":                 "true",
 							"ruby":                  "2.7.8",
 							"rspec":                 "true",
 							"rspec_junit_formatter": "true",
@@ -69,6 +70,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
+							"rails": "true",
 							"ruby":  "2.7.8",
 							"rspec": "true",
 							"pg":    "true",
@@ -89,7 +91,8 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
-							"ruby": "1.9.3",
+							"rails": "true",
+							"ruby":  "1.9.3",
 						},
 					},
 				},
@@ -143,6 +146,7 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 					LabelData: labels.LabelData{
 						BasePath: ".",
 						Dependencies: map[string]string{
+							"rails":                 "true",
 							"ruby":                  "2.7.8",
 							"rspec":                 "true",
 							"rspec_junit_formatter": "true",
@@ -157,6 +161,23 @@ func TestCodebase_ApplyRubyRules(t *testing.T) {
 							"rake":                  "true",
 							"rspec":                 "true",
 							"rspec_junit_formatter": "true",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Ruby Gemfile with rails, but without rake or rspec",
+			files: map[string]string{
+				"Gemfile": "gem 'rails', '~> 7.0.5'",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsRuby,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"rails": "true",
 						},
 					},
 				},

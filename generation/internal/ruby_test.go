@@ -156,6 +156,43 @@ func TestGenerateRubyJobs(t *testing.T) {
 			},
 		},
 		{
+			name: "gemfile has rails w/o rake or rspec",
+			args: args{ls: labels.LabelSet{
+				labels.DepsRuby: labels.Label{
+					Valid: true,
+					LabelData: labels.LabelData{
+						Dependencies: map[string]string{"rails": "true"},
+						HasLockFile:  true,
+					},
+				}}},
+			wantJobs: []*Job{
+				{
+					Job: config.Job{
+						Name:             "test-ruby",
+						Comment:          "Install gems, run rails tests",
+						DockerImages:     []string{"cimg/ruby:3.2-node"},
+						WorkingDirectory: "~/project",
+						Steps: []config.Step{
+							{
+								Path: "~/project",
+								Type: config.Checkout,
+							},
+							{
+								Command: "ruby/install-deps",
+								Type:    config.OrbCommand,
+							},
+							{
+								Type:    config.Run,
+								Name:    "rails test",
+								Command: "bundle exec rails test",
+							},
+						}},
+					Type: TestJob,
+					Orbs: map[string]string{"ruby": "circleci/ruby@2.0.1"},
+				},
+			},
+		},
+		{
 			name: "gemfile has rspec",
 			args: args{ls: labels.LabelSet{
 				labels.DepsRuby: labels.Label{

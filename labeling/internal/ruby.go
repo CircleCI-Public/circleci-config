@@ -68,6 +68,7 @@ func readDepsFile(c codebase.Codebase, deps map[string]string, filePath string) 
 		}
 
 		gems := map[string]string{
+			"rails":                 "rails",
 			"rspec-rails":           "rspec",
 			"rspec":                 "rspec",
 			"rspec_junit_formatter": "rspec_junit_formatter",

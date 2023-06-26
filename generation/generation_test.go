@@ -288,7 +288,6 @@ jobs:
     executor: node/default
     steps:
       - checkout
-      # Update the default install command as the project doesn't have a lock file
       - node/install-packages:
           cache-path: ~/project/node_modules
           override-ci-command: npm install

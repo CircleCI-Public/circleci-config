@@ -32,23 +32,20 @@ func nodeInitialSteps(ls labels.LabelSet) []config.Step {
 		checkoutStep(ls[labels.DepsNode]),
 	}
 
-	if ls[labels.DepsNode].HasLockFile {
-		steps = append(steps, config.Step{
-			Type:    config.OrbCommand,
-			Command: "node/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"pkg-manager": nodePackageManager(ls),
-			}})
-	} else {
-		steps = append(steps, config.Step{
-			Comment: "Update the default install command as the project doesn't have a lock file",
-			Type:    config.OrbCommand,
-			Command: "node/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"cache-path":          "~/project/node_modules",
-				"override-ci-command": fmt.Sprintf("%s install", nodePackageManager(ls)),
-			}})
+	installParams := config.OrbCommandParameters{
+		"pkg-manager": nodePackageManager(ls),
 	}
+	if !ls[labels.DepsNode].HasLockFile {
+		installParams = config.OrbCommandParameters{
+			"cache-path":          "~/project/node_modules",
+			"override-ci-command": fmt.Sprintf("%s install", nodePackageManager(ls)),
+		}
+	}
+
+	steps = append(steps, config.Step{
+		Type:       config.OrbCommand,
+		Command:    "node/install-packages",
+		Parameters: installParams})
 
 	return steps
 }

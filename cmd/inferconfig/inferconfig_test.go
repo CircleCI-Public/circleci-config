@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/go-git/go-git/v5/plumbing"
 	"net/url"
 	"os"
 	"path"
@@ -18,15 +19,18 @@ func TestInferConfig(t *testing.T) {
 	// 1. Add the git url (https) to this list
 	// 2. Add the expected config as a file in testdata/expected/REPO_NAME.yml
 	tests := []struct {
-		url string
+		url    string
+		branch string
 	}{
 		{url: "https://github.com/CircleCI-Public/circleci-demo-react-native"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-javascript-express"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-python-flask"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-python-django"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-ruby-rails"},
-		// There is no "demo" for rust, but the rust-orb repo contains a sample dir
+		{url: "https://github.com/CircleCI-Public/circleci-demo-java-spring"},
+		// There is no "demo" for rust or maven, but the orbs repo contain sample dirs
 		{url: "https://github.com/CircleCI-Public/rust-orb"},
+		{url: "https://github.com/CircleCI-Public/maven-orb", branch: "main"},
 	}
 
 	for _, tt := range tests {
@@ -42,10 +46,14 @@ func TestInferConfig(t *testing.T) {
 				return
 			}
 			dir := fmt.Sprintf("%s/repos/%s", cacheDir, u.Path)
+			if tt.branch == "" {
+				tt.branch = "master"
+			}
 			_, err = git.PlainClone(dir, false, &git.CloneOptions{
-				URL:          tt.url,
-				SingleBranch: true,
-				Depth:        1})
+				URL:           tt.url,
+				ReferenceName: plumbing.NewBranchReferenceName(tt.branch),
+				SingleBranch:  true,
+				Depth:         1})
 			if errors.Is(err, git.ErrRepositoryAlreadyExists) {
 				fmt.Printf("Warning: Using existing cloned repo at %s\n", dir)
 			} else if err != nil {

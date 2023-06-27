@@ -711,14 +711,19 @@ jobs:
       - image: cimg/openjdk:17.0
     steps:
       - checkout
+      - run:
+          name: Calculate cache key
+          command: |-
+            find . -o -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
+                    sort | xargs cat > /tmp/CIRCLECI_CACHE_KEY
       - restore_cache:
-          key: maven-{{ checksum "pom.xml" }}
+          key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
       - run:
           command: mvn verify
       - store_test_results:
           path: target/surefire-reports
       - save_cache:
-          key: maven-{{ checksum "pom.xml" }}
+          key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
           paths:
             - ~/.m2/repository
   deploy:
@@ -740,7 +745,7 @@ workflows:
 `,
 		},
 		{
-			testName: "java project using groovy gradle",
+			testName: "java project using gradle",
 			labels: labels.LabelSet{
 				labels.DepsJava: labels.Label{
 					Key:   labels.DepsJava,
@@ -763,72 +768,19 @@ jobs:
       - image: cimg/openjdk:17.0
     steps:
       - checkout
+      - run:
+          name: Calculate cache key
+          command: |-
+            find . -o -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
+                    sort | xargs cat > /tmp/CIRCLECI_CACHE_KEY
       - restore_cache:
-          key: gradle-{{ checksum "build.gradle" }}-{{ checksum "gradlew" }}
+          key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
       - run:
           command: gradlew check
       - store_test_results:
           path: build/test-results
       - save_cache:
-          key: gradle-{{ checksum "build.gradle" }}-{{ checksum "gradlew" }}
-          paths:
-            - ~/.gradle/caches
-      - store_artifacts:
-          path: build/reports
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
-    docker:
-      - image: cimg/base:stable
-    steps:
-      # Replace this with steps to deploy to users
-      - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
-workflows:
-  build-and-test:
-    jobs:
-      - test-java
-    # - deploy:
-    #     requires:
-    #       - test-java
-`,
-		},
-		{
-			testName: "java project using kotlin gradle",
-			labels: labels.LabelSet{
-				labels.DepsJava: labels.Label{
-					Key:   labels.DepsJava,
-					Valid: true,
-					LabelData: labels.LabelData{
-						BasePath: ".",
-					},
-				},
-				labels.ToolGradle: labels.Label{
-					Key:   labels.ToolGradle,
-					Valid: true,
-				},
-				labels.FileBuildGradleKts: labels.Label{
-					Key:   labels.FileBuildGradleKts,
-					Valid: true,
-				},
-			},
-			expected: `# This config was automatically generated from your source code
-# Stacks detected: deps:java:.,file:build.gradle.kts:,tool:gradle:
-version: 2.1
-jobs:
-  test-java:
-    docker:
-      - image: cimg/openjdk:17.0
-    steps:
-      - checkout
-      - restore_cache:
-          key: gradle-{{ checksum "build.gradle.kts" }}-{{ checksum "gradlew" }}
-      - run:
-          command: gradlew check
-      - store_test_results:
-          path: build/test-results
-      - save_cache:
-          key: gradle-{{ checksum "build.gradle.kts" }}-{{ checksum "gradlew" }}
+          key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
           paths:
             - ~/.gradle/caches
       - store_artifacts:

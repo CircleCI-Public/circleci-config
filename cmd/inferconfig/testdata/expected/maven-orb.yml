@@ -9,14 +9,19 @@ jobs:
     steps:
       - checkout:
           path: ~/project
+      - run:
+          name: Calculate cache key
+          command: |-
+            find . -o -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
+                    sort | xargs cat > /tmp/CIRCLECI_CACHE_KEY
       - restore_cache:
-          key: maven-{{ checksum "pom.xml" }}
+          key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
       - run:
           command: mvn verify
       - store_test_results:
           path: target/surefire-reports
       - save_cache:
-          key: maven-{{ checksum "pom.xml" }}
+          key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
           paths:
             - ~/.m2/repository
   deploy:

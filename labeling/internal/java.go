@@ -20,10 +20,4 @@ var JavaRules = []labels.Rule{
 		label.Valid = gradlew != "" && path.Dir(gradlew) == (*ls)[labels.DepsJava].BasePath
 		return label, err
 	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
-		label.Key = labels.FileBuildGradleKts
-		buildGradleKts, err := c.FindFile("build.gradle.kts")
-		label.Valid = buildGradleKts != "" && path.Dir(buildGradleKts) == (*ls)[labels.DepsJava].BasePath
-		return label, err
-	},
 }

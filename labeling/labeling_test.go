@@ -667,27 +667,6 @@ func TestCodebase_ApplyRules_Java(t *testing.T) {
 					Valid: true,
 				},
 			},
-		}, {
-			name: "gradlew & build.gradle.kts",
-			files: map[string]string{
-				"gradlew":          "",
-				"build.gradle.kts": "",
-			},
-			expectedLabels: []labels.Label{
-				{
-					Key: labels.DepsJava,
-					LabelData: labels.LabelData{
-						BasePath: ".",
-					},
-					Valid: true,
-				}, {
-					Key:   labels.ToolGradle,
-					Valid: true,
-				}, {
-					Key:   labels.FileBuildGradleKts,
-					Valid: true,
-				},
-			},
 		},
 	}
 	for _, tt := range tests {

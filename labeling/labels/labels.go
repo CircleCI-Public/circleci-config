@@ -23,7 +23,6 @@ const (
 	PackageManagerGemspec = "package_manager:gemspec"
 	TestJest              = "test:jest"
 	ToolGradle            = "tool:gradle"
-	FileBuildGradleKts    = "file:build.gradle.kts"
 	FileManagePy          = "file:manage.py"
 )
 

@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"github.com/CircleCI-Public/circleci-config/config"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
@@ -10,31 +9,33 @@ import (
 const javaDockerImage = "cimg/openjdk:17.0"
 
 func javaTestJob(ls labels.LabelSet) *Job {
-	var cacheKey string
 	var cachePath string
 	var testCommand string
 	var testResultsPath string
 	var testReportsPath string
 
 	if ls[labels.ToolGradle].Valid {
-		gradleBuildFile := "build.gradle"
-		if ls[labels.FileBuildGradleKts].Valid {
-			gradleBuildFile = "build.gradle.kts"
-		}
-		cacheKey = fmt.Sprintf(`gradle-{{ checksum "%s" }}-{{ checksum "gradlew" }}`, gradleBuildFile)
 		cachePath = "~/.gradle/caches"
 		testCommand = "gradlew check"
 		testResultsPath = "build/test-results"
 		testReportsPath = "build/reports"
 	} else {
-		cacheKey = `maven-{{ checksum "pom.xml" }}`
 		cachePath = "~/.m2/repository"
 		testCommand = "mvn verify"
 		testResultsPath = "target/surefire-reports"
 	}
 
+	cacheKeyCalcCommand := `find . -o -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
+        sort | xargs cat > /tmp/CIRCLECI_CACHE_KEY`
+	cacheKey := `cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}`
+
 	steps := []config.Step{
 		checkoutStep(ls[labels.DepsJava]),
+		{
+			Type:    config.Run,
+			Name:    "Calculate cache key",
+			Command: cacheKeyCalcCommand,
+		},
 		{
 			Type:     config.RestoreCache,
 			CacheKey: cacheKey,

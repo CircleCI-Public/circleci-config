@@ -14,5 +14,6 @@ func GenerateConfig(labels labels.LabelSet) config.Config {
 	generatedJobs = append(generatedJobs, internal.GeneratePythonJobs(labels)...)
 	generatedJobs = append(generatedJobs, internal.GenerateRubyJobs(labels)...)
 	generatedJobs = append(generatedJobs, internal.GenerateRustJobs(labels)...)
+	generatedJobs = append(generatedJobs, internal.GeneratePHPJobs(labels)...)
 	return internal.BuildConfig(labels, generatedJobs)
 }

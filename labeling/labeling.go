@@ -34,6 +34,7 @@ func ApplyAllRules(c codebase.Codebase) labels.LabelSet {
 		internal.PythonRules,
 		internal.RubyRules,
 		internal.RustRules,
+		internal.PhpRules,
 		// Add other stacks here
 	}
 

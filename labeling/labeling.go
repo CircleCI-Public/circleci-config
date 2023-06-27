@@ -13,7 +13,7 @@ import (
 func ApplyRules(c codebase.Codebase, rules []labels.Rule) labels.LabelSet {
 	ls := make(labels.LabelSet)
 	for _, r := range rules {
-		label, err := r(c, &ls)
+		label, err := r(c, ls)
 		if err != nil {
 			continue
 		}

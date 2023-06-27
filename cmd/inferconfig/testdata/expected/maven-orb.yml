@@ -12,7 +12,7 @@ jobs:
       - run:
           name: Calculate cache key
           command: |-
-            find . -o -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
+            find . -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
                     sort | xargs cat > /tmp/CIRCLECI_CACHE_KEY
       - restore_cache:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}

@@ -25,7 +25,7 @@ func javaTestJob(ls labels.LabelSet) *Job {
 		testResultsPath = "target/surefire-reports"
 	}
 
-	cacheKeyCalcCommand := `find . -o -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
+	cacheKeyCalcCommand := `find . -name 'pom.xml' -o -name 'gradlew*' -o -name '*.gradle*' | \
         sort | xargs cat > /tmp/CIRCLECI_CACHE_KEY`
 	cacheKey := `cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}`
 

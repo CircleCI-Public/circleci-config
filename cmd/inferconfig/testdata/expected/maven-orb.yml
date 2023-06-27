@@ -1,27 +1,11 @@
 # This config was automatically generated from your source code
-# Stacks detected: deps:java:android,deps:node:.,deps:ruby:android,package_manager:yarn:,test:jest:,tool:gradle:
+# Stacks detected: deps:java:sample_app2
 version: 2.1
-orbs:
-  node: circleci/node@5
 jobs:
-  test-node:
-    # Install node dependencies and run tests
-    executor: node/default
-    environment:
-      JEST_JUNIT_OUTPUT_DIR: ./test-results/
-    steps:
-      - checkout
-      - node/install-packages:
-          pkg-manager: yarn
-      - run:
-          name: Run tests
-          command: yarn run test --ci --runInBand --reporters=default --reporters=jest-junit
-      - store_test_results:
-          path: ./test-results/
   test-java:
     docker:
       - image: cimg/openjdk:17.0
-    working_directory: ~/project/android
+    working_directory: ~/project/sample_app2
     steps:
       - checkout:
           path: ~/project
@@ -33,15 +17,13 @@ jobs:
       - restore_cache:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
       - run:
-          command: gradlew check
+          command: mvn verify
       - store_test_results:
-          path: build/test-results
+          path: target/surefire-reports
       - save_cache:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
           paths:
-            - ~/.gradle/caches
-      - store_artifacts:
-          path: build/reports
+            - ~/.m2/repository
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -54,9 +36,7 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - test-node
       - test-java
     # - deploy:
     #     requires:
-    #       - test-node
     #       - test-java

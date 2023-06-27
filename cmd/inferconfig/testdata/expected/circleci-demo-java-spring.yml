@@ -1,30 +1,12 @@
 # This config was automatically generated from your source code
-# Stacks detected: deps:java:android,deps:node:.,deps:ruby:android,package_manager:yarn:,test:jest:,tool:gradle:
+# Stacks detected: deps:java:.,tool:gradle:
 version: 2.1
-orbs:
-  node: circleci/node@5
 jobs:
-  test-node:
-    # Install node dependencies and run tests
-    executor: node/default
-    environment:
-      JEST_JUNIT_OUTPUT_DIR: ./test-results/
-    steps:
-      - checkout
-      - node/install-packages:
-          pkg-manager: yarn
-      - run:
-          name: Run tests
-          command: yarn run test --ci --runInBand --reporters=default --reporters=jest-junit
-      - store_test_results:
-          path: ./test-results/
   test-java:
     docker:
       - image: cimg/openjdk:17.0
-    working_directory: ~/project/android
     steps:
-      - checkout:
-          path: ~/project
+      - checkout
       - run:
           name: Calculate cache key
           command: |-
@@ -54,9 +36,7 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - test-node
       - test-java
     # - deploy:
     #     requires:
-    #       - test-node
     #       - test-java

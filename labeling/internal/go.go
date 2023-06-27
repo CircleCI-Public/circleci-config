@@ -1,24 +1,25 @@
 package internal
 
 import (
-	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
-	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 	"go/parser"
 	"go/token"
 	"path"
+
+	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
+	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
 var GoRules = []labels.Rule{
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.DepsGo
 		goModPath, err := c.FindFile("go.mod")
 		label.Valid = goModPath != ""
 		label.BasePath = path.Dir(goModPath)
 		return label, err
 	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.ArtifactGoExecutable
-		if !(*ls)[labels.DepsGo].Valid {
+		if !ls[labels.DepsGo].Valid {
 			return label, err
 		}
 

@@ -33,7 +33,7 @@ var possiblePythonFiles = append(
 )
 
 var PythonRules = []labels.Rule{
-	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (labels.Label, error) {
 		label := labels.Label{
 			Key: labels.DepsPython,
 		}
@@ -50,7 +50,7 @@ var PythonRules = []labels.Rule{
 
 		return label, nil
 	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (labels.Label, error) {
 		label := labels.Label{
 			Key: labels.PackageManagerPipenv,
 		}
@@ -66,7 +66,7 @@ var PythonRules = []labels.Rule{
 
 		return label, nil
 	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (labels.Label, error) {
 		label := labels.Label{
 			Key: labels.PackageManagerPoetry,
 		}
@@ -82,7 +82,7 @@ var PythonRules = []labels.Rule{
 
 		return label, nil
 	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (labels.Label, error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (labels.Label, error) {
 		label := labels.Label{
 			Key: labels.FileManagePy,
 		}

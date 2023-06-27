@@ -10,7 +10,7 @@ import (
 )
 
 var RubyRules = []labels.Rule{
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.DepsRuby
 		label.Dependencies = make(map[string]string)
 
@@ -29,7 +29,7 @@ var RubyRules = []labels.Rule{
 		}
 		return label, nil
 	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.PackageManagerGemspec
 		label.Dependencies = make(map[string]string)
 

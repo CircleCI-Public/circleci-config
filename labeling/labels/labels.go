@@ -62,4 +62,4 @@ func (ls LabelSet) String() string {
 	return strings.Join(labelsAsStrings, ",")
 }
 
-type Rule func(codebase.Codebase, *LabelSet) (Label, error)
+type Rule func(codebase.Codebase, LabelSet) (Label, error)

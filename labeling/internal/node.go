@@ -14,7 +14,7 @@ var lockFiles = []string{
 }
 
 var NodeRules = []labels.Rule{
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.DepsNode
 		packagePath := findPackageJSON(c)
 		label.Valid = packagePath != ""
@@ -29,7 +29,7 @@ var NodeRules = []labels.Rule{
 
 		return label, err
 	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.PackageManagerYarn
 		yarnLock, _ := c.FindFile("yarn.lock")
 
@@ -47,7 +47,7 @@ var NodeRules = []labels.Rule{
 
 		return label, err
 	},
-	func(c codebase.Codebase, ls *labels.LabelSet) (label labels.Label, err error) {
+	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.TestJest
 		label.Valid = hasDependency(ls, "jest")
 		return label, err
@@ -93,6 +93,6 @@ func readPackageJSON(c codebase.Codebase, filePath string, label *labels.Label) 
 	return err
 }
 
-func hasDependency(ls *labels.LabelSet, dep string) bool {
-	return (*ls)[labels.DepsNode].Dependencies[dep] != ""
+func hasDependency(ls labels.LabelSet, dep string) bool {
+	return ls[labels.DepsNode].Dependencies[dep] != ""
 }

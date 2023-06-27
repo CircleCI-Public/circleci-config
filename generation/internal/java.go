@@ -16,7 +16,7 @@ func javaTestJob(ls labels.LabelSet) *Job {
 
 	if ls[labels.ToolGradle].Valid {
 		cachePath = "~/.gradle/caches"
-		testCommand = "gradlew check"
+		testCommand = "./gradlew check"
 		testResultsPath = "build/test-results"
 		testReportsPath = "build/reports"
 	} else {

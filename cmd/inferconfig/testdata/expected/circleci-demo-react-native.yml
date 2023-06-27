@@ -33,7 +33,7 @@ jobs:
       - restore_cache:
           key: cache-{{ checksum "/tmp/CIRCLECI_CACHE_KEY" }}
       - run:
-          command: gradlew check
+          command: ./gradlew check
       - store_test_results:
           path: build/test-results
       - save_cache:

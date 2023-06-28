@@ -5,30 +5,38 @@ import (
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
-const rustOrb = "circleci/rust@1.6.0"
 const rustDockerImage = "cimg/rust:1.70"
+const cargoCacheKey = `cargo-{{ checksum "Cargo.lock" }}`
 
 func rustInitialSteps(ls labels.LabelSet) []config.Step {
-	return []config.Step{checkoutStep(ls[labels.DepsRust])}
+	return []config.Step{checkoutStep(ls[labels.DepsRust]), {
+		Type:     config.RestoreCache,
+		CacheKey: cargoCacheKey,
+	}}
 }
 
 func rustTestJob(ls labels.LabelSet) *Job {
 	steps := rustInitialSteps(ls)
 
-	steps = append(steps, config.Step{
-		Type:    config.OrbCommand,
-		Command: "rust/test",
-	})
+	steps = append(steps, []config.Step{
+		{
+			Type:    config.Run,
+			Command: "cargo test",
+		},
+		{
+			Type:     config.SaveCache,
+			CacheKey: cargoCacheKey,
+			Path:     "~/.cargo",
+		},
+	}...)
 
 	return &Job{
 		Job: config.Job{
 			Name:             "test-rust",
-			Comment:          "Run tests using the rust orb",
 			DockerImages:     []string{rustDockerImage},
 			WorkingDirectory: workingDirectory(ls[labels.DepsRust]),
 			Steps:            steps,
 		},
-		Orbs: map[string]string{"rust": rustOrb},
 		Type: TestJob,
 	}
 }

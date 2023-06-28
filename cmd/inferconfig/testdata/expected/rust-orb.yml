@@ -1,18 +1,22 @@
 # This config was automatically generated from your source code
 # Stacks detected: deps:rust:sample
 version: 2.1
-orbs:
-  rust: circleci/rust@1.6.0
 jobs:
   test-rust:
-    # Run tests using the rust orb
     docker:
       - image: cimg/rust:1.70
     working_directory: ~/project/sample
     steps:
       - checkout:
           path: ~/project
-      - rust/test
+      - restore_cache:
+          key: cargo-{{ checksum "Cargo.lock" }}
+      - run:
+          command: cargo test
+      - save_cache:
+          key: cargo-{{ checksum "Cargo.lock" }}
+          paths:
+            - ~/.cargo
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:

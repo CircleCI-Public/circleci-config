@@ -12,13 +12,13 @@ func GeneratePHPJobs(ls labels.LabelSet) []*Job {
 
 	jobs := []*Job{}
 
-	if hasLib(ls, "phpunit/phpunit") {
-		jobs = append(jobs, phpunitJob(ls))
+	if hasPhpLib(ls, "phpunit/phpunit") {
+		jobs = append(jobs, phpTestJob(ls))
 	}
 	return jobs
 }
 
-func hasLib(ls labels.LabelSet, lib string) bool {
+func hasPhpLib(ls labels.LabelSet, lib string) bool {
 	if ls[labels.DepsPhp].Dependencies[lib] != "" {
 		return true
 	}
@@ -34,7 +34,7 @@ func initialPhpSteps(ls labels.LabelSet) []config.Step {
 	return []config.Step{checkout, installPackages}
 }
 
-func phpunitJob(ls labels.LabelSet) *Job {
+func phpTestJob(ls labels.LabelSet) *Job {
 	steps := initialPhpSteps(ls)
 	steps = append(steps, config.Step{
 		Type:    config.Run,
@@ -49,7 +49,7 @@ func phpunitJob(ls labels.LabelSet) *Job {
 			DockerImages: []string{"cimg/php:8.2.7-node"},
 		},
 		Orbs: map[string]string{
-			"php": "circleci/php@1.1.0",
+			"php": "circleci/php@1",
 		},
 	}
 }

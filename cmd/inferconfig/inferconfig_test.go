@@ -3,11 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/go-git/go-git/v5/plumbing"
 	"net/url"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/go-git/go-git/v5/plumbing"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -31,6 +32,7 @@ func TestInferConfig(t *testing.T) {
 		// There is no "demo" for rust or maven, but the orbs repo contain sample dirs
 		{url: "https://github.com/CircleCI-Public/rust-orb"},
 		{url: "https://github.com/CircleCI-Public/maven-orb", branch: "main"},
+		{url: "https://github.com/CircleCI-Public/sample-php-laravel", branch: "circleci-2.0"},
 	}
 
 	for _, tt := range tests {

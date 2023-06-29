@@ -17,6 +17,7 @@ const (
 	DepsPython            = "deps:python"
 	DepsRuby              = "deps:ruby"
 	DepsRust              = "deps:rust"
+	DepsPhp               = "deps:php"
 	PackageManagerPipenv  = "package_manager:pipenv"
 	PackageManagerPoetry  = "package_manager:poetry"
 	PackageManagerYarn    = "package_manager:yarn"

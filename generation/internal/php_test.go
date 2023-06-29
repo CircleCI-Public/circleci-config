@@ -50,7 +50,7 @@ func TestGeneratePHPJobs(t *testing.T) {
 							},
 						}},
 					Type: TestJob,
-					Orbs: map[string]string{"php": "circleci/php@1.1.0"},
+					Orbs: map[string]string{"php": "circleci/php@1"},
 				},
 			},
 		},

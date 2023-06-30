@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/CircleCI-Public/circleci-config/config"
@@ -39,9 +40,14 @@ func initialPhpSteps(ls labels.LabelSet) []config.Step {
 func phpImageVersion(composerVersion string) string {
 	version := "8.2.7"
 	if composerVersion != "" {
-		version = strings.TrimPrefix(composerVersion, "~")
-		version = strings.TrimPrefix(version, "^")
-		version = strings.TrimSuffix(version, ".*")
+		composerVersion = strings.TrimPrefix(composerVersion, "~")
+		composerVersion = strings.TrimPrefix(composerVersion, "^")
+		composerVersion = strings.TrimSuffix(composerVersion, ".*")
+		versionRegex := regexp.MustCompile(`^[0-9].[0-9]`)
+		versionMatch := versionRegex.FindString(composerVersion)
+		if versionMatch != "" {
+			version = versionMatch
+		}
 	}
 	return "cimg/php:" + version + "-node"
 }

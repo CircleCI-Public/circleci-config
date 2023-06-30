@@ -114,10 +114,10 @@ func Test_phpImageVersion(t *testing.T) {
 		args args
 		want string
 	}{
-		{"explicit version", args{"8.1.2"}, "cimg/php:8.1.2-node"},
-		{"caret version", args{"^8.1.2"}, "cimg/php:8.1.2-node"},
+		{"explicit version", args{"8.1.2"}, "cimg/php:8.1-node"},
+		{"caret version", args{"^8.1.2"}, "cimg/php:8.1-node"},
 		{"wildcard version", args{"8.1.*"}, "cimg/php:8.1-node"},
-		{"~ version", args{"~8.1.2"}, "cimg/php:8.1.2-node"},
+		{"~ version", args{"~8.1.2"}, "cimg/php:8.1-node"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

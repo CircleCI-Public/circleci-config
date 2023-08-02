@@ -142,6 +142,7 @@ workflows:
       - build-and-push-docker-image:
           requires:
             - test
+            - vulnerability-scan
           filters:
             branches:
               only: main

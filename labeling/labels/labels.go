@@ -22,6 +22,9 @@ const (
 	PackageManagerPoetry  = "package_manager:poetry"
 	PackageManagerYarn    = "package_manager:yarn"
 	PackageManagerGemspec = "package_manager:gemspec"
+	CICDGithubActions     = "cicd:github-actions"
+	CICDGitlabWorkflow    = "cicd:gitlab-worfklows"
+	CICDJenkins           = "cicd:jenkins"
 	TestJest              = "test:jest"
 	ToolGradle            = "tool:gradle"
 	FileManagePy          = "file:manage.py"
@@ -53,11 +56,9 @@ func (label Label) String() string {
 type LabelSet map[string]Label
 
 func (ls LabelSet) String() string {
-	labelsAsStrings := make([]string, len(ls))
-	i := 0
+	labelsAsStrings := make([]string, 0, len(ls))
 	for _, v := range ls {
-		labelsAsStrings[i] = v.String()
-		i++
+		labelsAsStrings = append(labelsAsStrings, v.String())
 	}
 	sort.Strings(labelsAsStrings)
 	return strings.Join(labelsAsStrings, ",")

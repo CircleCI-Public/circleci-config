@@ -1,5 +1,5 @@
 # This config was automatically generated from your source code
-# Stacks detected: deps:node:.,deps:php:.
+# Stacks detected: cicd:jenkins:laradock/jenkins,deps:node:.,deps:php:.
 version: 2.1
 orbs:
   php: circleci/php@1
@@ -23,6 +23,9 @@ jobs:
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: found jenkins config
+          command: ':'
 workflows:
   build-and-test:
     jobs:

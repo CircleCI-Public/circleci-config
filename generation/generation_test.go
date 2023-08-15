@@ -809,9 +809,16 @@ workflows:
 					Key:   labels.ToolGradle,
 					Valid: true,
 				},
+				labels.CICDGithubActions: labels.Label{
+					Key:   labels.CICDGithubActions,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".github/workflows",
+					},
+				},
 			},
 			expected: `# This config was automatically generated from your source code
-# Stacks detected: deps:java:.,tool:gradle:
+# Stacks detected: cicd:github-actions:.github/workflows,deps:java:.,tool:gradle:
 version: 2.1
 jobs:
   test-java:
@@ -845,6 +852,9 @@ jobs:
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: found github actions config
+          command: ':'
 workflows:
   build-and-test:
     jobs:

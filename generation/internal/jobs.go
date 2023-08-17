@@ -54,7 +54,7 @@ func getCICDSteps(ls labels.LabelSet) []config.Step {
 
 	cicdStepMap := map[string]string{
 		labels.CICDGithubActions:  "github actions",
-		labels.CICDGitlabWorkflow: "github workflows",
+		labels.CICDGitlabWorkflow: "gitlab workflows",
 		labels.CICDJenkins:        "jenkins",
 	}
 

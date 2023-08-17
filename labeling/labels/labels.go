@@ -23,7 +23,7 @@ const (
 	PackageManagerYarn    = "package_manager:yarn"
 	PackageManagerGemspec = "package_manager:gemspec"
 	CICDGithubActions     = "cicd:github-actions"
-	CICDGitlabWorkflow    = "cicd:gitlab-worfklows"
+	CICDGitlabWorkflow    = "cicd:gitlab-workflows"
 	CICDJenkins           = "cicd:jenkins"
 	TestJest              = "test:jest"
 	ToolGradle            = "tool:gradle"

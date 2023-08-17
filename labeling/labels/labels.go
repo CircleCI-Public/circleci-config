@@ -56,9 +56,11 @@ func (label Label) String() string {
 type LabelSet map[string]Label
 
 func (ls LabelSet) String() string {
-	labelsAsStrings := make([]string, 0, len(ls))
+	labelsAsStrings := make([]string, len(ls))
+	i := 0
 	for _, v := range ls {
-		labelsAsStrings = append(labelsAsStrings, v.String())
+		labelsAsStrings[i] = v.String()
+		i++
 	}
 	sort.Strings(labelsAsStrings)
 	return strings.Join(labelsAsStrings, ",")

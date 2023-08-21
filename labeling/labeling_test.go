@@ -690,3 +690,104 @@ func TestCodebase_ApplyRules_Java(t *testing.T) {
 		})
 	}
 }
+
+func TestCodebase_ApplyRules_CICD(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		files    map[string]string
+		rules    []labels.Rule
+		expected labels.LabelSet
+	}{
+		{
+			name: "github-actions with a workflow",
+			files: map[string]string{
+				".github/workflows/tests.yml": "",
+			},
+			rules: internal.GithubActionRules,
+			expected: labels.LabelSet{
+				labels.CICDGithubActions: labels.Label{
+					Key:   labels.CICDGithubActions,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".github/workflows",
+					},
+				},
+			},
+		},
+		{
+
+			name: "github-actions without any workflows",
+			files: map[string]string{
+				".github/CODEOWNERS": "",
+			},
+			rules:    internal.GithubActionRules,
+			expected: labels.LabelSet{},
+		},
+
+		{
+			name: "gitlab workflows config present",
+			files: map[string]string{
+				".gitlab-ci.yml": "",
+			},
+			rules: internal.GitlabWorkflowRules,
+			expected: labels.LabelSet{
+				labels.CICDGitlabWorkflow: labels.Label{
+					Key:   labels.CICDGitlabWorkflow,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				},
+			},
+		},
+
+		{
+
+			name: "jenkins config present",
+			files: map[string]string{
+				"Jenkinsfile": "",
+			},
+			rules: internal.JenkinsRules,
+			expected: labels.LabelSet{
+				labels.CICDJenkins: labels.Label{
+					Key:   labels.CICDJenkins,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				},
+			},
+		},
+
+		{
+			name:     "no gitlab workflow config present",
+			files:    map[string]string{},
+			rules:    internal.GitlabWorkflowRules,
+			expected: labels.LabelSet{},
+		},
+
+		{
+			name:     "no jenkins config present",
+			files:    map[string]string{},
+			rules:    internal.JenkinsRules,
+			expected: labels.LabelSet{},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			c := fakeCodebase{tt.files}
+			got := ApplyRules(c, tt.rules)
+
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Errorf("\n"+
+					"got      %+v\n"+
+					"expected %+v", got, tt.expected)
+			}
+		})
+
+	}
+
+}

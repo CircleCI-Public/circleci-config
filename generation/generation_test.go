@@ -703,9 +703,14 @@ workflows:
 					Valid:     true,
 					LabelData: labels.LabelData{BasePath: "."},
 				},
+				labels.CICDGitlabWorkflow: labels.Label{
+					Key:       labels.CICDGitlabWorkflow,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
 			},
 			expected: `# This config was automatically generated from your source code
-# Stacks detected: deps:python:.,package_manager:pipenv:.
+# Stacks detected: cicd:gitlab-workflows:.,deps:python:.,package_manager:pipenv:.
 version: 2.1
 orbs:
   python: circleci/python@2
@@ -733,6 +738,9 @@ jobs:
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: found gitlab workflows config
+          command: ':'
 workflows:
   build-and-test:
     jobs:
@@ -752,9 +760,16 @@ workflows:
 						BasePath: ".",
 					},
 				},
+				labels.CICDJenkins: labels.Label{
+					Key:   labels.CICDJenkins,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				},
 			},
 			expected: `# This config was automatically generated from your source code
-# Stacks detected: deps:java:.
+# Stacks detected: cicd:jenkins:.,deps:java:.
 version: 2.1
 jobs:
   test-java:
@@ -786,6 +801,9 @@ jobs:
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: found jenkins config
+          command: ':'
 workflows:
   build-and-test:
     jobs:
@@ -809,9 +827,16 @@ workflows:
 					Key:   labels.ToolGradle,
 					Valid: true,
 				},
+				labels.CICDGithubActions: labels.Label{
+					Key:   labels.CICDGithubActions,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".github/workflows",
+					},
+				},
 			},
 			expected: `# This config was automatically generated from your source code
-# Stacks detected: deps:java:.,tool:gradle:
+# Stacks detected: cicd:github-actions:.github/workflows,deps:java:.,tool:gradle:
 version: 2.1
 jobs:
   test-java:
@@ -845,6 +870,9 @@ jobs:
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: found github actions config
+          command: ':'
 workflows:
   build-and-test:
     jobs:

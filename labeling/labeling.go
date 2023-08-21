@@ -35,6 +35,9 @@ func ApplyAllRules(c codebase.Codebase) labels.LabelSet {
 		internal.RubyRules,
 		internal.RustRules,
 		internal.PhpRules,
+		internal.GithubActionRules,
+		internal.GitlabWorkflowRules,
+		internal.JenkinsRules,
 		// Add other stacks here
 	}
 

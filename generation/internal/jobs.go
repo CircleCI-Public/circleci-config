@@ -30,7 +30,7 @@ func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 		return fallbackConfig
 	}
 
-	jobs = addStubJobs(jobs)
+	jobs = addStubJobs(ls, jobs)
 
 	// Can jobs not just be "cast" to []*config.Jobs somehow?
 	configJobs := make([]*config.Job, len(jobs))
@@ -49,7 +49,30 @@ func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 	}
 }
 
-func addStubJobs(jobs []*Job) []*Job {
+func getCICDSteps(ls labels.LabelSet) []config.Step {
+	steps := make([]config.Step, 0)
+
+	cicdStepMap := map[string]string{
+		labels.CICDGithubActions:  "github actions",
+		labels.CICDGitlabWorkflow: "gitlab workflows",
+		labels.CICDJenkins:        "jenkins",
+	}
+
+	for label, cicdName := range cicdStepMap {
+		if ciLabel, ok := ls[label]; ok && ciLabel.Valid {
+			steps = append(steps, config.Step{
+				Type:    config.Run,
+				Name:    fmt.Sprintf("found %s config", cicdName),
+				Command: ":", // dont do anything just return status 0 and continue
+			})
+		}
+
+	}
+
+	return steps
+}
+
+func addStubJobs(ls labels.LabelSet, jobs []*Job) []*Job {
 	jobTypesPresent := map[Type]bool{}
 
 	for _, j := range jobs {
@@ -60,7 +83,11 @@ func addStubJobs(jobs []*Job) []*Job {
 		jobs = append(jobs, &stubTestJob)
 	}
 	if !jobTypesPresent[DeployJob] {
-		jobs = append(jobs, &stubDeployJob)
+		deployJob := stubDeployJob
+		deployJob.Steps = stubDeployJob.Steps
+		deployJob.Steps = append(deployJob.Steps, getCICDSteps(ls)...)
+
+		jobs = append(jobs, &deployJob)
 	}
 
 	return jobs

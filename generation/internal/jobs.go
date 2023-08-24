@@ -27,7 +27,7 @@ type Job struct {
 
 func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 	if len(jobs) == 0 {
-		return fallbackConfig
+		return buildFallbackConfig(ls)
 	}
 
 	jobs = addStubJobs(ls, jobs)
@@ -47,6 +47,57 @@ func BuildConfig(ls labels.LabelSet, jobs []*Job) config.Config {
 		Jobs:      configJobs,
 		Orbs:      buildOrbs(jobs),
 	}
+}
+
+func buildDeployJob(ls labels.LabelSet) *Job {
+	deployJob := stubDeployJob
+	deployJob.Steps = stubDeployJob.Steps
+	deployJob.Steps = append(deployJob.Steps, getCICDSteps(ls)...)
+
+	return &deployJob
+}
+
+func buildFallbackConfig(ls labels.LabelSet) config.Config {
+	deployJob := buildDeployJob(ls)
+
+	comment := `Couldn't automatically generate a config from your source code.
+This is generic template to serve as a base for your custom config
+See: https://circleci.com/docs/configuration-reference`
+	if len(ls) > 0 {
+		comment = fmt.Sprintf("%s\n"+
+			"Stacks detected: %s", comment, ls.String())
+
+	}
+
+	return config.Config{
+		Comment: comment,
+		Jobs: []*config.Job{
+			&stubTestJob.Job,
+			&stubArtifactJob.Job,
+			&deployJob.Job,
+		},
+		Workflows: []*config.Workflow{
+			{
+				Name: "example",
+				Jobs: []config.WorkflowJob{
+					{
+						Job: &stubTestJob.Job,
+					}, {
+						Job: &stubArtifactJob.Job,
+						Requires: []*config.Job{
+							&stubTestJob.Job,
+						},
+					}, {
+						Job: &deployJob.Job,
+						Requires: []*config.Job{
+							&stubTestJob.Job,
+						},
+					},
+				},
+			},
+		},
+	}
+
 }
 
 func getCICDSteps(ls labels.LabelSet) []config.Step {
@@ -83,11 +134,8 @@ func addStubJobs(ls labels.LabelSet, jobs []*Job) []*Job {
 		jobs = append(jobs, &stubTestJob)
 	}
 	if !jobTypesPresent[DeployJob] {
-		deployJob := stubDeployJob
-		deployJob.Steps = stubDeployJob.Steps
-		deployJob.Steps = append(deployJob.Steps, getCICDSteps(ls)...)
-
-		jobs = append(jobs, &deployJob)
+		deployJob := buildDeployJob(ls)
+		jobs = append(jobs, deployJob)
 	}
 
 	return jobs

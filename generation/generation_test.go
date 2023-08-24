@@ -44,7 +44,7 @@ func TestGenerateConfig(t *testing.T) {
 			testName: "no labels generates fallback config",
 			labels:   labels.LabelSet{},
 			expected: `# Couldn't automatically generate a config from your source code.
-# This is generic template to serve as a base for your custom config
+# This is a generic template to serve as a base for your custom config
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 jobs:
@@ -102,7 +102,7 @@ workflows:
 				},
 			},
 			expected: `# Couldn't automatically generate a config from your source code.
-# This is generic template to serve as a base for your custom config
+# This is a generic template to serve as a base for your custom config
 # See: https://circleci.com/docs/configuration-reference
 # Stacks detected: cicd:github-actions:.
 version: 2.1

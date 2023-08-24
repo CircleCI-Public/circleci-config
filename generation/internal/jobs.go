@@ -61,7 +61,7 @@ func buildFallbackConfig(ls labels.LabelSet) config.Config {
 	deployJob := buildDeployJob(ls)
 
 	comment := `Couldn't automatically generate a config from your source code.
-This is generic template to serve as a base for your custom config
+This is a generic template to serve as a base for your custom config
 See: https://circleci.com/docs/configuration-reference`
 	if len(ls) > 0 {
 		comment = fmt.Sprintf("%s\n"+

@@ -44,7 +44,7 @@ func TestGenerateConfig(t *testing.T) {
 			testName: "no labels generates fallback config",
 			labels:   labels.LabelSet{},
 			expected: `# Couldn't automatically generate a config from your source code.
-# This is generic template to serve as a base for your custom config
+# This is a generic template to serve as a base for your custom config
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 jobs:
@@ -69,7 +69,6 @@ jobs:
       - store_artifacts:
           path: example.txt
   deploy:
-    # This is an example deploy job, not actually used by the workflow
     docker:
       - image: cimg/base:stable
     steps:
@@ -88,7 +87,69 @@ workflows:
           requires:
             - test
 `,
-		}, {
+		},
+
+		{
+			testName: "cicd included in fallback config",
+			labels: labels.LabelSet{
+				labels.CICDGithubActions: labels.Label{
+					Key:   labels.CICDGithubActions,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				},
+			},
+			expected: `# Couldn't automatically generate a config from your source code.
+# This is a generic template to serve as a base for your custom config
+# See: https://circleci.com/docs/configuration-reference
+# Stacks detected: cicd:github-actions:.
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      # Replace this with a real test runner invocation
+      - run:
+          name: Run tests
+          command: echo 'replace me with real tests!' && false
+  build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      # Replace this with steps to build a package, or executable
+      - run:
+          name: Build an artifact
+          command: touch example.txt
+      - store_artifacts:
+          path: example.txt
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+      - run:
+          name: found github actions config
+          command: ':'
+workflows:
+  example:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+      - deploy:
+          requires:
+            - test
+`,
+		},
+		{
 			testName: "node and go codebases in subdirs",
 			labels: labels.LabelSet{
 				labels.DepsNode: labels.Label{

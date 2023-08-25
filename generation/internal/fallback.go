@@ -59,34 +59,3 @@ var stubDeployJob = Job{
 	},
 	Type: DeployJob,
 }
-
-var fallbackConfig = config.Config{
-	Comment: `Couldn't automatically generate a config from your source code.
-This is generic template to serve as a base for your custom config
-See: https://circleci.com/docs/configuration-reference`,
-	Jobs: []*config.Job{
-		&stubTestJob.Job,
-		&stubArtifactJob.Job,
-		&stubDeployJob.Job,
-	},
-	Workflows: []*config.Workflow{
-		{
-			Name: "example",
-			Jobs: []config.WorkflowJob{
-				{
-					Job: &stubTestJob.Job,
-				}, {
-					Job: &stubArtifactJob.Job,
-					Requires: []*config.Job{
-						&stubTestJob.Job,
-					},
-				}, {
-					Job: &stubDeployJob.Job,
-					Requires: []*config.Job{
-						&stubTestJob.Job,
-					},
-				},
-			},
-		},
-	},
-}

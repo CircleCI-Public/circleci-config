@@ -59,6 +59,7 @@ func buildDeployJob(ls labels.LabelSet) *Job {
 
 func buildFallbackConfig(ls labels.LabelSet) config.Config {
 	deployJob := buildDeployJob(ls)
+	deployJob.Comment = ""
 
 	comment := `Couldn't automatically generate a config from your source code.
 This is a generic template to serve as a base for your custom config

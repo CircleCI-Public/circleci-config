@@ -69,7 +69,6 @@ jobs:
       - store_artifacts:
           path: example.txt
   deploy:
-    # This is an example deploy job, not actually used by the workflow
     docker:
       - image: cimg/base:stable
     steps:
@@ -128,7 +127,6 @@ jobs:
       - store_artifacts:
           path: example.txt
   deploy:
-    # This is an example deploy job, not actually used by the workflow
     docker:
       - image: cimg/base:stable
     steps:

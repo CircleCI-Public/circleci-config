@@ -24,7 +24,6 @@ var possiblePythonFiles = append(
 		[]string{
 			"requirements.txt",
 			"pyproject.toml",
-			"setup.py",
 			"manage.py",
 		},
 		pipenvFiles...,

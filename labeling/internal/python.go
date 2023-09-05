@@ -1,12 +1,14 @@
 package internal
 
 import (
+	"log"
 	"path"
 	"regexp"
 	"strings"
 
 	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
+	"github.com/pelletier/go-toml"
 )
 
 var pipenvFiles = []string{
@@ -43,7 +45,7 @@ var PythonRules = []labels.Rule{
 		pythonVersion := getPythonVersion(c)
 		if pythonVersion != "" {
 			label.Dependencies = map[string]string{
-				"python": getPythonVersion(c),
+				"python": pythonVersion,
 			}
 		}
 
@@ -107,22 +109,67 @@ func fileContainsString(c codebase.Codebase, filePath string, str string) bool {
 }
 
 func getPythonVersion(c codebase.Codebase) string {
-	versionRegex := regexp.MustCompile(`[0-9.]+`)
 
 	versionFilePath, _ := c.FindFile(".python-version")
-	if versionFilePath == "" {
-		return ""
+	if versionFilePath != "" {
+		file, err := c.ReadFile(versionFilePath)
+		if err != nil {
+			log.Println("Unable to read file .python-version. Attempting to determine python version another way... ", err)
+		} else {
+			versionRegex := regexp.MustCompile(`[0-9.]+`)
+			pythonVersion := versionRegex.FindString(string(file))
+			if pythonVersion != "" {
+				log.Println("Unable to parse file .python-version. Attempting to determine python version another way...")
+
+			}
+			log.Println("Found Python version in .python-version file: ", pythonVersion)
+			return pythonVersion
+		}
 	}
 
-	file, err := c.ReadFile(versionFilePath)
-	if err != nil {
-		return ""
+	pyprojectFilePath, _ := c.FindFile("pyproject.toml")
+	if pyprojectFilePath != "" {
+		file, err := c.ReadFile(pyprojectFilePath)
+		if err != nil {
+			log.Println("Unable to read file pyproject.toml. Attempting to determine python version another way... ", err)
+		} else {
+			tree, err := toml.LoadBytes(file)
+			if err != nil {
+				log.Println("Unable to read file pyproject.toml. Attempting to determine python version another way... ", err)
+			} else {
+				pythonVersion := tree.Get("tool.poetry.dependencies.python")
+				if pythonVersion == nil || pythonVersion.(string) == "" {
+					log.Println("Error parsing pyproject.toml, python version is nil")
+				} else {
+					pythonVersion = strings.TrimPrefix(pythonVersion.(string), "^")
+					log.Println("Found Python version in pyproject.toml file: ", pythonVersion.(string))
+					return pythonVersion.(string)
+				}
+			}
+		}
 	}
 
-	version := versionRegex.FindString(string(file))
-	if version != "" {
-		return version
+	pipfileFilePath, _ := c.FindFile("Pipfile")
+	if pipfileFilePath != "" {
+		file, err := c.ReadFile(pipfileFilePath)
+		if err != nil {
+			log.Println("Unable to read file Pipfile. Attempting to determine python version another way... ", err)
+		} else {
+			tree, err := toml.LoadBytes(file)
+			if err != nil {
+				log.Println("Unable to read file Pipfile. Attempting to determine python version another way... ", err)
+			} else {
+				pythonVersion := tree.Get("requires.python_version")
+				if pythonVersion == nil || pythonVersion.(string) == "" {
+					log.Println("Error parsing Pipfile, returning nil")
+					return ""
+				} else {
+					pythonVersion = strings.TrimPrefix(pythonVersion.(string), "^")
+					log.Println("Found Python version in Pipfile: ", pythonVersion.(string))
+					return pythonVersion.(string)
+				}
+			}
+		}
 	}
-
 	return ""
 }

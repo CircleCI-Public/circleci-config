@@ -569,6 +569,56 @@ func TestCodebase_ApplyRules_Python(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "project contains .pyproject.toml => python = 3.9 dependency",
+			files: map[string]string{
+				"pyproject.toml": "[tool.poetry.dependencies]\npython = \"3.9\"\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"python": "3.9",
+						},
+					},
+					Valid: true,
+				},
+				{
+					Key: labels.PackageManagerPoetry,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		},
+		{
+			name: "project contains Pipfile => python_version = 3.11 dependency",
+			files: map[string]string{
+				"Pipfile": "[packages]\nmylib = \"==1.0\"\n[requires]\npython_version = \"3.11\"\n",
+			},
+			expectedLabels: []labels.Label{
+				{
+					Key: labels.DepsPython,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+						Dependencies: map[string]string{
+							"python": "3.11",
+						},
+					},
+					Valid: true,
+				},
+				{
+					Key: labels.PackageManagerPipenv,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+					Valid: true,
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

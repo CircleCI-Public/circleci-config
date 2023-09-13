@@ -189,8 +189,8 @@ const (
 type WhenType uint32
 
 const (
-	WhenTypeUnused    WhenType = iota
-	WhenTypeOnSuccess          = iota
+	WhenTypeUnused WhenType = iota
+	WhenTypeOnSuccess
 	WhenTypeOnFail
 	WhenTypeAlways
 )

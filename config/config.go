@@ -186,6 +186,30 @@ const (
 	OrbCommand
 )
 
+type WhenType uint32
+
+const (
+	WhenTypeUnused    WhenType = iota
+	WhenTypeOnSuccess          = iota
+	WhenTypeOnFail
+	WhenTypeAlways
+)
+
+func (w WhenType) String() string {
+	switch w {
+	case WhenTypeOnSuccess:
+		return "on_success"
+	case WhenTypeOnFail:
+		return "on_fail"
+	case WhenTypeAlways:
+		return "always"
+	case WhenTypeUnused:
+		return ""
+	default:
+		panic("unknown when condition value")
+	}
+}
+
 type OrbCommandParameters map[string]string
 
 // Step definitions for Jobs. Go has no sum types, so for now just throw all supported fields under
@@ -199,6 +223,7 @@ type Step struct {
 	Path        string               // cache, artifact or test results path
 	Destination string               // artifact destination
 	Parameters  OrbCommandParameters // for orb-defined steps
+	When        WhenType
 }
 
 func (s Step) YamlNode() *yaml.Node {
@@ -217,6 +242,10 @@ func (s Step) YamlNode() *yaml.Node {
 			kvs = append(kvs, yScalar("name"), yScalar(s.Name))
 		}
 		kvs = append(kvs, yScalar("command"), yScalar(s.Command))
+
+		if s.When != WhenTypeUnused {
+			kvs = append(kvs, yScalar("when"), yScalar(s.When.String()))
+		}
 		return yCommentedMap(s.Comment,
 			yScalar("run"),
 			yMap(kvs...))

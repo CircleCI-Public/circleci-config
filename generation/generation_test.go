@@ -160,7 +160,7 @@ workflows:
 				labels.DepsGo: labels.Label{
 					Key:       labels.DepsGo,
 					Valid:     true,
-					LabelData: labels.LabelData{BasePath: "go-dir"},
+					LabelData: labels.LabelData{BasePath: "go-dir", HasLockFile: true},
 				}},
 			expected: `# This config was automatically generated from your source code
 # Stacks detected: deps:go:go-dir,deps:node:node-dir
@@ -941,6 +941,50 @@ workflows:
     # - deploy:
     #     requires:
     #       - test-java
+`,
+		},
+
+		{
+			testName: "go codebase without lockfile",
+			labels: labels.LabelSet{
+				labels.DepsGo: labels.Label{
+					Key:       labels.DepsGo,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "go-dir", HasLockFile: false},
+				}},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:go:go-dir
+version: 2.1
+jobs:
+  test-go:
+    # Install go modules and run tests
+    docker:
+      - image: cimg/go:1.20
+    working_directory: ~/project/go-dir
+    steps:
+      - checkout:
+          path: ~/project
+      - run:
+          name: Run tests
+          command: gotestsum --junitfile junit.xml
+      - store_test_results:
+          path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-go
+    # - deploy:
+    #     requires:
+    #       - test-go
 `,
 		},
 	}

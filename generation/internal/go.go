@@ -8,22 +8,31 @@ import (
 )
 
 func goInitialSteps(ls labels.LabelSet) []config.Step {
-	const goCacheKey = `go-mod-{{ checksum "go.sum" }}`
+	depsLabel := ls[labels.DepsGo]
+	steps := []config.Step{
+		checkoutStep(depsLabel),
+	}
+	if !depsLabel.HasLockFile {
+		return steps
+	}
 
-	return []config.Step{
-		checkoutStep(ls[labels.DepsGo]),
-		{
+	const goCacheKey = `go-mod-{{ checksum "go.sum" }}`
+	return append(steps,
+		config.Step{
 			Type:     config.RestoreCache,
 			CacheKey: goCacheKey,
-		}, {
+		},
+		config.Step{
 			Type:    config.Run,
 			Name:    "Download Go modules",
 			Command: "go mod download",
-		}, {
+		},
+		config.Step{
 			Type:     config.SaveCache,
 			CacheKey: goCacheKey,
 			Path:     "/home/circleci/go/pkg/mod",
-		}}
+		},
+	)
 }
 
 func goTestJob(ls labels.LabelSet) *Job {

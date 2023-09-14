@@ -15,6 +15,8 @@ var GoRules = []labels.Rule{
 		goModPath, err := c.FindFile("go.mod")
 		label.Valid = goModPath != ""
 		label.BasePath = path.Dir(goModPath)
+		lockFilePath, _ := c.FindFile("go.sum")
+		label.LabelData.HasLockFile = lockFilePath != ""
 		return label, err
 	},
 	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {

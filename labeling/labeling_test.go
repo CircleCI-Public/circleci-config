@@ -282,12 +282,14 @@ func TestCodebase_ApplyRules_Go(t *testing.T) {
 			name: "go.mod => deps:go",
 			files: map[string]string{
 				"go.mod": "module mymod\n\ngo 1.18\n",
+				"go.sum": "",
 			},
 			expectedLabels: []labels.Label{
 				{
 					Key: labels.DepsGo,
 					LabelData: labels.LabelData{
-						BasePath: ".",
+						BasePath:    ".",
+						HasLockFile: true,
 					},
 				},
 			},
@@ -340,13 +342,15 @@ func TestCodebase_ApplyRules_Go(t *testing.T) {
 			name: "go.mod & go main package in subdir of cmd => artifact:go-executable",
 			files: map[string]string{
 				"go.mod":        "module mymod\n\ngo 1.18\n",
+				"go.sum":        "",
 				"cmd/x/main.go": "//this is package main\npackage main",
 			},
 			expectedLabels: []labels.Label{
 				{
 					Key: labels.DepsGo,
 					LabelData: labels.LabelData{
-						BasePath: ".",
+						BasePath:    ".",
+						HasLockFile: true,
 					},
 				}, {
 					Key: labels.ArtifactGoExecutable,
@@ -358,6 +362,15 @@ func TestCodebase_ApplyRules_Go(t *testing.T) {
 				"main.go": "package main",
 			},
 			expectedLabels: []labels.Label{},
+		},
+		{
+			name: "go.mod but not go.sum",
+			files: map[string]string{
+				"go.mod": "module github.com/circleci-public/foobar\ngo 1.20",
+			},
+			expectedLabels: []labels.Label{
+				{Key: labels.DepsGo, LabelData: labels.LabelData{BasePath: "."}},
+			},
 		},
 	}
 	for _, tt := range tests {

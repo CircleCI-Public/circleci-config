@@ -26,15 +26,6 @@ func defaultSteps(l labels.Label, hasManagePy bool) []config.Step {
 
 	steps = append(steps, []config.Step{
 		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"args":        "pytest",
-				"pkg-manager": "pip",
-				"pypi-cache":  "false",
-			},
-		},
-		{
 			Name:    "Run tests",
 			Type:    config.Run,
 			Command: "pytest --junitxml=junit.xml",
@@ -43,78 +34,11 @@ func defaultSteps(l labels.Label, hasManagePy bool) []config.Step {
 	return steps
 }
 
-func pipenvSteps(l labels.Label, hasManagePy bool) []config.Step {
-	steps := []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"args":        "--dev",
-				"pkg-manager": "pipenv",
-			},
-		},
-	}
-
-	if hasManagePy {
-		steps = append(steps, config.Step{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: "pipenv run python manage.py test",
-		})
-		return steps
-	}
-
-	steps = append(steps, config.Step{
-		Name:    "Run tests",
-		Type:    config.Run,
-		Command: "pipenv run pytest --junitxml=junit.xml",
-	})
-
-	return steps
-}
-
-func poetrySteps(l labels.Label, hasManagerPy bool) []config.Step {
-	steps := []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"pkg-manager": "poetry",
-			},
-		},
-	}
-
-	if hasManagerPy {
-		steps = append(steps, config.Step{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: "poetry run python manage.py test",
-		})
-		return steps
-	}
-
-	steps = append(steps, config.Step{
-		Name:    "Run tests",
-		Type:    config.Run,
-		Command: "poetry run pytest --junitxml=junit.xml",
-	})
-
-	return steps
-}
-
 func pythonTestJob(ls labels.LabelSet) *Job {
 	steps := []config.Step{checkoutStep(ls[labels.DepsPython])}
 	hasManagePy := ls[labels.FileManagePy].Valid
 
-	// Support for different package managers
-	switch {
-	case ls[labels.PackageManagerPipenv].Valid:
-		steps = append(steps, pipenvSteps(ls[labels.PackageManagerPipenv], hasManagePy)...)
-	case ls[labels.PackageManagerPoetry].Valid:
-		steps = append(steps, poetrySteps(ls[labels.PackageManagerPoetry], hasManagePy)...)
-	default:
-		steps = append(steps, defaultSteps(ls[labels.DepsPython], hasManagePy)...)
-	}
+	steps = append(steps, defaultSteps(ls[labels.DepsPython], hasManagePy)...)
 
 	if !hasManagePy {
 		// Store test results

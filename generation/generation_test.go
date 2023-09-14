@@ -505,11 +505,10 @@ jobs:
       - image: cimg/python:3.8-node
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: poetry
+      - python/install-packages
       - run:
           name: Run tests
-          command: poetry run pytest --junitxml=junit.xml
+          command: pytest --junitxml=junit.xml
       - store_test_results:
           path: junit.xml
   deploy:
@@ -558,11 +557,10 @@ jobs:
     steps:
       - checkout:
           path: ~/project
-      - python/install-packages:
-          pkg-manager: poetry
+      - python/install-packages
       - run:
           name: Run tests
-          command: poetry run pytest --junitxml=junit.xml
+          command: pytest --junitxml=junit.xml
       - store_test_results:
           path: junit.xml
   deploy:
@@ -666,12 +664,10 @@ jobs:
       - image: cimg/python:3.8-node
     steps:
       - checkout
-      - python/install-packages:
-          args: --dev
-          pkg-manager: pipenv
+      - python/install-packages
       - run:
           name: Run tests
-          command: pipenv run python manage.py test
+          command: python manage.py test
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -723,11 +719,10 @@ jobs:
       - image: cimg/python:3.8-node
     steps:
       - checkout
-      - python/install-packages:
-          pkg-manager: poetry
+      - python/install-packages
       - run:
           name: Run tests
-          command: poetry run python manage.py test
+          command: python manage.py test
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -782,12 +777,10 @@ jobs:
       - image: cimg/python:3.1.1-node
     steps:
       - checkout
-      - python/install-packages:
-          args: --dev
-          pkg-manager: pipenv
+      - python/install-packages
       - run:
           name: Run tests
-          command: pipenv run pytest --junitxml=junit.xml
+          command: pytest --junitxml=junit.xml
       - store_test_results:
           path: junit.xml
   deploy:

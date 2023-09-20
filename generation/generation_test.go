@@ -513,7 +513,7 @@ jobs:
           pkg-manager: poetry
       - run:
           name: Run tests
-          command: poetry run pytest --junitxml=junit.xml
+          command: poetry run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')
       - store_test_results:
           path: junit.xml
   deploy:
@@ -566,7 +566,7 @@ jobs:
           pkg-manager: poetry
       - run:
           name: Run tests
-          command: poetry run pytest --junitxml=junit.xml
+          command: poetry run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')
       - store_test_results:
           path: junit.xml
   deploy:
@@ -791,7 +791,7 @@ jobs:
           pkg-manager: pipenv
       - run:
           name: Run tests
-          command: pipenv run pytest --junitxml=junit.xml
+          command: pipenv run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')
       - store_test_results:
           path: junit.xml
   deploy:

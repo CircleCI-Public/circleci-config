@@ -37,7 +37,7 @@ func defaultSteps(l labels.Label, hasManagePy bool) []config.Step {
 		{
 			Name:    "Run tests",
 			Type:    config.Run,
-			Command: "pytest --junitxml=junit.xml",
+			Command: "pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
 		}}...)
 
 	return steps
@@ -67,7 +67,7 @@ func pipenvSteps(l labels.Label, hasManagePy bool) []config.Step {
 	steps = append(steps, config.Step{
 		Name:    "Run tests",
 		Type:    config.Run,
-		Command: "pipenv run pytest --junitxml=junit.xml",
+		Command: "pipenv run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
 	})
 
 	return steps
@@ -96,7 +96,7 @@ func poetrySteps(l labels.Label, hasManagerPy bool) []config.Step {
 	steps = append(steps, config.Step{
 		Name:    "Run tests",
 		Type:    config.Run,
-		Command: "poetry run pytest --junitxml=junit.xml",
+		Command: "poetry run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
 	})
 
 	return steps

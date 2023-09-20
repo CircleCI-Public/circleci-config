@@ -92,6 +92,15 @@ var PythonRules = []labels.Rule{
 		label.BasePath = path.Dir(managePyPath)
 		return label, nil
 	},
+	func(c codebase.Codebase, ls labels.LabelSet) (labels.Label, error) {
+		label := labels.Label{
+			Key: labels.FileTox,
+		}
+		toxPath, _ := c.FindFile("tox.ini")
+		label.Valid = toxPath != ""
+		label.BasePath = path.Dir(toxPath)
+		return label, nil
+	},
 }
 
 func fileContainsString(c codebase.Codebase, filePath string, str string) bool {

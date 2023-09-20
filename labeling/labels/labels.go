@@ -28,6 +28,7 @@ const (
 	TestJest              = "test:jest"
 	ToolGradle            = "tool:gradle"
 	FileManagePy          = "file:manage.py"
+	FileTox               = "file:tox.ini"
 )
 
 type LabelData struct {

@@ -632,6 +632,15 @@ func TestCodebase_ApplyRules_Python(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "project contains tox.ini",
+			files: map[string]string{
+				"tox.ini": "[tox]\nminversion = 3.24",
+			},
+			expectedLabels: []labels.Label{
+				{Key: labels.FileTox, Valid: true, LabelData: labels.LabelData{BasePath: "."}},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

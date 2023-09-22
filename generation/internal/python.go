@@ -7,11 +7,45 @@ import (
 
 const pythonOrb = "circleci/python@2"
 
-func defaultSteps(l labels.Label, hasManagePy bool) []config.Step {
+func testSteps(ls labels.LabelSet) []config.Step {
+	hasManagePy := ls[labels.FileManagePy].Valid
+	hasSetupPy := ls[labels.FileSetupPy].Valid
+	hasTox := ls[labels.FileToxIni].Valid
+	hasPipenv := ls[labels.PackageManagerPipenv].Valid
+	hasPoetry := ls[labels.PackageManagerPoetry].Valid
+
+	packageManager := "auto"
+	installArgs := ""
+	commandPrefix := ""
+
+	if hasSetupPy {
+		packageManager = "pip-dist"
+	}
+
+	if hasPipenv {
+		packageManager = "pipenv"
+		commandPrefix = "pipenv run "
+		installArgs = "--dev"
+	}
+
+	if hasPoetry {
+		packageManager = "poetry"
+		commandPrefix = "poetry run "
+	}
+
+	installParams := config.OrbCommandParameters{}
+	if packageManager != "auto" {
+		installParams["pkg-manager"] = packageManager
+	}
+	if installArgs != "" {
+		installParams["args"] = installArgs
+	}
+
 	steps := []config.Step{
 		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
+			Type:       config.OrbCommand,
+			Command:    "python/install-packages",
+			Parameters: installParams,
 		},
 	}
 
@@ -19,110 +53,54 @@ func defaultSteps(l labels.Label, hasManagePy bool) []config.Step {
 		steps = append(steps, config.Step{
 			Name:    "Run tests",
 			Type:    config.Run,
-			Command: "python manage.py test",
+			Command: commandPrefix + "python manage.py test",
 		})
 		return steps
 	}
 
-	steps = append(steps, []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"args":        "pytest",
-				"pkg-manager": "pip",
-				"pypi-cache":  "false",
+	if hasTox {
+		steps = append(steps,
+			config.Step{
+				Name:    "Install tox",
+				Type:    config.OrbCommand,
+				Command: "python/install-packages",
+				Parameters: config.OrbCommandParameters{
+					"args":        "tox",
+					"pkg-manager": packageManager},
 			},
-		},
+			config.Step{
+				Name:    "Run tests",
+				Type:    config.Run,
+				Command: commandPrefix + "tox",
+			},
+			config.Step{
+				Type: config.StoreTestResults,
+				Path: "junit.xml",
+			},
+		)
+		return steps
+	}
+
+	// Run pytest via package manager (or directly)
+	steps = append(steps, []config.Step{
 		{
 			Name:    "Run tests",
 			Type:    config.Run,
-			Command: "pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
+			Command: commandPrefix + "pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
+		},
+		{
+			Type: config.StoreTestResults,
+			Path: "junit.xml",
 		}}...)
 
 	return steps
 }
 
-func pipenvSteps(l labels.Label, hasManagePy bool) []config.Step {
-	steps := []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"args":        "--dev",
-				"pkg-manager": "pipenv",
-			},
-		},
-	}
-
-	if hasManagePy {
-		steps = append(steps, config.Step{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: "pipenv run python manage.py test",
-		})
-		return steps
-	}
-
-	steps = append(steps, config.Step{
-		Name:    "Run tests",
-		Type:    config.Run,
-		Command: "pipenv run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
-	})
-
-	return steps
-}
-
-func poetrySteps(l labels.Label, hasManagerPy bool) []config.Step {
-	steps := []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"pkg-manager": "poetry",
-			},
-		},
-	}
-
-	if hasManagerPy {
-		steps = append(steps, config.Step{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: "poetry run python manage.py test",
-		})
-		return steps
-	}
-
-	steps = append(steps, config.Step{
-		Name:    "Run tests",
-		Type:    config.Run,
-		Command: "poetry run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
-	})
-
-	return steps
-}
-
 func pythonTestJob(ls labels.LabelSet) *Job {
-	steps := []config.Step{checkoutStep(ls[labels.DepsPython])}
-	hasManagePy := ls[labels.FileManagePy].Valid
-
-	// Support for different package managers
-	switch {
-	case ls[labels.PackageManagerPipenv].Valid:
-		steps = append(steps, pipenvSteps(ls[labels.PackageManagerPipenv], hasManagePy)...)
-	case ls[labels.PackageManagerPoetry].Valid:
-		steps = append(steps, poetrySteps(ls[labels.PackageManagerPoetry], hasManagePy)...)
-	default:
-		steps = append(steps, defaultSteps(ls[labels.DepsPython], hasManagePy)...)
+	steps := []config.Step{
+		checkoutStep(ls[labels.DepsPython]),
 	}
-
-	if !hasManagePy {
-		// Store test results
-		steps = append(steps, config.Step{
-			Type: config.StoreTestResults,
-			Path: "junit.xml",
-		})
-	}
+	steps = append(steps, testSteps(ls)...)
 
 	return &Job{
 		Job: config.Job{

@@ -751,6 +751,67 @@ workflows:
 `,
 		},
 		{
+			testName: "python project with a setup.py and tox",
+			labels: labels.LabelSet{
+				labels.DepsPython: labels.Label{
+					Key:   labels.DepsPython,
+					Valid: true,
+					LabelData: labels.LabelData{
+						BasePath: ".",
+					},
+				},
+				labels.FileSetupPy: labels.Label{
+					Key:       labels.FileSetupPy,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+				labels.FileToxIni: labels.Label{
+					Key:       labels.FileToxIni,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: "."},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:python:.,file:setup.py:.,file:tox.ini:.
+version: 2.1
+orbs:
+  python: circleci/python@2
+jobs:
+  test-python:
+    # Install dependencies and run tests
+    docker:
+      - image: cimg/python:3.8-node
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip-dist
+      - python/install-packages:
+          args: tox
+          pkg-manager: pip-dist
+      - run:
+          name: Run tests
+          command: tox
+      - store_test_results:
+          path: junit.xml
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-python
+    # - deploy:
+    #     requires:
+    #       - test-python
+`,
+		},
+		{
 			testName: "python project with a .python-version file",
 			labels: labels.LabelSet{
 				labels.DepsPython: labels.Label{

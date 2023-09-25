@@ -10,7 +10,7 @@ const pythonOrb = "circleci/python@2"
 func testSteps(ls labels.LabelSet) []config.Step {
 	hasManagePy := ls[labels.FileManagePy].Valid
 	hasSetupPy := ls[labels.FileSetupPy].Valid
-	hasTox := ls[labels.FileToxIni].Valid
+	hasTox := ls[labels.TestTox].Valid
 	hasPipenv := ls[labels.PackageManagerPipenv].Valid
 	hasPoetry := ls[labels.PackageManagerPoetry].Valid
 

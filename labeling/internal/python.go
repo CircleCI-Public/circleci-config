@@ -103,7 +103,7 @@ var PythonRules = []labels.Rule{
 		return label, nil
 	},
 	func(c codebase.Codebase, ls labels.LabelSet) (labels.Label, error) {
-		label := labels.Label{Key: labels.FileToxIni}
+		label := labels.Label{Key: labels.TestTox}
 		toxPath, _ := c.FindFile("tox.ini")
 		label.Valid = toxPath != ""
 		label.BasePath = path.Dir(toxPath)

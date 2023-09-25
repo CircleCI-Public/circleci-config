@@ -765,14 +765,14 @@ workflows:
 					Valid:     true,
 					LabelData: labels.LabelData{BasePath: "."},
 				},
-				labels.FileToxIni: labels.Label{
-					Key:       labels.FileToxIni,
+				labels.TestTox: labels.Label{
+					Key:       labels.TestTox,
 					Valid:     true,
 					LabelData: labels.LabelData{BasePath: "."},
 				},
 			},
 			expected: `# This config was automatically generated from your source code
-# Stacks detected: deps:python:.,file:setup.py:.,file:tox.ini:.
+# Stacks detected: deps:python:.,file:setup.py:.,test:tox:.
 version: 2.1
 orbs:
   python: circleci/python@2

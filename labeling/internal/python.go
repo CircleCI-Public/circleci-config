@@ -27,6 +27,7 @@ var possiblePythonFiles = append(
 			"requirements.txt",
 			"pyproject.toml",
 			"manage.py",
+			"setup.py",
 		},
 		pipenvFiles...,
 	),
@@ -90,6 +91,22 @@ var PythonRules = []labels.Rule{
 		managePyPath, _ := c.FindFile("manage.py")
 		label.Valid = managePyPath != ""
 		label.BasePath = path.Dir(managePyPath)
+		return label, nil
+	},
+	func(c codebase.Codebase, ls labels.LabelSet) (labels.Label, error) {
+		label := labels.Label{
+			Key: labels.FileSetupPy,
+		}
+		setupPath, _ := c.FindFile("setup.py")
+		label.Valid = setupPath != ""
+		label.BasePath = path.Dir(setupPath)
+		return label, nil
+	},
+	func(c codebase.Codebase, ls labels.LabelSet) (labels.Label, error) {
+		label := labels.Label{Key: labels.TestTox}
+		toxPath, _ := c.FindFile("tox.ini")
+		label.Valid = toxPath != ""
+		label.BasePath = path.Dir(toxPath)
 		return label, nil
 	},
 }

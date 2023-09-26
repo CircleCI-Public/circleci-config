@@ -7,122 +7,41 @@ import (
 
 const pythonOrb = "circleci/python@2"
 
-func defaultSteps(l labels.Label, hasManagePy bool) []config.Step {
-	steps := []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-		},
-	}
-
-	if hasManagePy {
-		steps = append(steps, config.Step{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: "python manage.py test",
-		})
-		return steps
-	}
-
-	steps = append(steps, []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"args":        "pytest",
-				"pkg-manager": "pip",
-				"pypi-cache":  "false",
-			},
-		},
-		{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: "pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
-		}}...)
-
-	return steps
+type pythonPackageManager interface {
+	installPackages() config.Step
+	installPackage(pkg string) config.Step
+	run(command string) string
 }
 
-func pipenvSteps(l labels.Label, hasManagePy bool) []config.Step {
-	steps := []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"args":        "--dev",
-				"pkg-manager": "pipenv",
-			},
-		},
-	}
-
-	if hasManagePy {
-		steps = append(steps, config.Step{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: "pipenv run python manage.py test",
-		})
-		return steps
-	}
-
-	steps = append(steps, config.Step{
-		Name:    "Run tests",
-		Type:    config.Run,
-		Command: "pipenv run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
-	})
-
-	return steps
-}
-
-func poetrySteps(l labels.Label, hasManagerPy bool) []config.Step {
-	steps := []config.Step{
-		{
-			Type:    config.OrbCommand,
-			Command: "python/install-packages",
-			Parameters: config.OrbCommandParameters{
-				"pkg-manager": "poetry",
-			},
-		},
-	}
-
-	if hasManagerPy {
-		steps = append(steps, config.Step{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: "poetry run python manage.py test",
-		})
-		return steps
-	}
-
-	steps = append(steps, config.Step{
-		Name:    "Run tests",
-		Type:    config.Run,
-		Command: "poetry run pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
-	})
-
-	return steps
+type pythonTestRunner interface {
+	testSteps(mgr pythonPackageManager) []config.Step
 }
 
 func pythonTestJob(ls labels.LabelSet) *Job {
-	steps := []config.Step{checkoutStep(ls[labels.DepsPython])}
-	hasManagePy := ls[labels.FileManagePy].Valid
+	steps := []config.Step{
+		checkoutStep(ls[labels.DepsPython]),
+	}
 
-	// Support for different package managers
+	var mgr pythonPackageManager = defaultManager{}
 	switch {
+	case ls[labels.FileSetupPy].Valid:
+		mgr = setuptools{}
 	case ls[labels.PackageManagerPipenv].Valid:
-		steps = append(steps, pipenvSteps(ls[labels.PackageManagerPipenv], hasManagePy)...)
+		mgr = pipenv{}
 	case ls[labels.PackageManagerPoetry].Valid:
-		steps = append(steps, poetrySteps(ls[labels.PackageManagerPoetry], hasManagePy)...)
-	default:
-		steps = append(steps, defaultSteps(ls[labels.DepsPython], hasManagePy)...)
+		mgr = poetry{}
 	}
 
-	if !hasManagePy {
-		// Store test results
-		steps = append(steps, config.Step{
-			Type: config.StoreTestResults,
-			Path: "junit.xml",
-		})
+	steps = append(steps, mgr.installPackages())
+
+	var testRunner pythonTestRunner = pytest{}
+	switch {
+	case ls[labels.FileManagePy].Valid:
+		testRunner = manage{}
+	case ls[labels.TestTox].Valid:
+		testRunner = tox{}
 	}
+	steps = append(steps, testRunner.testSteps(mgr)...)
 
 	return &Job{
 		Job: config.Job{
@@ -146,6 +65,154 @@ func GeneratePythonJobs(ls labels.LabelSet) []*Job {
 
 	return []*Job{
 		pythonTestJob(ls),
+	}
+}
+
+type defaultManager struct{}
+
+func (d defaultManager) run(command string) string {
+	return command
+}
+
+func (d defaultManager) installPackages() config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+	}
+}
+func (d defaultManager) installPackage(pkg string) config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"args": pkg,
+		},
+	}
+}
+
+type setuptools struct{}
+
+func (s setuptools) installPackages() config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": "pip-dist",
+		},
+	}
+}
+func (s setuptools) installPackage(pkg string) config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": "pip-dist",
+			"args":        pkg,
+		},
+	}
+}
+func (s setuptools) run(command string) string {
+	return command
+}
+
+type pipenv struct{}
+
+func (p pipenv) installPackages() config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"args":        "--dev",
+			"pkg-manager": "pipenv",
+		},
+	}
+}
+
+func (p pipenv) installPackage(pkg string) config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"args":        pkg,
+			"pkg-manager": "pipenv",
+		},
+	}
+}
+
+func (p pipenv) run(command string) string {
+	return "pipenv run " + command
+}
+
+type poetry struct{}
+
+func (p poetry) installPackages() config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": "poetry",
+		},
+	}
+}
+
+func (p poetry) installPackage(pkg string) config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": "poetry",
+			"args":        pkg,
+		},
+	}
+}
+
+func (p poetry) run(command string) string {
+	return "poetry run " + command
+}
+
+type manage struct{}
+
+func (m manage) testSteps(mgr pythonPackageManager) []config.Step {
+	return []config.Step{
+		{
+			Name:    "Run tests",
+			Type:    config.Run,
+			Command: mgr.run("python manage.py test"),
+		},
+	}
+
+}
+
+type pytest struct{}
+
+func (p pytest) testSteps(mgr pythonPackageManager) []config.Step {
+	return []config.Step{
+		{
+			Name:    "Run tests",
+			Type:    config.Run,
+			Command: mgr.run("pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')"),
+		},
+		{
+			Type: config.StoreTestResults,
+			Path: "junit.xml",
+		},
+	}
+}
+
+type tox struct{}
+
+func (t tox) testSteps(mgr pythonPackageManager) []config.Step {
+	return []config.Step{
+		mgr.installPackage("tox"),
+		{
+			Name:    "Run tests",
+			Type:    config.Run,
+			Command: mgr.run("tox"),
+		},
+		{
+			Type: config.StoreTestResults,
+			Path: "junit.xml",
+		},
 	}
 }
 

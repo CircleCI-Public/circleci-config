@@ -91,7 +91,7 @@ func nodeTestSteps(ls labels.LabelSet) []config.Step {
 		return []config.Step{{
 			Type:    config.Run,
 			Name:    "Run tests with Jest",
-			Command: "jest --ci --runInBand --reporters=default --reporters=jest-junit",
+			Command: "./node_modules/.bin/jest --ci --runInBand --reporters=default --reporters=jest-junit",
 		}}
 	}
 

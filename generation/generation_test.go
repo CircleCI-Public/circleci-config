@@ -312,7 +312,7 @@ jobs:
           command: yarn add jest-junit
       - run:
           name: Run tests with Jest
-          command: jest --ci --runInBand --reporters=default --reporters=jest-junit
+          command: ./node_modules/.bin/jest --ci --runInBand --reporters=default --reporters=jest-junit
       - store_test_results:
           path: ./test-results/
   deploy:
@@ -410,7 +410,7 @@ jobs:
           command: npm install jest-junit
       - run:
           name: Run tests with Jest
-          command: jest --ci --runInBand --reporters=default --reporters=jest-junit
+          command: ./node_modules/.bin/jest --ci --runInBand --reporters=default --reporters=jest-junit
       - store_test_results:
           path: ./test-results/
   deploy:

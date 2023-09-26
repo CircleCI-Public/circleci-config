@@ -7,100 +7,41 @@ import (
 
 const pythonOrb = "circleci/python@2"
 
-func testSteps(ls labels.LabelSet) []config.Step {
-	hasManagePy := ls[labels.FileManagePy].Valid
-	hasSetupPy := ls[labels.FileSetupPy].Valid
-	hasTox := ls[labels.TestTox].Valid
-	hasPipenv := ls[labels.PackageManagerPipenv].Valid
-	hasPoetry := ls[labels.PackageManagerPoetry].Valid
+type pythonPackageManager interface {
+	installPackages() config.Step
+	installPackage(pkg string) config.Step
+	run(command string) string
+}
 
-	packageManager := "auto"
-	installArgs := ""
-	commandPrefix := ""
-
-	if hasSetupPy {
-		packageManager = "pip-dist"
-	}
-
-	if hasPipenv {
-		packageManager = "pipenv"
-		commandPrefix = "pipenv run "
-		installArgs = "--dev"
-	}
-
-	if hasPoetry {
-		packageManager = "poetry"
-		commandPrefix = "poetry run "
-	}
-
-	installParams := config.OrbCommandParameters{}
-	if packageManager != "auto" {
-		installParams["pkg-manager"] = packageManager
-	}
-	if installArgs != "" {
-		installParams["args"] = installArgs
-	}
-
-	steps := []config.Step{
-		{
-			Type:       config.OrbCommand,
-			Command:    "python/install-packages",
-			Parameters: installParams,
-		},
-	}
-
-	if hasManagePy {
-		steps = append(steps, config.Step{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: commandPrefix + "python manage.py test",
-		})
-		return steps
-	}
-
-	if hasTox {
-		steps = append(steps,
-			config.Step{
-				Name:    "Install tox",
-				Type:    config.OrbCommand,
-				Command: "python/install-packages",
-				Parameters: config.OrbCommandParameters{
-					"args":        "tox",
-					"pkg-manager": packageManager},
-			},
-			config.Step{
-				Name:    "Run tests",
-				Type:    config.Run,
-				Command: commandPrefix + "tox",
-			},
-			config.Step{
-				Type: config.StoreTestResults,
-				Path: "junit.xml",
-			},
-		)
-		return steps
-	}
-
-	// Run pytest via package manager (or directly)
-	steps = append(steps, []config.Step{
-		{
-			Name:    "Run tests",
-			Type:    config.Run,
-			Command: commandPrefix + "pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')",
-		},
-		{
-			Type: config.StoreTestResults,
-			Path: "junit.xml",
-		}}...)
-
-	return steps
+type pythonTestRunner interface {
+	testSteps(mgr pythonPackageManager) []config.Step
 }
 
 func pythonTestJob(ls labels.LabelSet) *Job {
 	steps := []config.Step{
 		checkoutStep(ls[labels.DepsPython]),
 	}
-	steps = append(steps, testSteps(ls)...)
+
+	var mgr pythonPackageManager = defaultManager{}
+	switch {
+	case ls[labels.FileSetupPy].Valid:
+		mgr = setuptools{}
+	case ls[labels.PackageManagerPipenv].Valid:
+		mgr = pipenv{}
+	case ls[labels.PackageManagerPoetry].Valid:
+		mgr = poetry{}
+	}
+
+	steps = append(steps, mgr.installPackages())
+
+	var testRunner pythonTestRunner = pytest{}
+	switch {
+	case ls[labels.FileManagePy].Valid:
+		testRunner = manage{}
+	case ls[labels.TestTox].Valid:
+		testRunner = tox{}
+	}
+	steps = append(steps, testRunner.testSteps(mgr)...)
 
 	return &Job{
 		Job: config.Job{
@@ -124,6 +65,154 @@ func GeneratePythonJobs(ls labels.LabelSet) []*Job {
 
 	return []*Job{
 		pythonTestJob(ls),
+	}
+}
+
+type defaultManager struct{}
+
+func (d defaultManager) run(command string) string {
+	return command
+}
+
+func (d defaultManager) installPackages() config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+	}
+}
+func (d defaultManager) installPackage(pkg string) config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"args": pkg,
+		},
+	}
+}
+
+type setuptools struct{}
+
+func (s setuptools) installPackages() config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": "pip-dist",
+		},
+	}
+}
+func (s setuptools) installPackage(pkg string) config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": "pip-dist",
+			"args":        pkg,
+		},
+	}
+}
+func (s setuptools) run(command string) string {
+	return command
+}
+
+type pipenv struct{}
+
+func (p pipenv) installPackages() config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"args":        "--dev",
+			"pkg-manager": "pipenv",
+		},
+	}
+}
+
+func (p pipenv) installPackage(pkg string) config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"args":        pkg,
+			"pkg-manager": "pipenv",
+		},
+	}
+}
+
+func (p pipenv) run(command string) string {
+	return "pipenv run " + command
+}
+
+type poetry struct{}
+
+func (p poetry) installPackages() config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": "poetry",
+		},
+	}
+}
+
+func (p poetry) installPackage(pkg string) config.Step {
+	return config.Step{
+		Type:    config.OrbCommand,
+		Command: "python/install-packages",
+		Parameters: config.OrbCommandParameters{
+			"pkg-manager": "poetry",
+			"args":        pkg,
+		},
+	}
+}
+
+func (p poetry) run(command string) string {
+	return "poetry run " + command
+}
+
+type manage struct{}
+
+func (m manage) testSteps(mgr pythonPackageManager) []config.Step {
+	return []config.Step{
+		{
+			Name:    "Run tests",
+			Type:    config.Run,
+			Command: mgr.run("python manage.py test"),
+		},
+	}
+
+}
+
+type pytest struct{}
+
+func (p pytest) testSteps(mgr pythonPackageManager) []config.Step {
+	return []config.Step{
+		{
+			Name:    "Run tests",
+			Type:    config.Run,
+			Command: mgr.run("pytest --junitxml=junit.xml || ((($? == 5)) && echo 'Did not find any tests to run.')"),
+		},
+		{
+			Type: config.StoreTestResults,
+			Path: "junit.xml",
+		},
+	}
+}
+
+type tox struct{}
+
+func (t tox) testSteps(mgr pythonPackageManager) []config.Step {
+	return []config.Step{
+		mgr.installPackage("tox"),
+		{
+			Name:    "Run tests",
+			Type:    config.Run,
+			Command: mgr.run("tox"),
+		},
+		{
+			Type: config.StoreTestResults,
+			Path: "junit.xml",
+		},
 	}
 }
 

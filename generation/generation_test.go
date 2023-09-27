@@ -275,6 +275,50 @@ workflows:
 `,
 		},
 		{
+			testName: "node codebase with default test task set",
+			labels: labels.LabelSet{
+				labels.DepsNode: labels.Label{
+					Key:       labels.DepsNode,
+					Valid:     true,
+					LabelData: labels.LabelData{BasePath: ".", HasLockFile: false, Tasks: map[string]string{"test": "echo \"Error: no test specified\" && exit 1"}},
+				},
+			},
+			expected: `# This config was automatically generated from your source code
+# Stacks detected: deps:node:.
+version: 2.1
+orbs:
+  node: circleci/node@5
+jobs:
+  test-node:
+    # Install node dependencies and run tests
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages:
+          cache-path: ~/project/node_modules
+          override-ci-command: npm install
+      - run:
+          name: Run tests
+          command: echo \"No test specified in package.json\"
+  deploy:
+    # This is an example deploy job, not actually used by the workflow
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+workflows:
+  build-and-test:
+    jobs:
+      - test-node
+    # - deploy:
+    #     requires:
+    #       - test-node
+`,
+		},
+		{
 			testName: "node codebase with yarn.lock and .yarnrc.yml file",
 			labels: labels.LabelSet{
 				labels.DepsNode: labels.Label{

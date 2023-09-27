@@ -179,7 +179,7 @@ jobs:
           pkg-manager: npm
       - run:
           name: Run tests
-          command: npm test
+          command: npm test --passWithNoTests
   test-go:
     # Install go modules and run tests
     docker:
@@ -255,7 +255,7 @@ jobs:
           pkg-manager: yarn
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn test --passWithNoTests
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -358,7 +358,7 @@ jobs:
           override-ci-command: npm install
       - run:
           name: Run tests
-          command: npm test
+          command: npm test --passWithNoTests
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:

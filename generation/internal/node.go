@@ -22,7 +22,7 @@ func nodePackageManager(ls labels.LabelSet) string {
 
 func nodeRunCommand(ls labels.LabelSet, task string) string {
 	if task == "test" {
-		return fmt.Sprintf("%s test", nodePackageManager(ls))
+		return fmt.Sprintf("%s test --passWithNoTests", nodePackageManager(ls))
 	}
 	return fmt.Sprintf("%s run %s", nodePackageManager(ls), task)
 }

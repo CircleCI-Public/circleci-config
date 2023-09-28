@@ -178,6 +178,20 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
+          name: Print node install help instructions
+          command: |-
+            echo "One cause for node package install failure is if you have private repositories that it can't reach
+            One way to fix this for private npm packages:
+              1. Use the npm CLI's \"login\" command to create a token (usually saved in your user's \"~/.npmrc\" file)
+                For more info, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=set%20the%20%24npm_token%20environment%20variable%20in%20circleci
+              2. Add a NPM_TOKEN to an org context
+                For info on how to use contexts, see https://circleci.com/docs/contexts/
+              3. Add a .circleci/config.yml to your repository or use this config.yml as a starting template
+              4. Configure the jobs to use the context that includes NPM_TOKEN
+              5. Add a step to inject your NPM_TOKEN environment variable into npm before \"install-packages\"
+                For an example, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=the%20deploy%20job%20has%20several%20steps%20that%20run%20to%20authenticate%20with%20and%20publish%20to"
+          when: on_fail
+      - run:
           name: Run tests
           command: npm test --passWithNoTests
   test-go:
@@ -254,6 +268,20 @@ jobs:
       - node/install-packages:
           pkg-manager: yarn
       - run:
+          name: Print node install help instructions
+          command: |-
+            echo "One cause for node package install failure is if you have private repositories that it can't reach
+            One way to fix this for private npm packages:
+              1. Use the npm CLI's \"login\" command to create a token (usually saved in your user's \"~/.npmrc\" file)
+                For more info, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=set%20the%20%24npm_token%20environment%20variable%20in%20circleci
+              2. Add a NPM_TOKEN to an org context
+                For info on how to use contexts, see https://circleci.com/docs/contexts/
+              3. Add a .circleci/config.yml to your repository or use this config.yml as a starting template
+              4. Configure the jobs to use the context that includes NPM_TOKEN
+              5. Add a step to inject your NPM_TOKEN environment variable into npm before \"install-packages\"
+                For an example, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=the%20deploy%20job%20has%20several%20steps%20that%20run%20to%20authenticate%20with%20and%20publish%20to"
+          when: on_fail
+      - run:
           name: Run tests
           command: yarn test --passWithNoTests
   deploy:
@@ -309,6 +337,20 @@ jobs:
       - node/install-packages:
           pkg-manager: yarn
       - run:
+          name: Print node install help instructions
+          command: |-
+            echo "One cause for node package install failure is if you have private repositories that it can't reach
+            One way to fix this for private npm packages:
+              1. Use the npm CLI's \"login\" command to create a token (usually saved in your user's \"~/.npmrc\" file)
+                For more info, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=set%20the%20%24npm_token%20environment%20variable%20in%20circleci
+              2. Add a NPM_TOKEN to an org context
+                For info on how to use contexts, see https://circleci.com/docs/contexts/
+              3. Add a .circleci/config.yml to your repository or use this config.yml as a starting template
+              4. Configure the jobs to use the context that includes NPM_TOKEN
+              5. Add a step to inject your NPM_TOKEN environment variable into npm before \"install-packages\"
+                For an example, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=the%20deploy%20job%20has%20several%20steps%20that%20run%20to%20authenticate%20with%20and%20publish%20to"
+          when: on_fail
+      - run:
           command: yarn add jest-junit
       - run:
           name: Run tests with Jest
@@ -356,6 +398,20 @@ jobs:
       - node/install-packages:
           cache-path: ~/project/node_modules
           override-ci-command: npm install
+      - run:
+          name: Print node install help instructions
+          command: |-
+            echo "One cause for node package install failure is if you have private repositories that it can't reach
+            One way to fix this for private npm packages:
+              1. Use the npm CLI's \"login\" command to create a token (usually saved in your user's \"~/.npmrc\" file)
+                For more info, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=set%20the%20%24npm_token%20environment%20variable%20in%20circleci
+              2. Add a NPM_TOKEN to an org context
+                For info on how to use contexts, see https://circleci.com/docs/contexts/
+              3. Add a .circleci/config.yml to your repository or use this config.yml as a starting template
+              4. Configure the jobs to use the context that includes NPM_TOKEN
+              5. Add a step to inject your NPM_TOKEN environment variable into npm before \"install-packages\"
+                For an example, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=the%20deploy%20job%20has%20several%20steps%20that%20run%20to%20authenticate%20with%20and%20publish%20to"
+          when: on_fail
       - run:
           name: Run tests
           command: npm test --passWithNoTests
@@ -407,6 +463,20 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run:
+          name: Print node install help instructions
+          command: |-
+            echo "One cause for node package install failure is if you have private repositories that it can't reach
+            One way to fix this for private npm packages:
+              1. Use the npm CLI's \"login\" command to create a token (usually saved in your user's \"~/.npmrc\" file)
+                For more info, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=set%20the%20%24npm_token%20environment%20variable%20in%20circleci
+              2. Add a NPM_TOKEN to an org context
+                For info on how to use contexts, see https://circleci.com/docs/contexts/
+              3. Add a .circleci/config.yml to your repository or use this config.yml as a starting template
+              4. Configure the jobs to use the context that includes NPM_TOKEN
+              5. Add a step to inject your NPM_TOKEN environment variable into npm before \"install-packages\"
+                For an example, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=the%20deploy%20job%20has%20several%20steps%20that%20run%20to%20authenticate%20with%20and%20publish%20to"
+          when: on_fail
+      - run:
           command: npm install jest-junit
       - run:
           name: Run tests with Jest
@@ -453,6 +523,20 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
+      - run:
+          name: Print node install help instructions
+          command: |-
+            echo "One cause for node package install failure is if you have private repositories that it can't reach
+            One way to fix this for private npm packages:
+              1. Use the npm CLI's \"login\" command to create a token (usually saved in your user's \"~/.npmrc\" file)
+                For more info, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=set%20the%20%24npm_token%20environment%20variable%20in%20circleci
+              2. Add a NPM_TOKEN to an org context
+                For info on how to use contexts, see https://circleci.com/docs/contexts/
+              3. Add a .circleci/config.yml to your repository or use this config.yml as a starting template
+              4. Configure the jobs to use the context that includes NPM_TOKEN
+              5. Add a step to inject your NPM_TOKEN environment variable into npm before \"install-packages\"
+                For an example, see https://circleci.com/blog/publishing-npm-packages-using-circleci-2-0/#:~:text=the%20deploy%20job%20has%20several%20steps%20that%20run%20to%20authenticate%20with%20and%20publish%20to"
+          when: on_fail
       - run:
           command: npm run build
       - run:

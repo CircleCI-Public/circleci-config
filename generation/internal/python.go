@@ -58,14 +58,47 @@ func pythonTestJob(ls labels.LabelSet) *Job {
 	}
 }
 
+func pythonBuildJob(ls labels.LabelSet) *Job {
+
+	steps := []config.Step{
+		checkoutStep(ls[labels.DepsPython]),
+		createArtifactsDirStep,
+		{
+			Type:    config.OrbCommand,
+			Name:    "build package",
+			Command: "python/dist",
+		},
+		{
+			Type:        config.StoreArtifacts,
+			Path:        "dist",
+			Destination: "~/artifacts",
+		},
+	}
+	return &Job{
+		Job: config.Job{
+			Name:         "build-package",
+			Comment:      "build python package",
+			DockerImages: []string{pythonImageVersion(ls)},
+			Steps:        steps,
+		},
+		Type: ArtifactJob,
+		Orbs: map[string]string{
+			"python": pythonOrb,
+		},
+	}
+}
+
 func GeneratePythonJobs(ls labels.LabelSet) []*Job {
 	if !ls[labels.DepsPython].Valid {
 		return nil
 	}
-
-	return []*Job{
+	jobs := []*Job{
 		pythonTestJob(ls),
 	}
+	if ls[labels.FileSetupPy].Valid {
+		jobs = append(jobs, pythonBuildJob(ls))
+	}
+	return jobs
 }
 
 type defaultManager struct{}

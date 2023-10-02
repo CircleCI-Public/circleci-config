@@ -26,7 +26,7 @@ func nodeRunCommand(ls labels.LabelSet, task string) string {
 		if ls[labels.DepsNode].Tasks[task] == "echo \"Error: no test specified\" && exit 1" {
 			return "echo \\\"No test specified in package.json\\\""
 		}
-		return fmt.Sprintf("%s test", nodePackageManager(ls))
+		return fmt.Sprintf("%s test --passWithNoTests", nodePackageManager(ls))
 	}
 	return fmt.Sprintf("%s run %s", nodePackageManager(ls), task)
 }

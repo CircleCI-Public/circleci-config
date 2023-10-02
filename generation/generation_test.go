@@ -179,7 +179,7 @@ jobs:
           pkg-manager: npm
       - run:
           name: Run tests
-          command: npm test
+          command: npm test --passWithNoTests
   test-go:
     # Install go modules and run tests
     docker:
@@ -255,7 +255,7 @@ jobs:
           pkg-manager: yarn
       - run:
           name: Run tests
-          command: yarn test
+          command: yarn test --passWithNoTests
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -402,7 +402,7 @@ jobs:
           override-ci-command: npm install
       - run:
           name: Run tests
-          command: npm test
+          command: npm test --passWithNoTests
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -837,6 +837,19 @@ jobs:
           command: tox
       - store_test_results:
           path: junit.xml
+  build-package:
+    # build python package
+    docker:
+      - image: cimg/python:3.8-node
+    steps:
+      - checkout
+      - run:
+          name: Create the ~/artifacts directory if it doesn't exist
+          command: mkdir -p ~/artifacts
+      - python/dist
+      - store_artifacts:
+          path: dist
+          destination: ~/artifacts
   deploy:
     # This is an example deploy job, not actually used by the workflow
     docker:
@@ -850,9 +863,12 @@ workflows:
   build-and-test:
     jobs:
       - test-python
+      - build-package:
+          requires:
+            - test-python
     # - deploy:
     #     requires:
-    #       - test-python
+    #       - build-package
 `,
 		},
 		{

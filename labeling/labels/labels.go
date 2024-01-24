@@ -30,6 +30,7 @@ const (
 	FileManagePy          = "file:manage.py"
 	FileSetupPy           = "file:setup.py"
 	TestTox               = "test:tox"
+	EmptyRepo             = "cicd:empty"
 )
 
 type LabelData struct {

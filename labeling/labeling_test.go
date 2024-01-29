@@ -854,3 +854,25 @@ func TestCodebase_ApplyRules_CICD(t *testing.T) {
 	}
 
 }
+
+func TestCodebase_ApplyRules_Empty(t *testing.T) {
+	repo := map[string]string{}
+	rules := internal.EmptyRepoRules
+
+	c := fakeCodebase{repo}
+	got := ApplyRules(c, rules)
+	want := labels.LabelSet{
+		labels.EmptyRepo: labels.Label{
+			Key:   labels.EmptyRepo,
+			Valid: true,
+		},
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("\n"+
+			"got        %+v\n"+
+			"expected   %+v\n", got, want,
+		)
+	}
+
+}

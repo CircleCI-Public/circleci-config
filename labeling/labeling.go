@@ -38,6 +38,7 @@ func ApplyAllRules(c codebase.Codebase) labels.LabelSet {
 		internal.GithubActionRules,
 		internal.GitlabWorkflowRules,
 		internal.JenkinsRules,
+		internal.EmptyRepoRules,
 		// Add other stacks here
 	}
 

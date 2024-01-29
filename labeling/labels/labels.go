@@ -25,6 +25,7 @@ const (
 	CICDGithubActions     = "cicd:github-actions"
 	CICDGitlabWorkflow    = "cicd:gitlab-workflows"
 	CICDJenkins           = "cicd:jenkins"
+	EmptyRepo             = "cicd:empty"
 	TestJest              = "test:jest"
 	ToolGradle            = "tool:gradle"
 	FileManagePy          = "file:manage.py"

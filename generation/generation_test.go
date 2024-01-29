@@ -1210,6 +1210,63 @@ workflows:
     #       - test-go
 `,
 		},
+		{
+			testName: "empty repo",
+			labels: labels.LabelSet{
+				labels.EmptyRepo: labels.Label{
+					Key:   labels.EmptyRepo,
+					Valid: true,
+				},
+			},
+			expected: `# Couldn't automatically generate a config from your source code.
+# This is a generic template to serve as a base for your custom config
+# See: https://circleci.com/docs/configuration-reference
+# Stacks detected: cicd:empty:
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      # Replace this with a real test runner invocation
+      - run:
+          name: Run tests
+          command: echo 'replace me with real tests!' && false
+  build:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      # Replace this with steps to build a package, or executable
+      - run:
+          name: Build an artifact
+          command: touch example.txt
+      - store_artifacts:
+          path: example.txt
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      # Replace this with steps to deploy to users
+      - run:
+          name: deploy
+          command: '#e.g. ./deploy.sh'
+      - run:
+          name: found empty repo
+          command: ':'
+workflows:
+  example:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+      - deploy:
+          requires:
+            - test
+`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.testName, func(t *testing.T) {

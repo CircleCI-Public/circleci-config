@@ -53,6 +53,9 @@ func buildDeployJob(ls labels.LabelSet) *Job {
 	deployJob := stubDeployJob
 	deployJob.Steps = stubDeployJob.Steps
 	deployJob.Steps = append(deployJob.Steps, getCICDSteps(ls)...)
+	if emptyRepoLabel, ok := ls[labels.EmptyRepo]; ok && emptyRepoLabel.Valid {
+		deployJob.Steps = append(deployJob.Steps, getEmptyJobSteps(ls)...)
+	}
 
 	return &deployJob
 }
@@ -215,4 +218,14 @@ func getJobsByType(jobs []*Job) map[Type][]*config.Job {
 	}
 
 	return jobsByType
+}
+
+func getEmptyJobSteps(ls labels.LabelSet) []config.Step {
+	steps := make([]config.Step, 0)
+	steps = append(steps, config.Step{
+		Type:    config.Run,
+		Name:    "found empty repo",
+		Command: ":", // dont do anything just return status 0 and continue
+	})
+	return steps
 }

@@ -30,7 +30,7 @@ func TestInferConfig(t *testing.T) {
 		{url: "https://github.com/CircleCI-Public/circleci-demo-ruby-rails"},
 		{url: "https://github.com/CircleCI-Public/circleci-demo-java-spring"},
 		// There is no "demo" for rust or maven, but the orbs repo contain sample dirs
-		{url: "https://github.com/CircleCI-Public/rust-orb"},
+		{url: "https://github.com/CircleCI-Public/rust-orb", branch: "main"},
 		{url: "https://github.com/CircleCI-Public/maven-orb", branch: "main"},
 		{url: "https://github.com/CircleCI-Public/sample-php-laravel", branch: "circleci-2.0"},
 	}

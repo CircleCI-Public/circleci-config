@@ -14,6 +14,9 @@ var EmptyRepoRules = []labels.Rule{
 			if path == "." {
 				return false
 			}
+			if path == "README.md" {
+				return false
+			}
 			return true
 		}, "*.*")
 		fmt.Println("====> result", result, err)

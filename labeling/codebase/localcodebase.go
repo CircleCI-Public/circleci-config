@@ -103,3 +103,16 @@ func (c LocalCodebase) FindFile(glob ...string) (path string, err error) {
 func (c LocalCodebase) ReadFile(path string) (contents []byte, err error) {
 	return os.ReadFile(filepath.Join(c.BasePath, path))
 }
+
+func (c LocalCodebase) ListFiles() ([]string, error) {
+	files, err := c.files()
+	if err != nil {
+		return []string{}, err
+	}
+
+	if len(files) > 0 && files[0] == "." {
+		files = files[1:]
+	}
+
+	return files, nil
+}

@@ -37,7 +37,7 @@ func TestCodebase_ApplyPhpRules(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := fakeCodebase{tt.files}
+			c := fakeCodebase{tt.files, []string{"file"}}
 			expected := make(labels.LabelSet)
 			for _, label := range tt.expectedLabels {
 				// all should be Valid

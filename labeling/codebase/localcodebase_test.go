@@ -214,3 +214,20 @@ func TestLocalCodebase_files(t *testing.T) {
 	})
 
 }
+
+func TestLocalCodebase_ListFiles(t *testing.T) {
+	files, err := LocalCodebase{BasePath: "./testdata", maxDepth: 2}.ListFiles()
+
+	if err != nil {
+		t.Errorf("%s", err.Error())
+	}
+
+	if len(files) != 1 {
+		t.Errorf("unexpected files found, wanted 1 file but found %d", len(files))
+	}
+
+	if files[0] != "find.me" {
+		t.Errorf("found unexpected file. \nwanted:\t\t%s\ngot:\t\t%s\n", "find.me", files[0])
+	}
+
+}

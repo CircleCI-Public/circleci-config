@@ -11,6 +11,4 @@ type Codebase interface {
 	// returns the first file that matches glob
 	FindFile(glob ...string) (path string, err error)
 	ReadFile(path string) (contents []byte, err error)
-	// ListFiles returns a list of files starting from the bast path of the codebase
-	ListFiles() ([]string, error)
 }

@@ -14,8 +14,6 @@ import (
 type fakeCodebase struct {
 	// map of filename to file contents
 	contentsByPath map[string]string
-
-	files []string
 }
 
 func (c fakeCodebase) FindFileMatching(predicate func(string) bool, globs ...string) (string, error) {
@@ -41,14 +39,6 @@ func (c fakeCodebase) ReadFile(path string) (contents []byte, err error) {
 		return []byte(contentString), nil
 	}
 	return nil, codebase.NotFoundError
-}
-
-func (c fakeCodebase) ListFiles() ([]string, error) {
-	return c.files, nil
-}
-
-func (c fakeCodebase) setFileList(files []string) {
-	c.files = files
 }
 
 func TestCodebase_ApplyAllRules(t *testing.T) {
@@ -94,7 +84,7 @@ func TestCodebase_ApplyAllRules(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := fakeCodebase{tt.files, []string{"file"}}
+			c := fakeCodebase{tt.files}
 			expected := make(labels.LabelSet)
 			for _, label := range tt.expectedLabels {
 				// all should be Valid
@@ -260,7 +250,7 @@ func TestCodebase_ApplyRules_Node(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := fakeCodebase{tt.files, []string{"file"}}
+			c := fakeCodebase{tt.files}
 			expected := make(labels.LabelSet)
 			for _, label := range tt.expectedLabels {
 				// all should be Valid
@@ -385,7 +375,7 @@ func TestCodebase_ApplyRules_Go(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := fakeCodebase{tt.files, []string{"file"}}
+			c := fakeCodebase{tt.files}
 			expected := make(labels.LabelSet)
 			for _, label := range tt.expectedLabels {
 				// all should be Valid
@@ -645,7 +635,7 @@ func TestCodebase_ApplyRules_Python(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := fakeCodebase{tt.files, []string{"file"}}
+			c := fakeCodebase{tt.files}
 			expected := make(labels.LabelSet)
 			for _, label := range tt.expectedLabels {
 				// all should be Valid
@@ -744,7 +734,7 @@ func TestCodebase_ApplyRules_Java(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := fakeCodebase{tt.files, []string{"file"}}
+			c := fakeCodebase{tt.files}
 			expected := make(labels.LabelSet)
 			for _, label := range tt.expectedLabels {
 				// all should be Valid
@@ -851,7 +841,7 @@ func TestCodebase_ApplyRules_CICD(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			c := fakeCodebase{tt.files, []string{"file"}}
+			c := fakeCodebase{tt.files}
 			got := ApplyRules(c, tt.rules)
 
 			if !reflect.DeepEqual(got, tt.expected) {
@@ -870,7 +860,7 @@ func TestCodebase_ApplyRules_Empty(t *testing.T) {
 	t.Run("no files", func(t *testing.T) {
 		repo := map[string]string{}
 		rules := internal.EmptyRepoRules
-		c := fakeCodebase{repo, []string{}}
+		c := fakeCodebase{repo}
 		got := ApplyRules(c, rules)
 		want := labels.LabelSet{
 			labels.EmptyRepo: labels.Label{
@@ -888,9 +878,9 @@ func TestCodebase_ApplyRules_Empty(t *testing.T) {
 	})
 
 	t.Run("only has readme", func(t *testing.T) {
-		repo := map[string]string{}
+		repo := map[string]string{"README.md": "#hello world"}
 		rules := internal.EmptyRepoRules
-		c := fakeCodebase{repo, []string{"README.md"}}
+		c := fakeCodebase{repo}
 		got := ApplyRules(c, rules)
 		want := labels.LabelSet{
 			labels.EmptyRepo: labels.Label{
@@ -908,9 +898,9 @@ func TestCodebase_ApplyRules_Empty(t *testing.T) {
 	})
 
 	t.Run("has readme but with different casing", func(t *testing.T) {
-		repo := map[string]string{}
+		repo := map[string]string{"README.md": "#hello world"}
 		rules := internal.EmptyRepoRules
-		c := fakeCodebase{repo, []string{"readme.md"}}
+		c := fakeCodebase{repo}
 		got := ApplyRules(c, rules)
 		want := labels.LabelSet{
 			labels.EmptyRepo: labels.Label{

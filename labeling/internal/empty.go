@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/CircleCI-Public/circleci-config/labeling/codebase"
@@ -10,30 +11,19 @@ import (
 var EmptyRepoRules = []labels.Rule{
 	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.EmptyRepo
-		isEmpty, err := isRepoEmpty(c)
+		fileCount := 0
+		_, err = c.FindFileMatching(func(path string) bool {
+			if path != "." && strings.TrimSpace(strings.ToLower(path)) != "readme.md" {
+				fileCount += 1
+			}
 
-		if err == codebase.NotFoundError || isEmpty {
+			return false
+		}, "*")
+
+		if errors.Is(err, codebase.NotFoundError) && fileCount == 0 {
 			label.Valid = true
 			return label, nil
 		}
 		return label, err
 	},
-}
-
-func isRepoEmpty(c codebase.Codebase) (bool, error) {
-	files, err := c.ListFiles()
-	if err != nil {
-		return false, err
-	}
-
-	if len(files) == 0 {
-		return true, nil
-	}
-
-	if len(files) == 1 {
-		readme := strings.ToLower(strings.TrimSpace(files[0]))
-		return readme == "readme.md", nil
-	}
-
-	return false, nil
 }

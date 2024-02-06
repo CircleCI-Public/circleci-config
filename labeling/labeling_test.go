@@ -898,7 +898,7 @@ func TestCodebase_ApplyRules_Empty(t *testing.T) {
 	})
 
 	t.Run("has readme but with different casing", func(t *testing.T) {
-		repo := map[string]string{"README.md": "#hello world"}
+		repo := map[string]string{"readME.md": "#hello world"}
 		rules := internal.EmptyRepoRules
 		c := fakeCodebase{repo}
 		got := ApplyRules(c, rules)

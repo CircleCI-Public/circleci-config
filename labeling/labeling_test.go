@@ -856,23 +856,65 @@ func TestCodebase_ApplyRules_CICD(t *testing.T) {
 }
 
 func TestCodebase_ApplyRules_Empty(t *testing.T) {
-	repo := map[string]string{}
-	rules := internal.EmptyRepoRules
 
-	c := fakeCodebase{repo}
-	got := ApplyRules(c, rules)
-	want := labels.LabelSet{
-		labels.EmptyRepo: labels.Label{
-			Key:   labels.EmptyRepo,
-			Valid: true,
-		},
-	}
+	t.Run("no files", func(t *testing.T) {
+		repo := map[string]string{}
+		rules := internal.EmptyRepoRules
+		c := fakeCodebase{repo}
+		got := ApplyRules(c, rules)
+		want := labels.LabelSet{
+			labels.EmptyRepo: labels.Label{
+				Key:   labels.EmptyRepo,
+				Valid: true,
+			},
+		}
 
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("\n"+
-			"got        %+v\n"+
-			"expected   %+v\n", got, want,
-		)
-	}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("\n"+
+				"got        %+v\n"+
+				"expected   %+v\n", got, want,
+			)
+		}
+	})
 
+	t.Run("only has readme", func(t *testing.T) {
+		repo := map[string]string{"README.md": "#hello world"}
+		rules := internal.EmptyRepoRules
+		c := fakeCodebase{repo}
+		got := ApplyRules(c, rules)
+		want := labels.LabelSet{
+			labels.EmptyRepo: labels.Label{
+				Key:   labels.EmptyRepo,
+				Valid: true,
+			},
+		}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("\n"+
+				"got        %+v\n"+
+				"expected   %+v\n", got, want,
+			)
+		}
+	})
+
+	t.Run("has readme but with different casing", func(t *testing.T) {
+		repo := map[string]string{"readME.md": "#hello world"}
+		rules := internal.EmptyRepoRules
+		c := fakeCodebase{repo}
+		got := ApplyRules(c, rules)
+		want := labels.LabelSet{
+			labels.EmptyRepo: labels.Label{
+				Key:   labels.EmptyRepo,
+				Valid: true,
+			},
+		}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("\n"+
+				"got        %+v\n"+
+				"expected   %+v\n", got, want,
+			)
+		}
+
+	})
 }

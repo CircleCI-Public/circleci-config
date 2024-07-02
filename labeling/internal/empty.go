@@ -8,15 +8,18 @@ import (
 	"github.com/CircleCI-Public/circleci-config/labeling/labels"
 )
 
+var ignoreList = []string{
+	".",
+	"readme.md",
+	".git",
+}
+
 var EmptyRepoRules = []labels.Rule{
 	func(c codebase.Codebase, ls labels.LabelSet) (label labels.Label, err error) {
 		label.Key = labels.EmptyRepo
 		_, err = c.FindFileMatching(func(path string) bool {
-			if path == "." || strings.TrimSpace(strings.ToLower(path)) == "readme.md" {
-				return false
-			}
-
-			return true
+			path = strings.TrimSpace(strings.ToLower(path))
+			return !shouldIgnorePath(path)
 		}, "*")
 
 		if errors.Is(err, codebase.NotFoundError) {
@@ -25,4 +28,14 @@ var EmptyRepoRules = []labels.Rule{
 		}
 		return label, err
 	},
+}
+
+func shouldIgnorePath(path string) bool {
+	for _, token := range ignoreList {
+		if path == token {
+			return true
+		}
+	}
+
+	return strings.HasPrefix(path, ".git/")
 }

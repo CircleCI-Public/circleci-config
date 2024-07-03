@@ -878,7 +878,7 @@ func TestCodebase_ApplyRules_Empty(t *testing.T) {
 	})
 
 	t.Run("only has readme", func(t *testing.T) {
-		repo := map[string]string{"README.md": "#hello world"}
+		repo := map[string]string{"README.md": "#hello world", ".git/refs/ref1": "something", ".git": "something"}
 		rules := internal.EmptyRepoRules
 		c := fakeCodebase{repo}
 		got := ApplyRules(c, rules)
@@ -917,4 +917,5 @@ func TestCodebase_ApplyRules_Empty(t *testing.T) {
 		}
 
 	})
+
 }

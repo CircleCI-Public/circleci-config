@@ -1,11 +1,11 @@
 # This config was automatically generated from your source code
-# Stacks detected: deps:java:sample_app2
+# Stacks detected: deps:java:sample_app
 version: 2.1
 jobs:
   test-java:
     docker:
       - image: cimg/openjdk:17.0
-    working_directory: ~/project/sample_app2
+    working_directory: ~/project/sample_app
     steps:
       - checkout:
           path: ~/project

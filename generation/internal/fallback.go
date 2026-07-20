@@ -50,12 +50,42 @@ var stubDeployJob = Job{
 		Name:         "deploy",
 		Comment:      "This is an example deploy job, not actually used by the workflow",
 		DockerImages: []string{"cimg/base:stable"},
-		Steps: []config.Step{{
-			Type:    config.Run,
-			Name:    "deploy",
-			Comment: "Replace this with steps to deploy to users",
-			Command: "#e.g. ./deploy.sh",
-		}},
+		Steps: []config.Step{
+			{
+				Type: config.Run,
+				Name: "Plan deployment",
+				Command: `circleci run release plan deploy \
+  --environment-name="default" \
+  --component-name="deploy" \
+  --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"`,
+			},
+			{
+				Type:    config.Run,
+				Name:    "deploy",
+				Comment: "Replace this with steps to deploy to users",
+				Command: "#e.g. ./deploy.sh",
+			},
+		},
 	},
 	Type: DeployJob,
+}
+
+var releaseMarkerFinalSteps = []config.Step{
+	{
+		Type:    config.Run,
+		Name:    "Update deployment status to running",
+		Command: "circleci run release update deploy --status=RUNNING",
+	},
+	{
+		Type:    config.Run,
+		Name:    "Update deployment status to success",
+		Command: "circleci run release update deploy --status=SUCCESS",
+		When:    config.WhenTypeOnSuccess,
+	},
+	{
+		Type:    config.Run,
+		Name:    "Update deployment status to failed",
+		Command: "circleci run release update deploy --status=FAILED",
+		When:    config.WhenTypeOnFail,
+	},
 }

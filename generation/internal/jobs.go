@@ -56,6 +56,7 @@ func buildDeployJob(ls labels.LabelSet) *Job {
 	if emptyRepoLabel, ok := ls[labels.EmptyRepo]; ok && emptyRepoLabel.Valid {
 		deployJob.Steps = append(deployJob.Steps, getEmptyJobSteps(ls)...)
 	}
+	deployJob.Steps = append(deployJob.Steps, releaseMarkerFinalSteps...)
 
 	return &deployJob
 }

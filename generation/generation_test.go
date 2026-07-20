@@ -72,10 +72,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   example:
     jobs:
@@ -130,6 +148,13 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
@@ -137,6 +162,17 @@ jobs:
       - run:
           name: found github actions config
           command: ':'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   example:
     jobs:
@@ -211,10 +247,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -261,10 +315,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -305,10 +377,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -364,10 +454,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -408,10 +516,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -462,10 +588,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -514,10 +658,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build:
     jobs:
@@ -565,10 +727,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -618,10 +798,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -668,10 +866,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -725,10 +941,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -781,10 +1015,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -855,10 +1107,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -920,6 +1190,13 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
@@ -927,6 +1204,17 @@ jobs:
       - run:
           name: found gitlab workflows config
           command: ':'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -983,6 +1271,13 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
@@ -990,6 +1285,17 @@ jobs:
       - run:
           name: found jenkins config
           command: ':'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -1052,6 +1358,13 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
@@ -1059,6 +1372,17 @@ jobs:
       - run:
           name: found github actions config
           command: ':'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -1099,10 +1423,28 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
           command: '#e.g. ./deploy.sh'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   build-and-test:
     jobs:
@@ -1150,6 +1492,13 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run:
+          name: Plan deployment
+          command: |-
+            circleci run release plan deploy \
+              --environment-name="default" \
+              --component-name="deploy" \
+              --target-version="1.0.${CIRCLE_BUILD_NUM}-${CIRCLE_SHA1:0:7}"
       # Replace this with steps to deploy to users
       - run:
           name: deploy
@@ -1157,6 +1506,17 @@ jobs:
       - run:
           name: found empty repo
           command: ':'
+      - run:
+          name: Update deployment status to running
+          command: circleci run release update deploy --status=RUNNING
+      - run:
+          name: Update deployment status to success
+          command: circleci run release update deploy --status=SUCCESS
+          when: on_success
+      - run:
+          name: Update deployment status to failed
+          command: circleci run release update deploy --status=FAILED
+          when: on_fail
 workflows:
   example:
     jobs:
